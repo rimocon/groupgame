@@ -22,6 +22,7 @@ extern void Startup(void); //最初に呼び出される関数
 extern void Destroy(void); //SDL関連破棄する関数
 extern void Input(void); //入力関数
 extern void Imageload(void); //画像読み込み関数
+extern void RenderWindow(void); //画像の描画(イベントが無い時の)
 
 /*  define関連  */
 #define WINDOWWIDTH 1280 //ウィンドウの幅
@@ -33,6 +34,8 @@ extern void Imageload(void); //画像読み込み関数
 int status; //ゲームの現在の状態
 bool run; //プログラムが動いてるかどうか
 
+int circle_x, circle_y; //プレイヤーの位置(現在は、簡略化のため、赤点)
+
 SDL_Window *mainwindow; //メイン画面用
 SDL_Renderer *mainrenderer; //メイン画面用レンダラー
 SDL_Surface *background; //背景用サーフェイス
@@ -40,7 +43,9 @@ SDL_Joystick *joystick; //ジョイスティックを特定,利用するため�
 SDL_Event inputevent; //入力用
 
 static char *imagefiles[IMAGE_NUM] = {"./images/kinkai.png","./images/shelf.png"}; // 読み込む画像ファイルを指定
+static SDL_Rect image_src_rects[IMAGE_NUM]; // imagefilesの表示させたい
 static SDL_Rect images_dst_rects[IMAGE_NUM] = {{1000, 100, 100, 100}, {400, 100, 46, 108}}; // imagefilesの出力する領域を設定
+static SDL_Texture *imagetextures[IMAGE_NUM]; // imagefilesのテクスチャを保存する変数
 
 
 typedef struct { //キー入力用の構造体を型宣言
