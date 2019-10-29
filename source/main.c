@@ -8,6 +8,7 @@ int main (int argc, char *argv[]) {
     }
     //Destroy(); //破棄関連
     //SDL_Quit();
+    SDL_RenderPresent(mainrenderer);
   }
   return 0;
 }
