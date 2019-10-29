@@ -22,17 +22,25 @@ extern void Startup(void); //最初に呼び出される関数
 extern void Destroy(void); //SDL関連破棄する関数
 extern void Input(void); //入力関数
 extern void Imageload(void); //画像読み込み関数
+extern void RenderWindow(void); //画像の描画(イベントが無い時の)
 
 /*  グローバル変数  */
 int status; //ゲームの現在の状態
 bool run; //プログラムが動いてるかどうか
 
+int circle_x, circle_y; //プレイヤーの位置(現在は、簡略化のため、赤点)
 
 SDL_Window *mainwindow; //メイン画面用
 SDL_Renderer *mainrenderer; //メイン画面用レンダラー
 SDL_Surface *background; //背景用サーフェイス
 SDL_Joystick *joystick; //ジョイスティックを特定,利用するための構造体
 SDL_Event inputevent; //入力用
+SDL_Rect src_rect_kinkai; // 転送元画像の領域
+SDL_Rect dst_rect_kinkai; // 転送先画像の領域
+SDL_Rect src_rect_shelf;  // 転送元画像の領域
+SDL_Rect dst_rect_shelf;  // 転送先画像の領域
+SDL_Texture *texture_kinkai; //金塊のテキスチャ
+SDL_Texture *texture_shelf;  //棚のテクスチャ
 
 typedef struct { //キー入力用の構造体を型宣言
 	Uint32  left, //左矢印

@@ -6,6 +6,8 @@ int main (int argc, char *argv[]) {
     if((SDL_PollEvent(&inputevent))){
       Input();
     }
+    SDL_Delay(10);
+    RenderWindow();
     //Destroy(); //破棄関連
     //SDL_Quit();
   }
