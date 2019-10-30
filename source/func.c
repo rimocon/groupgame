@@ -18,6 +18,7 @@ void Startup()
   }
    */
   circle_x = 150, circle_y = 850; //点の初期位置
+  flag_kinkai = true; //金塊は，最初配置されているので，true
 
   if (SDL_Init(SDL_INIT_VIDEO) == -1)
     SDL_Quit();
@@ -176,8 +177,12 @@ void Input()
     case SDLK_1:
       run = false;
       break;
-    }
+	case SDLK_SPACE: //	スペースボタンを押すと，金塊を取る
+	  if(circle_x > 1000 && circle_x <1100 && circle_y > 100 && circle_y <200){
+	    flag_kinkai = false;
+	  }
     break;
+	}
   }
   printf("%d, %d\n",circle_x,circle_y); //プレイヤーの座標確認用
 }
@@ -213,7 +218,10 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
   SDL_RenderClear(mainrenderer);       // 設定した描画色(白)でレンダラーをクリア
   for(int i=0; i<IMAGE_NUM; i++){
-    SDL_RenderCopy(mainrenderer, imagetextures[i], &image_src_rects[i], &images_dst_rects[i]); //各画像をレンダーに出力
+    //金塊が地面にあれば，金塊の描画はしない
+	if(!(i == 0 && flag_kinkai == false)){
+      SDL_RenderCopy(mainrenderer, imagetextures[i], &image_src_rects[i], &images_dst_rects[i]); //各画像をレンダーに出力
+    }
   }
   filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
   SDL_RenderPresent(mainrenderer);              // 描画データを表示

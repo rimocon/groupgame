@@ -33,6 +33,7 @@ extern void RenderWindow(void); //画像の描画(イベントが無い時の)
 /*  グローバル変数  */
 int status; //ゲームの現在の状態
 bool run; //プログラムが動いてるかどうか
+bool flag_kinkai; //金塊が置かれている時'true'，取られている時'false'
 
 int circle_x, circle_y; //プレイヤーの位置(現在は、簡略化のため、赤点)
 
