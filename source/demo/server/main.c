@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 
   int cond = 1;
   while (cond) {
-    cond = control_requests();
+    //cond = control_requests();
   }
 
   terminate_server();

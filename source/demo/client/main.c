@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include "../constants.h"
+#include "../common.h"
 
 extern void setup_client(char *, u_short);
 extern int control_requests();
@@ -29,10 +30,16 @@ int main(int argc, char *argv[]) {
   }
 
   setup_client(server_name, port);
+  Startup(); //描画に関するセットアップ
 
-  int cond = 1;
-  while (cond) {
-    cond = control_requests();
+  //int cond = 1;
+  //while (cond){
+  while(1){
+    //cond = control_requests();
+    if((SDL_PollEvent(&inputevent))){
+      printf("o\n"); //キーボードの入力に反応しているか確認用
+      Input();
+    }
   }
 
   terminate_client();
