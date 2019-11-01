@@ -28,7 +28,14 @@ extern void RenderWindow(void); //画像の描画(イベントが無い時の)
 #define WINDOWWIDTH 1280 //ウィンドウの幅
 #define WINDOWHEIGHT 960 //ウィンドウの高さ
 
-#define IMAGE_NUM 2 // 読み込む画像の総数を指定
+#define PLAYER_NUM 1
+#define PLAYER_SPEED 3
+
+#define KINKAI_NUM 1
+#define CAMERA_NUM 0
+#define SHELF_NUM 1
+#define ENTRANCE_NUM 1
+#define  KOTEI_OBJECT_NUM 3
 
 /*  グローバル変数  */
 int status; //ゲームの現在の状態
@@ -42,11 +49,33 @@ SDL_Surface *background; //背景用サーフェイス
 SDL_Joystick *joystick; //ジョイスティックを特定,利用するための構造体
 SDL_Event inputevent; //入力用
 
-static char *imagefiles[IMAGE_NUM] = {"./images/kinkai.png","./images/shelf.png"}; // 読み込む画像ファイルを指定
-static SDL_Rect image_src_rects[IMAGE_NUM]; // imagefilesの表示させたい
-static SDL_Rect images_dst_rects[IMAGE_NUM] = {{1000, 100, 100, 100}, {400, 100, 46, 108}}; // imagefilesの出力する領域を設定
-static SDL_Texture *imagetextures[IMAGE_NUM]; // imagefilesのテクスチャを保存する変数
 
+
+typedef enum{
+	TYPE_KINKAI = 0,
+	TYPE_SHELF = 1,
+	TYPE_CAMERA = 2,
+	TYPE_ENTRANCE = 3,
+	TYPE_ENEMY = 4,
+	TYPE_PLAYER = 5,
+	TYPE_NUM = 6
+}objecttype;
+
+typedef struct {
+	objecttype type;
+	SDL_Texture *image_texture;
+	SDL_Rect src_rect;
+	SDL_Rect dst_rect;
+} objectinfo;
+
+typedef struct {
+	objecttype type;
+	SDL_Texture * image_texture;
+	SDL_Rect src_rect;
+	SDL_Rect dst_rect;
+	bool flag_kinkai;
+	int speed;
+}playerinfo;
 
 typedef struct { //キー入力用の構造体を型宣言
 	Uint32  left, //左矢印
