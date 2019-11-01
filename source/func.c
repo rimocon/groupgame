@@ -21,6 +21,7 @@ void Startup()
   int h_kinkai = 384; //金塊の高さ
   int w_shelf = 239;  //棚の幅
   int h_shelf = 544;  //棚の高さ
+  flag_kinkai = true; //金塊は、最初、配置されているので、'true'
 
   circle_x = 150, circle_y = 850; //点の初期位置
 
@@ -202,11 +203,16 @@ void Input()
       break;
     case SDLK_1:
       run = false;
+    case SDLK_SPACE: //金塊を取るボタン
+      if(circle_x > 1000 && circle_x < 1100 && circle_y > 100 && circle_y < 200){
+        flag_kinkai = false;
+      }
       break;
     } 
     break;
   }
   printf("%d, %d\n",circle_x,circle_y); //プレイヤーの座標確認用
+
 }
 
 void Destroy()
@@ -223,8 +229,10 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
 {
   SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
   SDL_RenderClear(mainrenderer);       // 設定した描画色(白)でレンダラーをクリア
-  SDL_RenderCopy(mainrenderer, texture_kinkai, &src_rect_kinkai, &dst_rect_kinkai);
+  if(flag_kinkai == true){
+    SDL_RenderCopy(mainrenderer, texture_kinkai, &src_rect_kinkai, &dst_rect_kinkai);
+  }
   SDL_RenderCopy(mainrenderer, texture_shelf, &src_rect_shelf, &dst_rect_shelf);
   filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
-  SDL_RenderPresent(mainrenderer);              // 描画データを表示
+  SDL_RenderPresent(mainrenderer); // 描画データを表示
 }
