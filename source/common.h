@@ -33,10 +33,10 @@ extern void MoveChara(void); // キャラクター移動のための関数
 #define PLAYER_SPEED 3
 
 #define KINKAI_NUM 1
-#define CAMERA_NUM 0
+#define CAMERA_NUM 1
 #define SHELF_NUM 1
 #define ENTRANCE_NUM 1
-#define  KOTEI_OBJECT_NUM 3
+#define  KOTEI_OBJECT_NUM 4
 
 /*  グローバル変数  */
 int status; //ゲームの現在の状態
@@ -77,6 +77,17 @@ typedef struct {
 	bool flag_kinkai;
 	int speed;
 }playerinfo;
+
+
+typedef struct {
+	int rotate_range;
+	objecttype type;
+	SDL_Texture * image_texture;
+	SDL_Rect src_rect;
+	SDL_Rect dst_rect;
+	bool flag_kinkai;
+	int speed;
+}camerainfo;
 
 typedef struct { //キー入力用の構造体を型宣言
 	Uint32  left, //左矢印

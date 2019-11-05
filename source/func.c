@@ -14,6 +14,7 @@ static SDL_Rect kinkai_dst_rects[KINKAI_NUM] = {
   {1000, 100, 100, 100}
 };
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
+  {1200,900,80,60}
 };
 static SDL_Rect shelf_dst_rects[SHELF_NUM] = {
   {400, 100, 46, 108}
@@ -24,6 +25,7 @@ static SDL_Rect entrance_dst_rects[ENTRANCE_NUM] = {
 static SDL_Rect player_dst_rects[PLAYER_NUM] = {
   {150,850,24,24}
 };
+
 
 // プレイヤーの情報を格納したplayer構造体を実体化
 playerinfo player[PLAYER_NUM];
@@ -237,21 +239,9 @@ void Imageload()
       kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
       kotei_objects[i].dst_rect =kinkai_dst_rects[j];
       SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-      i++;
+      i++; // 金塊、カメラ、棚、出入り口のデータをkotei_objectsに保存するためにiをインクリメント
     }
-    for(int j = 0; j<CAMERA_NUM; j++){
-      printf("j = %d\n",j);
-      kotei_objects[i].type = TYPE_CAMERA;
-      s = IMG_Load(imgfiles[TYPE_CAMERA]);
-      kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
-      kotei_objects[i].src_rect.x = 0;
-      kotei_objects[i].src_rect.y = 0;
-      kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-      kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-      kotei_objects[i].dst_rect =camera_dst_rects[j];
-      SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-      i++;
-    }
+
     for(int j = 0; j<SHELF_NUM; j++){
       printf("j = %d\n",j);
       kotei_objects[i].type = TYPE_SHELF;
@@ -275,9 +265,22 @@ void Imageload()
       kotei_objects[i].src_rect.y = 0;
       kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
       kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-      kotei_objects[i].dst_rect = entrance_dst_rects[i];
+              printf("j = %d\n",j);
+   kotei_objects[i].dst_rect = entrance_dst_rects[j];
       SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
       i++;
+    }
+        for(int j = 0; j<CAMERA_NUM; j++){
+      printf("j = %d\n",j);
+      kotei_objects[i].type = TYPE_CAMERA;
+      s = IMG_Load(imgfiles[TYPE_CAMERA]);
+      kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+      kotei_objects[i].src_rect.x = 0;
+      kotei_objects[i].src_rect.y = 0;
+      kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+      kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+      kotei_objects[i].dst_rect =camera_dst_rects[j];
+  SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     }
     for(i=0; i<PLAYER_NUM; i++){
       player[i].type = TYPE_PLAYER;
