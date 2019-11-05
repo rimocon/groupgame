@@ -7,6 +7,7 @@ int main (int argc, char *argv[]) {
       Input();
     }
     SDL_Delay(10);
+    MoveChara();
     RenderWindow();
     //Destroy(); //破棄関連
     //SDL_Quit();

@@ -23,6 +23,7 @@ extern void Destroy(void); //SDL関連破棄する関数
 extern void Input(void); //入力関数
 extern void Imageload(void); //画像読み込み関数
 extern void RenderWindow(void); //画像の描画(イベントが無い時の)
+extern void MoveChara(void); // キャラクター移動のための関数
 
 /*  define関連  */
 #define WINDOWWIDTH 1280 //ウィンドウの幅

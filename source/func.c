@@ -174,7 +174,7 @@ void Input()
       key.left = 0;
       key.up = 1;
       key.down = 0;
-      circle_y = circle_y - 10; //プレイヤーの座標を上方向に変更
+      //circle_y = circle_y - 10; //プレイヤーの座標を上方向に変更
       break;
     case SDLK_DOWN:
       printf("press down\n");
@@ -182,7 +182,7 @@ void Input()
       key.left = 0;
       key.up = 0;
       key.down = 1;
-      circle_y = circle_y + 10; //プレイヤーの座標を下方向に変更
+      //circle_y = circle_y + 10; //プレイヤーの座標を下方向に変更
       break;
     case SDLK_RIGHT:
       printf("press right\n");
@@ -190,7 +190,7 @@ void Input()
       key.left = 0;
       key.up = 0;
       key.down = 0;
-      circle_x = circle_x + 10; //プレイヤーの座標を右方向に変更
+      //circle_x = circle_x + 10; //プレイヤーの座標を右方向に変更
       break;
     case SDLK_LEFT:
       printf("press left\n");
@@ -198,7 +198,7 @@ void Input()
       key.left = 1;
       key.up = 0;
       key.down = 0;
-      circle_x = circle_x - 10; //プレイヤーの座標を左方向に変更
+      //circle_x = circle_x - 10; //プレイヤーの座標を左方向に変更
       break;
     case SDLK_1:
       run = false;
@@ -287,7 +287,8 @@ void Imageload()
       player[i].src_rect.y = 0;
       player[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
       player[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-      SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player_dst_rects[i]); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+      player[i].dst_rect = player_dst_rects[i];
+      SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
       player[i].speed = PLAYER_SPEED;
     }
 }
@@ -300,8 +301,25 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
     SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
   }
   for(int i=0; i<PLAYER_NUM; i++){
-    SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player_dst_rects[i]); //プレイヤーをレンダーに出力
+    SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
   }
   //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
   SDL_RenderPresent(mainrenderer);              // 描画データを表示
+}
+
+void MoveChara()
+{
+  int move_distance = PLAYER_SPEED * 2;
+  if(key.left){
+    player[0].dst_rect.x -= move_distance;
+  }
+  else if(key.right){
+    player[0].dst_rect.x += move_distance;
+  }
+  else if(key.up){
+    player[0].dst_rect.y -= move_distance;
+  }
+  else if(key.down){
+    player[0].dst_rect.y += move_distance;
+  }
 }
