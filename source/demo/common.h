@@ -23,6 +23,7 @@ extern void Destroy(void); //SDL関連破棄する関数
 extern void Input(void); //入力関数
 extern void Imageload(void); //画像読み込み関数
 extern void RenderWindow(void); //画像の描画(イベントが無い時の)
+extern int coord(void); //座標に関する関数
 
 /*  グローバル変数  */
 int status; //ゲームの現在の状態
@@ -42,6 +43,66 @@ SDL_Rect src_rect_shelf;  // 転送元画像の領域
 SDL_Rect dst_rect_shelf;  // 転送先画像の領域
 SDL_Texture *texture_kinkai; //金塊のテキスチャ
 SDL_Texture *texture_shelf;  //棚のテクスチャ
+
+/*  define関連  */
+#define WINDOWWIDTH 1280 //ウィンドウの幅
+#define WINDOWHEIGHT 960 //ウィンドウの高さ
+
+#define PLAYER_NUM 1
+#define PLAYER_SPEED 3
+
+#define KINKAI_NUM 1
+#define CAMERA_NUM 1
+#define SHELF_NUM 1
+#define ENTRANCE_NUM 1
+#define  KOTEI_OBJECT_NUM 4
+
+/*  グローバル変数  */
+int status; //ゲームの現在の状態
+bool run; //プログラムが動いてるかどうか
+
+SDL_Window *mainwindow; //メイン画面用
+SDL_Renderer *mainrenderer; //メイン画面用レンダラー
+SDL_Surface *background; //背景用サーフェイス
+SDL_Joystick *joystick; //ジョイスティックを特定,利用するための構造体
+SDL_Event inputevent; //入力用
+
+typedef enum{
+	TYPE_KINKAI = 0,
+	TYPE_SHELF = 1,
+	TYPE_CAMERA = 2,
+	TYPE_ENTRANCE = 3,
+	TYPE_ENEMY = 4,
+	TYPE_PLAYER = 5,
+	TYPE_NUM = 6
+}objecttype;
+
+typedef struct {
+	objecttype type;
+	SDL_Texture *image_texture;
+	SDL_Rect src_rect;
+	SDL_Rect dst_rect;
+} objectinfo;
+
+typedef struct {
+	objecttype type;
+	SDL_Texture * image_texture;
+	SDL_Rect src_rect;
+	SDL_Rect dst_rect;
+	bool flag_kinkai;
+	int speed;
+}playerinfo;
+
+
+typedef struct {
+	int rotate_range;
+	objecttype type;
+	SDL_Texture * image_texture;
+	SDL_Rect src_rect;
+	SDL_Rect dst_rect;
+	bool flag_kinkai;
+	int speed;
+}camerainfo;
 
 typedef struct { //キー入力用の構造体を型宣言
 	Uint32        left, //左矢印

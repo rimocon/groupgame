@@ -13,6 +13,10 @@
 
 inputkeys key; //inputkeys構造体をinputという名前で実体化
 
+//画像ファイルパス
+static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png",
+                                   "./images/camera.png","./images/entrance.png",
+                                   "./images/enemy.png","./images/player.png"}; // 読み込む画像ファイルを指定
 static int num_clients;
 static int myid;
 static int sock;
@@ -20,6 +24,31 @@ static int num_sock;
 static fd_set mask;
 int speaker; //発言者の番号
 static CLIENT clients[MAX_NUM_CLIENTS];
+
+// 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
+// 金塊、カメラ、棚、出入り口の数を設定する(あとからテキストファイルにしたりしてステージごとに作ったりできる？)
+//const int KOTEI_OBJECT_NUM =  KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUM;
+static objectinfo kotei_objects[KOTEI_OBJECT_NUM];
+
+// 固定オブジェクト、プレイヤーの初期位置を設定する
+static SDL_Rect kinkai_dst_rects[KINKAI_NUM] = {
+  {1000, 100, 100, 100}
+};
+static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
+  {1200,900,80,60}
+};
+static SDL_Rect shelf_dst_rects[SHELF_NUM] = {
+  {400, 100, 46, 108}
+};
+static SDL_Rect entrance_dst_rects[ENTRANCE_NUM] = {
+  {0, WINDOWHEIGHT-20,80,20}
+};
+static SDL_Rect player_dst_rects[PLAYER_NUM] = {
+  {150,850,24,24}
+};
+
+// プレイヤーの情報を格納したplayer構造体を実体化
+playerinfo player[PLAYER_NUM];
 
 void setup_client(char *, u_short);
 int control_requests();
@@ -33,9 +62,32 @@ static void handle_error(char *);
 
 void Startup() //描画に関する最初のセットアップを行う
 {
-
   circle_x = 150, circle_y = 850; //点の初期位置
+
+  if(SDL_Init(SDL_INIT_VIDEO) == -1){
+    SDL_Quit();
+  }
+  Imageload(); //画像の読み込み
+
+  mainwindow = SDL_CreateWindow(
+    "test" ,
+    SDL_WINDOWPOS_CENTERED ,
+    SDL_WINDOWPOS_CENTERED ,
+    WINDOWWIDTH,
+    WINDOWHEIGHT,
+    0
+  );
+  if(mainwindow == NULL){
+    printf("ウィンドウを生成できませんでした\n");
+    SDL_Quit(); //終了
+  }
+  run = true;
+
+  mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0);
+
+  Imageload();
 }
+
 void setup_client(char *server_name, u_short port)
 {
   struct hostent *server;
@@ -164,18 +216,42 @@ int control_requests()
   }
 
   int result = 1;
+
+  if (SDL_PollEvent(&inputevent))
+  {                //キーボードが押された時
+    printf("o\n"); //キーボードの入力に反応しているか確認用
+    //cond = coord(); //座標に関する処理
+    Input();
+    
+  }
+
+  /*
   //クライアント自身がコマンドを送る時
   if (FD_ISSET(0, &read_flag))
   {
+    //input_command　関数
+    //  コマンドを受け取って、コマンドに合わせた処理をする
+    //  例えば、'M'なら、メッセージが入力されるまで待つ
     result = input_command();
-    //他のクライアントからコマンドを受信した時
   }
-  else if (FD_ISSET(sock, &read_flag))
+  
+
+  //サーバーからコマンドを受信した時
+  if (FD_ISSET(sock, &read_flag))
   {
     result = execute_command();
   }
+  */
+  //return result;
+  return 1;
+}
 
-  return result;
+//座標に関する関数
+int coord()
+{
+  ZAHYO data;
+
+  printf("%d\n", circle_x);
 }
 
 static int input_command()
@@ -183,9 +259,9 @@ static int input_command()
   CONTAINER data;
   char com;
   memset(&data, 0, sizeof(CONTAINER));
-  com = getchar();
+  com = getchar(); //標準入力から１文字を受け取る('M'または'Q')
   while (getchar() != '\n')
-    ;
+    ; //改行コードが入力されるまで，1文字ずつ文字を受けとる
 
   switch (com)
   {
@@ -278,4 +354,114 @@ void terminate_client()
   fprintf(stderr, "Connection is closed.\n");
   close(sock);
   exit(0);
+}
+
+void Imageload()
+{
+  SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
+  SDL_RenderClear(mainrenderer); // 設定した描画色(白)でレンダラーをクリア
+
+  SDL_Surface *s; // サーフェイスを一時的に保存する変数
+
+  // 順番的に先に背景を描画する必要あり
+
+  // 「kotei_objects」構造体（金塊、カメラ、棚、出入り口）にグローバル変数で設定した位置、画像をに設定する
+  int i= 0;
+    for(int j = 0; j<KINKAI_NUM; j++){
+      printf("j = %d\n",j);
+      kotei_objects[i].type = TYPE_KINKAI;
+      s = IMG_Load(imgfiles[TYPE_KINKAI]);
+      kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+      kotei_objects[i].src_rect.x = 0;
+      kotei_objects[i].src_rect.y = 0;
+      kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+      kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+      kotei_objects[i].dst_rect =kinkai_dst_rects[j];
+      SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+      i++; // 金塊、カメラ、棚、出入り口のデータをkotei_objectsに保存するためにiをインクリメント
+    }
+
+    for(int j = 0; j<SHELF_NUM; j++){
+      printf("j = %d\n",j);
+      kotei_objects[i].type = TYPE_SHELF;
+      s = IMG_Load(imgfiles[TYPE_SHELF]);
+      kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+      kotei_objects[i].src_rect.x = 0;
+      kotei_objects[i].src_rect.y = 0;
+      kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+      kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+      kotei_objects[i].dst_rect = shelf_dst_rects[j];
+      SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+      i++;
+    }
+
+    for(int j = 0; j<ENTRANCE_NUM; j++){
+      printf("j = %d\n",j);
+      kotei_objects[i].type = TYPE_ENTRANCE;
+      s = IMG_Load(imgfiles[TYPE_ENTRANCE]);
+      kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+      kotei_objects[i].src_rect.x = 0;
+      kotei_objects[i].src_rect.y = 0;
+      kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+      kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+              printf("j = %d\n",j);
+   kotei_objects[i].dst_rect = entrance_dst_rects[j];
+      SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+      i++;
+    }
+        for(int j = 0; j<CAMERA_NUM; j++){
+      printf("j = %d\n",j);
+      kotei_objects[i].type = TYPE_CAMERA;
+      s = IMG_Load(imgfiles[TYPE_CAMERA]);
+      kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+      kotei_objects[i].src_rect.x = 0;
+      kotei_objects[i].src_rect.y = 0;
+      kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+      kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+      kotei_objects[i].dst_rect =camera_dst_rects[j];
+  SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    }
+    for(i=0; i<PLAYER_NUM; i++){
+      player[i].type = TYPE_PLAYER;
+      s = IMG_Load(imgfiles[TYPE_PLAYER]);
+      player[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+      player[i].src_rect.x = 0;
+      player[i].src_rect.y = 0;
+      player[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+      player[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+      player[i].dst_rect = player_dst_rects[i];
+      SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+      player[i].speed = PLAYER_SPEED;
+    }
+}
+
+void RenderWindow(void) //画面の描画(イベントが無い時)
+{
+  SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
+  SDL_RenderClear(mainrenderer);       // 設定した描画色(白)でレンダラーをクリア
+  for(int i=0; i<KOTEI_OBJECT_NUM; i++){
+    SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
+  }
+  for(int i=0; i<PLAYER_NUM; i++){
+    SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
+  }
+  //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
+  SDL_RenderPresent(mainrenderer);              // 描画データを表示
+}
+
+void MoveChara()
+{
+  int move_distance = PLAYER_SPEED * 2;
+  if(key.left){
+    player[0].dst_rect.x -= move_distance;
+  }
+  else if(key.right){
+    player[0].dst_rect.x += move_distance;
+  }
+  else if(key.up){
+    player[0].dst_rect.y -= move_distance;
+  }
+  else if(key.down){
+    player[0].dst_rect.y += move_distance;
+  }
 }
