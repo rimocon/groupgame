@@ -8,6 +8,8 @@
 #define BROADCAST -1 //ブロードキャスト
 
 #define MESSAGE_COMMAND 'M' //メッセージの送信
+#define ZAHYO_COMMAND 'Z' //座標の送信
+#define KINKAI_COMMAND 'K' //金塊の状態
 #define QUIT_COMMAND 'Q' //チャットシステムの終了
 
 typedef struct {
@@ -21,4 +23,6 @@ typedef struct {
   int cid;
   char command;
   char message[MAX_LEN_BUFFER];
+  int zahyo_x;
+  int zahyo_y;
 } CONTAINER;

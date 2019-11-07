@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "constants.h"
+#include "../constants.h"
 
 extern void setup_server(int, u_short);
 extern int control_requests();

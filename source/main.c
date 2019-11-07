@@ -1,5 +1,5 @@
-#include "common.h"
-#include "constants.h"
+#include "../common.h"
+#include "../constants.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +8,7 @@
 extern void setup_client(char *, u_short);
 extern int control_requests();
 extern void terminate_client();
+extern void joystick_send(int);
 
 int main (int argc, char *argv[]) {
 
@@ -35,15 +36,16 @@ int main (int argc, char *argv[]) {
 
   Startup(); //$B:G=i$NFI$_9~$_4XO"(B
   while (run) {
-    printf("%d, %d\n",player[0].dst_rect.x, player[0].dst_rect.y); //プレイヤーの座標確認用
-    if((SDL_PollEvent(&inputevent))){
+    //printf("%d, %d\n",player[0].dst_rect.x, player[0].dst_rect.y);
+    if(SDL_PollEvent(&inputevent)){
       Input();
     }
-    control_requests();
-    SDL_Delay(10);
     MoveChara();
+    //joystick_send(0); //?????????????
+    control_requests();
+    SDL_Delay(3);
     RenderWindow();
-    //Destroy(); //$BGK4~4XO"(B
+    //Destroy();
     //SDL_Quit();
     SDL_RenderPresent(mainrenderer);
   }
