@@ -1,5 +1,34 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <errno.h>
+
 #include "common.h"
+#include "constants.h"
+
 inputkeys key; //inputkeys構造体をinputという名前で実体化
+
+static int num_clients;
+static int myid;
+static int sock;
+static int num_sock;
+static fd_set mask;  //FD集合を表す構造体
+static CLIENT clients[MAX_NUM_CLIENTS];
+
+void setup_client(char *, u_short);
+int control_requests();
+void terminate_client();
+
+static int input_command(void);
+static int execute_command(void);
+static void send_data(void *, int);
+static int receive_data(void *, int);
+static void handle_error(char *);
 
 //画像ファイルパス
 static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png"}; // 読み込む画像ファイルを指定
@@ -26,10 +55,6 @@ static SDL_Rect player_dst_rects[PLAYER_NUM] = {
   {150,850,24,24}
 };
 
-
-// プレイヤーの情報を格納したplayer構造体を実体化
-playerinfo player[PLAYER_NUM];
-
 void Startup()
 {
   /*
@@ -46,7 +71,6 @@ void Startup()
   exit(-1);
   }
    */
-  circle_x = 150, circle_y = 850; //点の初期位置
 
   if (SDL_Init(SDL_INIT_VIDEO) == -1)
     SDL_Quit();
@@ -65,7 +89,7 @@ void Startup()
     SDL_Quit(); //終了
   }
   run = true; //動かす
-
+  kinkai_flag = true; //金塊は最初は、配置されている
   mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0); //メインウィンドウに対するレンダラー生成
 
   Imageload();
@@ -202,13 +226,20 @@ void Input()
       key.down = 0;
       //circle_x = circle_x - 10; //プレイヤーの座標を左方向に変更
       break;
+    case SDLK_SPACE: //金塊を取る
+      if(player[0].dst_rect.x >= 1000 && player[0].dst_rect.x <= 1100){
+        if(player[0].dst_rect.y >= 100 && player[0].dst_rect.y <= 200){
+          kinkai_flag = false;
+        }
+      }
+      break;
     case SDLK_1:
       run = false;
       break;
     }
     break;
   }
-  //printf("%d, %d\n",circle_x,circle_y); //プレイヤーの座標確認用
+  printf("%d, %d\n",player[0].dst_rect.x, player[0].dst_rect.y); //プレイヤーの座標確認用
 }
 
 void Destroy()
@@ -301,10 +332,13 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
   SDL_RenderClear(mainrenderer);       // 設定した描画色(白)でレンダラーをクリア
   for(int i=0; i<KOTEI_OBJECT_NUM; i++){
-    SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
+    //描画対象が金塊で、金塊が地面に設置されていなければ、描画しない
+    if(!(kotei_objects[i].type == TYPE_KINKAI && kinkai_flag == false)){
+      SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
+    }
   }
   for(int i=0; i<PLAYER_NUM; i++){
-    SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
+      SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
   }
   //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
   SDL_RenderPresent(mainrenderer);              // 描画データを表示
@@ -325,4 +359,174 @@ void MoveChara()
   else if(key.down){
     player[0].dst_rect.y += move_distance;
   }
+}
+
+void setup_client(char *server_name, u_short port) {
+  struct hostent *server; //インターネットホスト名からアドレスへの割り当て
+  struct sockaddr_in sv_addr;
+
+  fprintf(stderr, "Trying to connect server %s (port = %d).\n", server_name, port);
+  /* gethostbyname関数
+     呼び出しで指定されたホスト名用の hostent 構造体へのポインターを戻す*/
+  if ((server = gethostbyname(server_name)) == NULL) {
+    handle_error("gethostbyname()");
+  }
+
+  //ソケットの生成(クライアント側)
+  sock = socket(AF_INET, SOCK_STREAM, 0); 
+  if (sock < 0) { //正常に実行されなかった場合
+    handle_error("socket()");
+  }
+
+  sv_addr.sin_family = AF_INET; //ネットワークアドレスの種類(ここでは、インターネット)
+  sv_addr.sin_port = htons(port); //ポート番号
+  sv_addr.sin_addr.s_addr = *(u_int *)server->h_addr_list[0]; 
+
+  if (connect(sock, (struct sockaddr *)&sv_addr, sizeof(sv_addr)) != 0) { //クライアントからサーバへの接続要求
+    handle_error("connect()");
+  }
+
+  fprintf(stderr, "Input your name: ");
+  char user_name[MAX_LEN_NAME]; //ユーザ名格納(最大10文字)
+  /*
+  ・fgets(user_name, sizeof(user_name), stdin)について
+  fgets関数は、改行までの文字列をまとめて読み込むための関数であり、改行コードも格納される
+  stdinと指定しているので、標準入力である。
+  */
+  if (fgets(user_name, sizeof(user_name), stdin) == NULL) { //ユーザ名の取得
+    handle_error("fgets()");
+  }
+  //user_name[]の最後尾に含まれる改行コードをヌル文字に変更
+  user_name[strlen(user_name) - 1] = '\0';
+  send_data(user_name, MAX_LEN_NAME); //ユーザ名をサーバに送信
+
+  fprintf(stderr, "Waiting for other clients...\n");
+  receive_data(&num_clients, sizeof(int)); //サーバに接続されているクライアントの数の読み込み
+  fprintf(stderr, "Number of clients = %d.\n", num_clients);
+  receive_data(&myid, sizeof(int)); //クライアント自身の識別IDを読み込み
+  fprintf(stderr, "Your ID = %d.\n", myid);
+  int i;
+  for (i = 0; i < num_clients; i++) { //全クライアントのデータの受信
+    receive_data(&clients[i], sizeof(CLIENT));
+  }
+
+  num_sock = sock + 1;
+  FD_ZERO(&mask); //&maskをゼロクリア
+  FD_SET(0, &mask); //0番目のFDに対応する値を1にセット
+  FD_SET(sock, &mask); //sock番目のFDに対応する値を1にセット
+  fprintf(stderr, "Input command (M=message, Q=quit): \n");
+}
+
+int control_requests () {
+  fd_set read_flag = mask;
+
+  struct timeval timeout; //タイマ値を指定する
+  timeout.tv_sec = 0; //秒単位
+  timeout.tv_usec = 30; //マイクロ秒単位
+  
+  if (select(num_sock, (fd_set *)&read_flag, NULL, NULL, &timeout) == -1) {
+    handle_error("select()");
+  }
+
+  int result = 1;
+  /*
+  FD集合&read_flagの、0番目のビットが立っているかどうか
+  立っていれば、0 以外の値を返し、存在しなければ 0 を返す
+  */
+  if (FD_ISSET(0, &read_flag)) { //クライアント自身がインプットするとき
+    result = input_command();
+  } else if (FD_ISSET(sock, &read_flag)) { //他のクライアントはインプットしたとき
+    result = execute_command();
+  }
+
+  return result;
+}
+
+static int input_command() { //クライアントがデータをインプットした時
+  CONTAINER data;
+  char com;
+  memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
+  com = getchar(); //標準入力から１文字を受け取る('M'または'Q')
+  while(getchar()!='\n'); //改行コードが入力されるまで，1文字ずつ文字を受けとる
+
+  switch (com) {
+  case MESSAGE_COMMAND: //'M'のとき
+    fprintf(stderr, "Input message: ");
+    if (fgets(data.message, MAX_LEN_BUFFER, stdin) == NULL) { //メッセージの受け取り
+      handle_error("fgets()");
+    }
+    data.command = MESSAGE_COMMAND; //コマンドを格納
+    data.message[strlen(data.message)-1] = '\0'; //メッセージの最後にヌル文字を代入
+    data.cid = myid; //クライアントIDを格納
+    send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
+    break;
+  case QUIT_COMMAND: //'Q'のとき
+    data.command = QUIT_COMMAND; //コマンドを格納
+    data.cid = myid; //クライアントIDを格納
+    send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
+    break;
+  default: //その他の文字が入力された場合
+    fprintf(stderr, "%c is not a valid command.\n", com);
+  }
+
+  return 1;
+}
+
+static int execute_command() { //サーバからデータを受け取ったとき
+  CONTAINER data;
+  int result = 1;
+  memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
+  receive_data(&data, sizeof(data)); //クライアントのデータを受信
+
+  switch (data.command) {
+  case MESSAGE_COMMAND: //'M'のとき
+    fprintf(stderr, "client[%d] %s: %s\n", data.cid, clients[data.cid].name, data.message);
+    result = 1;
+    break;
+  case QUIT_COMMAND: //'Q'のとき
+    fprintf(stderr, "client[%d] %s sent quit command.\n", data.cid, clients[data.cid].name);
+    result = 0;
+    break;
+  default: //その他の文字が入力された場合
+    fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
+    exit(1); //異常終了
+  }
+
+  return result;
+}
+
+static void send_data(void *data, int size) {
+  if ((data == NULL) || (size <= 0)) { //CONTAINER構造体で宣言されたdataに不具合がある場合
+        fprintf(stderr, "send_data(): data is illeagal.\n");
+	exit(1); //異常終了
+  }
+  //引数2が指すバッファーから、ファイルディスクリプター引数1が参照するファイルへ、最大引数3のバイト数分を書き込む
+  if (write(sock, data, size) == -1) { 
+    handle_error("write()");
+  }
+}
+
+static int receive_data(void *data, int size) {
+  if ((data == NULL) || (size <= 0)) { //CONTAINER構造体で宣言されたdataに不具合がある場合
+    fprintf(stderr, "receive_data(): data is illeagal.\n");
+  	exit(1); //異常終了
+  }
+
+  return(read(sock, data, size)); //コネクションからバッファへのデータの読み込み
+}
+
+static void handle_error(char *message) {
+  perror(message); //システム・エラー・メッセージを伴うエラー・メッセージ
+  /* 
+  errno : システムコールや一部のライブラリ関数の実行に失敗した際、 
+  どのような原因で失敗したのかを教えてくれる
+  */
+  fprintf(stderr, "%d\n", errno); 
+  exit(1); //エラー終了
+}
+
+void terminate_client() {
+  fprintf(stderr, "Connection is closed.\n");
+  close(sock); ////ソケットを切断
+  exit(0); //正常終了
 }

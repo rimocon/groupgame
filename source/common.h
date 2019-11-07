@@ -41,16 +41,13 @@ extern void MoveChara(void); // キャラクター移動のための関数
 /*  グローバル変数  */
 int status; //ゲームの現在の状態
 bool run; //プログラムが動いてるかどうか
-
-int circle_x, circle_y; //プレイヤーの位置(現在は、簡略化のため、赤点)
+bool kinkai_flag; //金塊が配置されているかどうか
 
 SDL_Window *mainwindow; //メイン画面用
 SDL_Renderer *mainrenderer; //メイン画面用レンダラー
 SDL_Surface *background; //背景用サーフェイス
 SDL_Joystick *joystick; //ジョイスティックを特定,利用するための構造体
 SDL_Event inputevent; //入力用
-
-
 
 typedef enum{
 	TYPE_KINKAI = 0,
@@ -97,5 +94,7 @@ typedef struct { //キー入力用の構造体を型宣言
           a;  //4ボタン(決定ボタン)
 }inputkeys;
 
+// プレイヤーの情報を格納したplayer構造体を実体化
+playerinfo player[PLAYER_NUM];
 
 #endif
