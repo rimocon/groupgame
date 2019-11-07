@@ -414,3 +414,79 @@ void MoveChara()
     }
   }
 }
+
+void MakeMap()
+{
+  /* マップの読み込みと配置 */
+  /* ファイルオープン */
+  FILE *fp = fopen(mapdatafile, "r");
+  if (fp == NULL)
+  {
+    ret = PrintError("failed to open map data.");
+  }
+    int i, j;
+    SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
+    SDL_Rect dst = {0};
+    for (j = 0; j < MAP_HEIGHT; j++, dst.y += MAP_CHIPSIZE)
+    {
+      dst.x = 0;
+      for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
+      {
+        /* 値の読込(意味はMapTypeに準ずる) */
+        if (fscanf(fp, "%u", &mt) != 1)
+        {
+          ret = PrintError("failed to load map data.");
+        }
+
+        if (mt == TYPE_SHELF)
+        {
+          kotei_objects[i].type = TYPE_SHELF;
+          s = IMG_Load(imgfiles[TYPE_SHELF]);
+          kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
+          kotei_objects[i].src_rect.x = 0;
+          kotei_objects[i].src_rect.y = 0;
+          kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+          kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+          kotei_objects[i].dst_rect = shelf_dst_rects[j];
+          SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+
+          SetInitPoint(CT_Station, dst);
+          mt = MT_None;
+        }
+        else if (mt == MT_Player)
+        {
+          SetInitPoint(CT_Player, dst);
+          mt = MT_None;
+        }
+
+        src.x = mt * MAP_ChipSize;
+        src.y = 0;
+        if (0 > SDL_BlitSurface(img, &src, map, &dst))
+        {
+          ret = PrintError(SDL_GetError());
+        }
+
+        src.y = MAP_ChipSize;
+        if (0 > SDL_BlitSurface(img, &src, gGame.mapMask, &dst))
+        {
+          ret = PrintError(SDL_GetError());
+        }
+      }
+    }
+    /* マップはテクスチャに */
+    if (NULL == (gGame.map = SDL_CreateTextureFromSurface(gGame.render, map)))
+    {
+      ret = PrintError(SDL_GetError());
+    }
+  }
+
+  SDL_SaveBMP(gGame.mapMask, "test.bmp");
+
+  /* ファイルを閉じる */
+  fclose(fp);
+  /* サーフェイス解放(テクスチャに転送後はゲーム中に使わないので) */
+  SDL_FreeSurface(map);
+  SDL_FreeSurface(img);
+
+  return ret;
+}

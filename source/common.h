@@ -36,10 +36,14 @@ extern void MoveChara(void); // キャラクター移動のための関数
 #define CAMERA_NUM 1
 #define SHELF_NUM 1
 #define ENTRANCE_NUM 1
-#define  KOTEI_OBJECT_NUM 4
+#define  KOTEI_OBJECT_NUM 4 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
 
 #define ENEMY_NUM 2
 #define ENEMY_SPEED 1
+
+#define MAP_CHIPSIZE 40 //仮
+#define MAP_WIDTH 32
+#define MAP_HEIGHT 24
 
 /*  グローバル変数  */
 int status; //ゲームの現在の状態
