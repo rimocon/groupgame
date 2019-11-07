@@ -6,12 +6,11 @@ int main (int argc, char *argv[]) {
     if((SDL_PollEvent(&inputevent))){
       Input();
     }
-    SDL_Delay(10);
+    SDL_Delay(5);
     MoveChara();
+    MoveTriangle();
     RenderWindow();
     //Destroy(); //破棄関連
-    //SDL_Quit();
-    SDL_RenderPresent(mainrenderer);
   }
   return 0;
 }

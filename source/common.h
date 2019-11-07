@@ -9,7 +9,7 @@
 #include <string.h> //文字列を扱いやすくする
 #include <time.h> //時間用
 #include <stdbool.h> //bool型を使うため
-
+#include <math.h> //数学用ライブラリ
 /*  SDL関連 */
 #include <SDL2/SDL.h> //SDLを使う
 #include <SDL2/SDL2_gfxPrimitives.h> //SDLで図形描画
@@ -24,78 +24,16 @@ extern void Input(void); //入力関数
 extern void Imageload(void); //画像読み込み関数
 extern void RenderWindow(void); //画像の描画(イベントが無い時の)
 extern void MoveChara(void); // キャラクター移動のための関数
-
-/*  define関連  */
-#define WINDOWWIDTH 1280 //ウィンドウの幅
-#define WINDOWHEIGHT 960 //ウィンドウの高さ
-
-#define PLAYER_NUM 1
-#define PLAYER_SPEED 3
-
-#define KINKAI_NUM 1
-#define CAMERA_NUM 1
-#define SHELF_NUM 1
-#define ENTRANCE_NUM 1
-#define  KOTEI_OBJECT_NUM 4
+extern void MoveTriangle(void); //三角形移動
 
 /*  グローバル変数  */
 int status; //ゲームの現在の状態
 bool run; //プログラムが動いてるかどうか
-
-int circle_x, circle_y; //プレイヤーの位置(現在は、簡略化のため、赤点)
-
 SDL_Window *mainwindow; //メイン画面用
 SDL_Renderer *mainrenderer; //メイン画面用レンダラー
 SDL_Surface *background; //背景用サーフェイス
 SDL_Joystick *joystick; //ジョイスティックを特定,利用するための構造体
 SDL_Event inputevent; //入力用
-
-
-
-typedef enum{
-	TYPE_KINKAI = 0,
-	TYPE_SHELF = 1,
-	TYPE_CAMERA = 2,
-	TYPE_ENTRANCE = 3,
-	TYPE_ENEMY = 4,
-	TYPE_PLAYER = 5,
-	TYPE_NUM = 6
-}objecttype;
-
-typedef struct {
-	objecttype type;
-	SDL_Texture *image_texture;
-	SDL_Rect src_rect;
-	SDL_Rect dst_rect;
-} objectinfo;
-
-typedef struct {
-	objecttype type;
-	SDL_Texture * image_texture;
-	SDL_Rect src_rect;
-	SDL_Rect dst_rect;
-	bool flag_kinkai;
-	int speed;
-}playerinfo;
-
-
-typedef struct {
-	int rotate_range;
-	objecttype type;
-	SDL_Texture * image_texture;
-	SDL_Rect src_rect;
-	SDL_Rect dst_rect;
-	bool flag_kinkai;
-	int speed;
-}camerainfo;
-
-typedef struct { //キー入力用の構造体を型宣言
-	Uint32  left, //左矢印
-	 			  right, //右矢印
-				  up, //上矢印
-				  down, //下矢印
-          a;  //4ボタン(決定ボタン)
-}inputkeys;
 
 
 #endif
