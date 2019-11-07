@@ -4,12 +4,11 @@ inputkeys key; //inputkeys構造体をinputという名前で実体化
 //画像ファイルパス
 static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png"}; // 読み込む画像ファイルを指定
 
-// 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
-// 金塊、カメラ、棚、出入り口の数を設定する(あとからテキストファイルにしたりしてステージごとに作ったりできる？)
+// 金塊、カメラ、棚、出入り口の4つをkotei_objects」という実体を作る
 //const int KOTEI_OBJECT_NUM =  KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUM;
 static objectinfo kotei_objects[KOTEI_OBJECT_NUM];
 
-// 固定オブジェクト、プレイヤーの初期位置を設定する
+// 固定オブジェクト(金塊、カメラ、棚、出入り口)、プレイヤーの初期位置を設定する
 static SDL_Rect kinkai_dst_rects[KINKAI_NUM] = {
   {1000, 100, 100, 100}
 };
@@ -25,10 +24,22 @@ static SDL_Rect entrance_dst_rects[ENTRANCE_NUM] = {
 static SDL_Rect player_dst_rects[PLAYER_NUM] = {
   {150,850,24,24}
 };
+static SDL_Rect enemy_dst_rects[ENEMY_NUM] = {
+  {200,850,24,24},
+  {400,850,24,24},
+};
 
+static int enemy_destination[ENEMY_NUM][2] = {
+  {200,450},
+  {400,300}
+};
+static int enemy_lookangles[ENEMY_NUM]={
+  90,270
+};
 
 // プレイヤーの情報を格納したplayer構造体を実体化
 playerinfo player[PLAYER_NUM];
+enemyinfo enemy[ENEMY_NUM];
 
 void Startup()
 {
@@ -46,11 +57,9 @@ void Startup()
   exit(-1);
   }
    */
-  circle_x = 150, circle_y = 850; //点の初期位置
 
   if (SDL_Init(SDL_INIT_VIDEO) == -1)
     SDL_Quit();
-  //Imageload(); // 画像の読み込みを行う
 
   mainwindow = SDL_CreateWindow( //ウィンドウ生成
       "test",
@@ -282,6 +291,8 @@ void Imageload()
       kotei_objects[i].dst_rect =camera_dst_rects[j];
   SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     }
+
+    //構造体playerに、プレイヤーの情報を格納
     for(i=0; i<PLAYER_NUM; i++){
       player[i].type = TYPE_PLAYER;
       s = IMG_Load(imgfiles[TYPE_PLAYER]);
@@ -292,7 +303,26 @@ void Imageload()
       player[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
       player[i].dst_rect = player_dst_rects[i];
       SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-      player[i].speed = PLAYER_SPEED;
+      player[i].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+    }
+    //構造体enemyに、敵の情報を格納
+    for(i=0; i<ENEMY_NUM; i++){
+      enemy[i].type = TYPE_ENEMY;
+      s = IMG_Load(imgfiles[TYPE_ENEMY]);
+      enemy[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+      enemy[i].src_rect.x = 0;
+      enemy[i].src_rect.y = 0;
+      enemy[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+      enemy[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+      enemy[i].dst_rect = enemy_dst_rects[i];
+      SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+      enemy[i].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+      enemy[i].isgodest = false;
+      enemy[i].look_angle = enemy_lookangles[i];
+    //       if(enemy_dst_rects[i].x > enemy_destination[i][0] && enemy_dst_rects[i].y > enemy_destination[i][1]) enemy[i].movemode = 0;
+    // else if(enemy_dst_rects[i].x > enemy_destination[i][0] && enemy_dst_rects[i].y < enemy_destination[i][1]) enemy[i].movemode = 1;
+    // else if(enemy_dst_rects[i].x < enemy_destination[i][0] && enemy_dst_rects[i].y > enemy_destination[i][1]) enemy[i].movemode = 2;
+    // else if(enemy_dst_rects[i].x < enemy_destination[i][0] && enemy_dst_rects[i].y < enemy_destination[i][1]) enemy[i].movemode = 3;
     }
 }
 
@@ -306,23 +336,81 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   for(int i=0; i<PLAYER_NUM; i++){
     SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
   }
+  for(int i=0; i<ENEMY_NUM; i++){
+    SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); //敵をレンダーに出力
+  }
   //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
   SDL_RenderPresent(mainrenderer);              // 描画データを表示
 }
 
 void MoveChara()
 {
-  int move_distance = PLAYER_SPEED * 2;
-  if(key.left){
+  // プレイヤーの移動
+  int move_distance = PLAYER_SPEED * 2; // プレイヤーの移動距離、設定したスピード
+
+  //キー入力状態に応じて移動
+  if (key.left)
+  {
     player[0].dst_rect.x -= move_distance;
   }
-  else if(key.right){
+  else if (key.right)
+  {
     player[0].dst_rect.x += move_distance;
   }
-  else if(key.up){
+  else if (key.up)
+  {
     player[0].dst_rect.y -= move_distance;
   }
-  else if(key.down){
+  else if (key.down)
+  {
     player[0].dst_rect.y += move_distance;
+  }
+
+  //棚との衝突判定
+  for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
+  {
+    if (SDL_HasIntersection(&(kotei_objects[i].dst_rect), &(player[0].dst_rect))) // プレイヤーと固定オブジェクトが重なった時
+    {
+      if (kotei_objects[i].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
+        break;
+
+      // ぶつかったぶんの距離プレイヤーの位置を戻す
+      if (key.left)
+      {
+        player[0].dst_rect.x += move_distance;
+      }
+      else if (key.right)
+      {
+        player[0].dst_rect.x -= move_distance;
+      }
+      else if (key.up)
+      {
+        player[0].dst_rect.y += move_distance;
+      }
+      else if (key.down)
+      {
+        player[0].dst_rect.y -= move_distance;
+      }
+    }
+  }
+
+  //敵キャラの移動
+  for (int i = 0; i < ENEMY_NUM; i++)
+  {
+    switch (enemy[i].look_angle)
+    {
+    case 0:
+      enemy[i].dst_rect.y -= ENEMY_SPEED;
+      break;
+    case 90:
+      enemy[i].dst_rect.x += ENEMY_SPEED;
+      break;
+    case 180:
+      enemy[i].dst_rect.y += ENEMY_SPEED;
+      break;
+    case 270:
+      enemy[i].dst_rect.x -= ENEMY_SPEED;
+      break;
+    }
   }
 }
