@@ -41,7 +41,8 @@ static objectinfo kotei_objects[KOTEI_OBJECT_NUM];
 
 // 固定オブジェクト、プレイヤーの初期位置を設定する
 static SDL_Rect kinkai_dst_rects[KINKAI_NUM] = {
-    {1000, 100, 100, 100}};
+    //{1000, 100, 100, 100}
+    {300, 100, 100, 100}};
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
     {1200, 900, 80, 60}};
 static SDL_Rect shelf_dst_rects[SHELF_NUM] = {
@@ -52,8 +53,19 @@ static SDL_Rect player_dst_rects[PLAYER_NUM] = {
     //{150, 850, 24, 24},
     //{150, 1050, 24, 24}
     {150, 350, 24, 24},
-    {250, 350, 24, 24}
-    };
+    {250, 350, 24, 24}};
+static SDL_Rect enemy_dst_rects[ENEMY_NUM] = {
+    {200, 850, 24, 24},
+    {400, 850, 24, 24},
+};
+static int enemy_destination[ENEMY_NUM][2] = {
+  {200,450},
+  {400,300}
+};
+static int enemy_lookangles[ENEMY_NUM]={
+  90,270
+};
+
 
 void Startup()
 {
@@ -190,7 +202,8 @@ void Input()
     //金塊を取る
     if (inputevent.jbutton.button == 3)
     {
-      if (player[0].dst_rect.x >= 1000 && player[0].dst_rect.x <= 1100)
+      //if (player[0].dst_rect.x >= 1000 && player[0].dst_rect.x <= 1100)
+      if (player[0].dst_rect.x >= 300 && player[0].dst_rect.x <= 400)
       {
         if (player[0].dst_rect.y >= 100 && player[0].dst_rect.y <= 200)
         {
@@ -199,6 +212,7 @@ void Input()
           joystick_send(1);
         }
       }
+      /*
       if (player[1].dst_rect.x >= 1000 && player[1].dst_rect.x <= 1100)
       {
         if (player[1].dst_rect.y >= 100 && player[1].dst_rect.y <= 200)
@@ -208,6 +222,7 @@ void Input()
           joystick_send(1);
         }
       }
+      */
     }
 
     //終了ボタンが押された
@@ -376,6 +391,25 @@ void Imageload()
     SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     player[i].speed = PLAYER_SPEED;
   }
+  //構造体enemyに、敵の情報を格納
+    for(i=0; i<ENEMY_NUM; i++){
+      enemy[i].type = TYPE_ENEMY;
+      s = IMG_Load(imgfiles[TYPE_ENEMY]);
+      enemy[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+      enemy[i].src_rect.x = 0;
+      enemy[i].src_rect.y = 0;
+      enemy[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+      enemy[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+      enemy[i].dst_rect = enemy_dst_rects[i];
+      SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+      enemy[i].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+      enemy[i].isgodest = false;
+      enemy[i].look_angle = enemy_lookangles[i];
+    //       if(enemy_dst_rects[i].x > enemy_destination[i][0] && enemy_dst_rects[i].y > enemy_destination[i][1]) enemy[i].movemode = 0;
+    // else if(enemy_dst_rects[i].x > enemy_destination[i][0] && enemy_dst_rects[i].y < enemy_destination[i][1]) enemy[i].movemode = 1;
+    // else if(enemy_dst_rects[i].x < enemy_destination[i][0] && enemy_dst_rects[i].y > enemy_destination[i][1]) enemy[i].movemode = 2;
+    // else if(enemy_dst_rects[i].x < enemy_destination[i][0] && enemy_dst_rects[i].y < enemy_destination[i][1]) enemy[i].movemode = 3;
+    }
 }
 
 void RenderWindow(void) //画面の描画(イベントが無い時)
@@ -393,6 +427,10 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   for (int i = 0; i < PLAYER_NUM; i++)
   {
     SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
+  }
+  for (int i = 0; i < ENEMY_NUM; i++)
+  {
+    SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); //敵をレンダーに出力
   }
   SDL_RenderPresent(mainrenderer); // 描画データを表示
 }
@@ -419,6 +457,62 @@ void MoveChara()
   {
     player[myid].dst_rect.y += move_distance;
     joystick_send(0); //座標などのデータ送信される
+  }
+
+  //棚との衝突判定
+  for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
+  {
+    if (SDL_HasIntersection(&(kotei_objects[i].dst_rect), &(player[0].dst_rect))) // プレイヤーと固定オブジェクトが重なった時
+    {
+      if (kotei_objects[i].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
+        break;
+
+      // ぶつかったぶんの距離プレイヤーの位置を戻す
+      if (key.left)
+      {
+        player[0].dst_rect.x += move_distance;
+      }
+      else if (key.right)
+      {
+        player[0].dst_rect.x -= move_distance;
+      }
+      else if (key.up)
+      {
+        player[0].dst_rect.y += move_distance;
+      }
+      else if (key.down)
+      {
+        player[0].dst_rect.y -= move_distance;
+      }
+    }
+  }
+
+  //敵キャラの移動
+  for (int i = 0; i < ENEMY_NUM; i++)
+  {
+    switch (enemy[i].look_angle)
+    {
+    case 0:
+      enemy[i].dst_rect.y -= ENEMY_SPEED;
+      break;
+    case 90:
+      if(enemy[i].dst_rect.x + ENEMY_SPEED > 1256){
+        enemy[i].look_angle = 270;
+        break;
+      }
+      enemy[i].dst_rect.x += ENEMY_SPEED;
+      break;
+    case 180:
+      enemy[i].dst_rect.y += ENEMY_SPEED;
+      break;
+    case 270:
+      if(enemy[i].dst_rect.x - ENEMY_SPEED < 0){
+        enemy[i].look_angle = 90;
+        break;
+      }
+      enemy[i].dst_rect.x -= ENEMY_SPEED;
+      break;
+    }
   }
 }
 
@@ -525,13 +619,13 @@ void joystick_send(int num)
   if (num == 0)
   {
     //コマンドとして、座標の'Z'を代入
-    data.command = ZAHYO_COMMAND;        //コマンドを格納
-    data.cid = myid;                     //クライアントIDを格納
+    data.command = ZAHYO_COMMAND;           //コマンドを格納
+    data.cid = myid;                        //クライアントIDを格納
     data.zahyo_x = player[myid].dst_rect.x; //プレイヤーのx座標を格納
     data.zahyo_y = player[myid].dst_rect.y; //プレイヤーのy座標を格納
     printf("myid = %d\n", myid);
-    printf("Player 0 : axis x = %d, axis y = %d\n",player[0].dst_rect.x, player[0].dst_rect.y);
-    printf("Player 1 : axis x = %d, axis y = %d\n",player[1].dst_rect.x, player[1].dst_rect.y);
+    printf("Player 0 : axis x = %d, axis y = %d\n", player[0].dst_rect.x, player[0].dst_rect.y);
+    printf("Player 1 : axis x = %d, axis y = %d\n", player[1].dst_rect.x, player[1].dst_rect.y);
   }
   else if (num == 1)
   {
@@ -587,7 +681,7 @@ static int execute_command()
   {
   case ZAHYO_COMMAND: //'Z'のとき
     //自分の座標は、スティックを動かした段階で更新してるので、ここでは、更新せず。
-    if (myid != data.cid) 
+    if (myid != data.cid)
     {
       player[data.cid].dst_rect.x = data.zahyo_x; //クライアントのx座標を各プレイヤーの座標を反映
       player[data.cid].dst_rect.y = data.zahyo_y; //クライアントのy座標を各プレイヤーの座標を反映

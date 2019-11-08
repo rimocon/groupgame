@@ -26,10 +26,10 @@ extern void RenderWindow(void); //画像の描画(イベントが無い時の)
 extern void MoveChara(void);	// キャラクター移動のための関数
 
 /*  define関連  */
-//#define WINDOWWIDTH 1280 //ウィンドウの幅
-#define WINDOWWIDTH 780 //ウィンドウの幅
-//#define WINDOWHEIGHT 960 //ウィンドウの高さ
-#define WINDOWHEIGHT 460 //ウィンドウの高さ
+#define WINDOWWIDTH 1280 //ウィンドウの幅
+//#define WINDOWWIDTH 780 //ウィンドウの幅
+#define WINDOWHEIGHT 960 //ウィンドウの高さ
+//#define WINDOWHEIGHT 460 //ウィンドウの高さ
 
 #define PLAYER_NUM 2
 #define PLAYER_SPEED 3
@@ -39,6 +39,9 @@ extern void MoveChara(void);	// キャラクター移動のための関数
 #define SHELF_NUM 1
 #define ENTRANCE_NUM 1
 #define KOTEI_OBJECT_NUM 4
+
+#define ENEMY_NUM 2
+#define ENEMY_SPEED 1
 
 /*  グローバル変数  */
 int status;		  //ゲームの現在の状態
@@ -99,7 +102,20 @@ typedef struct
 		a;		 //4ボタン(決定ボタン)
 } inputkeys;
 
+typedef struct {
+	int rotate_range; // 敵の回転速度
+	objecttype type; // タイプ
+	SDL_Texture * image_texture; // テクスチャ
+	SDL_Rect src_rect; // 元画像の座標、範囲
+	SDL_Rect dst_rect; // 出力先の座標、範囲
+	bool flag_kinkai; // 金塊をとったかどうか
+	int speed; //敵の移動速度
+	int look_angle; // 敵が向いている方向(0度〜360度)、視野の描画する方法によるので仮
+	bool isgodest; // 目的地まで行ってるかどうか
+}enemyinfo; // 敵の構造体
+
 // プレイヤーの情報を格納したplayer構造体を実体化
 playerinfo player[PLAYER_NUM];
+enemyinfo enemy[ENEMY_NUM];
 
 #endif
