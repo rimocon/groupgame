@@ -105,7 +105,7 @@ void Input()
 
   // ジョイスティックの方向キーまたはアナログキー（スティック)が押された時
   case SDL_JOYAXISMOTION:
-    joystick_send(0); //座標などのデータ送信される
+    //joystick_send(0); //座標などのデータ送信される
     //printf("The axis ID of the operated key is %d.\n",inputevent.jaxis.axis); // 操作された方向キーの方向軸を表示（0：アナログキー，1：アナログキー，2：方向キー左右方向，3：方向キー上下方向）
     if (inputevent.jaxis.axis == 0)
     {
@@ -403,18 +403,22 @@ void MoveChara()
   if (key.left)
   {
     player[myid].dst_rect.x -= move_distance;
+    joystick_send(0); //座標などのデータ送信される
   }
   else if (key.right)
   {
     player[myid].dst_rect.x += move_distance;
+    joystick_send(0); //座標などのデータ送信される
   }
   else if (key.up)
   {
     player[myid].dst_rect.y -= move_distance;
+    joystick_send(0); //座標などのデータ送信される
   }
   else if (key.down)
   {
     player[myid].dst_rect.y += move_distance;
+    joystick_send(0); //座標などのデータ送信される
   }
 }
 
