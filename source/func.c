@@ -101,7 +101,7 @@ void Input()
   case SDL_JOYBUTTONDOWN:
     //	printf("The ID of the pressed button is %d.\n", inputevent.jbutton.button); // 押されたボタンのIDを表示（0から）
     // ボタンIDに応じた処理
-    if (inputevent.jbutton.button == 0)
+    if (inputevent.jbutton.button == 11)
     {
       run = false;
     }
@@ -227,7 +227,7 @@ void Imageload()
   //構造体playerに、プレイヤーの情報を格納
   for(i=0; i<PLAYER_NUM; i++){
     player[i].type = TYPE_PLAYER;
-    s = IMG_Load(imgfiles[TYPE_PLAYER]);
+    s = IMG_Load(imgfiles[TYPE_PLAYER + i]); //各プレイヤーの画像を読み込み
     player[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
     player[i].src_rect.x = 0;
     player[i].src_rect.y = 0;
@@ -416,6 +416,64 @@ void MoveChara()
     }
   }
 }
+
+void MakeMap()
+{
+  /* マップの読み込みと配置 */
+  int i, j, k=0,mt;
+  SDL_Surface* s;
+  SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
+  SDL_Rect dst = {0};
+  for (j = 0; j < MAP_HEIGHT; j++, dst.y += MAP_CHIPSIZE)
+  {
+    dst.x = 0;
+    for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
+    {
+      mt = map0[j][i];
+      if (mt == MT_SHELF)
+      {
+        printf("j = %d\n", j);
+        kotei_objects[k].type = TYPE_SHELF;
+        s = IMG_Load(imgfiles[TYPE_SHELF]);
+        kotei_objects[k].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
+        kotei_objects[k].src_rect.x = 0;
+        kotei_objects[k].src_rect.y = 0;
+        kotei_objects[k].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+        kotei_objects[k].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+
+        kotei_objects[k].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
+        kotei_objects[k].dst_rect.y = dst.y;
+        kotei_objects[k].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
+        kotei_objects[k].dst_rect.h = MAP_CHIPSIZE;
+        SDL_RenderCopy(mainrenderer, kotei_objects[k].image_texture, &kotei_objects[k].src_rect, &kotei_objects[k].dst_rect); // テクスチャからレンダラーに出力
+        k++;
+      }
+      // else if (mt == MT_ENEMY)
+      // {
+      //   enemy_count++;
+      // }
+
+      // src.x = mt * MAP_ChipSize;
+      // src.y = 0;
+      // if (0 > SDL_BlitSurface(img, &src, map, &dst))
+      // {
+      //   ret = PrintError(SDL_GetError());
+      // }
+
+      // src.y = MAP_ChipSize;
+      // if (0 > SDL_BlitSurface(img, &src, gGame.mapMask, &dst))
+      // {
+      //   ret = PrintError(SDL_GetError());
+      // }
+    }
+  }
+  /* マップはテクスチャに */
+  // if (NULL == (gGame.map = SDL_CreateTextureFromSurface(gGame.render, map)))
+  // {
+  //   ret = PrintError(SDL_GetError());
+  // }
+}
+
 
 void setup_client(char *server_name, u_short port)
 {

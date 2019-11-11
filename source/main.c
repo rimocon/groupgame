@@ -30,16 +30,14 @@ int main (int argc, char *argv[]) {
     if((SDL_PollEvent(&inputevent))){
       Input(); //$BF~NO(B
     }
-    SDL_Delay(5);
-    MoveChara(); //$B%-%c%i0\F0(B
     MoveTriangle(); //$B;03Q7A0\F0(B
-    RenderWindow(); //$BIA2h(B
     Collision(); //$BEv$?$jH=Dj(B
-    SDL_Delay(10);
-    MoveChara();
-
-    RenderWindow();
+    MoveChara(); //$B%-%c%i0\F0(B
     control_requests();
+    SDL_Delay(3);
+    RenderWindow();
+    
+    SDL_RenderPresent(mainrenderer);
   }
   terminate_client(); //ソケットの切断
   return 0;
