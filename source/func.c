@@ -32,7 +32,7 @@ static int receive_data(void *, int);
 static void handle_error(char *);
 
 //画像ファイルパス
-static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png", "./images/shelf.png", "./images/camera.png", "./images/entrance.png", "./images/enemy.png", "./images/player.png", "./images/player2.png"}; // 読み込む画像ファイルを指定
+static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png", "./images/shelf.png", "./images/camera.png", "./images/entrance.png", "./images/enemy.png", "./images/player.png", "./images/player2.png", "./images/player3.png"}; // 読み込む画像ファイルを指定
 
 // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 // 金塊、カメラ、棚、出入り口の数を設定する(あとからテキストファイルにしたりしてステージごとに作ったりできる？)
@@ -52,11 +52,14 @@ static SDL_Rect entrance_dst_rects[ENTRANCE_NUM] = {
 static SDL_Rect player_dst_rects[PLAYER_NUM] = {
     //{150, 850, 24, 24},
     //{150, 1050, 24, 24}
-    {150, 350, 24, 24},
-    {250, 350, 24, 24}};
+    {150, 350, 24, 24},  //プレイヤー1の初期座標
+    {250, 350, 24, 24},  //プレイヤー2の初期座標
+    {350, 350, 24, 24}}; //プレイヤー3の初期座標
 static SDL_Rect enemy_dst_rects[ENEMY_NUM] = {
-    {200, 850, 24, 24},
-    {400, 850, 24, 24},
+    //{200, 850, 24, 24}, //敵1の初期座標
+    //{400, 850, 24, 24}, //敵2の初期座標
+    {200, 400, 24, 24}, //敵1の初期座標
+    {400, 400, 24, 24}, //敵2の初期座標
 };
 static int enemy_destination[ENEMY_NUM][2] = {
   {200,450},
@@ -203,9 +206,9 @@ void Input()
     if (inputevent.jbutton.button == 3)
     {
       //if (player[0].dst_rect.x >= 1000 && player[0].dst_rect.x <= 1100)
-      if (player[0].dst_rect.x >= 300 && player[0].dst_rect.x <= 400)
+      if (player[myid].dst_rect.x >= 300 && player[myid].dst_rect.x <= 400)
       {
-        if (player[0].dst_rect.y >= 100 && player[0].dst_rect.y <= 200)
+        if (player[myid].dst_rect.y >= 100 && player[myid].dst_rect.y <= 200)
         {
           kinkai_flag = false;
           //スティック操作がされた時、金塊情報などのデータ送信される
@@ -496,7 +499,8 @@ void MoveChara()
       enemy[i].dst_rect.y -= ENEMY_SPEED;
       break;
     case 90:
-      if(enemy[i].dst_rect.x + ENEMY_SPEED > 1256){
+        //if(enemy[i].dst_rect.x + ENEMY_SPEED > 1256){
+        if(enemy[i].dst_rect.x + ENEMY_SPEED > 756){
         enemy[i].look_angle = 270;
         break;
       }

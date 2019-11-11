@@ -26,12 +26,12 @@ extern void RenderWindow(void); //画像の描画(イベントが無い時の)
 extern void MoveChara(void);	// キャラクター移動のための関数
 
 /*  define関連  */
-#define WINDOWWIDTH 1280 //ウィンドウの幅
-//#define WINDOWWIDTH 780 //ウィンドウの幅
-#define WINDOWHEIGHT 960 //ウィンドウの高さ
-//#define WINDOWHEIGHT 460 //ウィンドウの高さ
+//#define WINDOWWIDTH 1280 //ウィンドウの幅
+#define WINDOWWIDTH 780 //ウィンドウの幅
+//#define WINDOWHEIGHT 960 //ウィンドウの高さ
+#define WINDOWHEIGHT 460 //ウィンドウの高さ
 
-#define PLAYER_NUM 2
+#define PLAYER_NUM 3
 #define PLAYER_SPEED 3
 
 #define KINKAI_NUM 1
@@ -61,7 +61,7 @@ typedef enum {
 	TYPE_ENTRANCE = 3,
 	TYPE_ENEMY = 4,
 	TYPE_PLAYER = 5,
-	TYPE_NUM = 7
+	TYPE_NUM = 8 //読み込む画像ファイルの種類
 } objecttype;
 
 typedef struct
