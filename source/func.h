@@ -6,37 +6,46 @@
 #define WINDOWWIDTH 1280 //ウィンドウの幅
 #define WINDOWHEIGHT 960 //ウィンドウの高さ
 
-#define PLAYER_NUM 1 // オブジェクトの数などはテキストファイルで読み込めるようにしたほうがいろんなマップに対応できるから後から修正したい
+#define PLAYER_NUM 1
 #define PLAYER_SPEED 3
 
+// 金塊、カメラ、棚、出入り口の数
 #define KINKAI_NUM 1
 #define CAMERA_NUM 1
-#define SHELF_NUM 10
+#define SHELF_NUM 10 // 棚の数、マップデータ(map0)の棚の数と合わせる
 #define ENTRANCE_NUM 1
 #define  KOTEI_OBJECT_NUM 13 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
 
 #define ENEMY_NUM 2
 #define ENEMY_SPEED 1
 
-#define MAP_CHIPSIZE 64 //仮
-#define MAP_WIDTH 20
-#define MAP_HEIGHT 16
+// 各オブジェクトの最大数、実装予定
+// #define SHELF_NUM_MAX 100 //
+// #define  KOTEI_OBJECT_NUM_MAX 125 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
+
+//敵の最大数と敵のスピード、実装予定
+// #define ENEMY_NUM_MAX 2
+// #define ENEMY_SPEED 1
+
+#define MAP_CHIPSIZE 64 //変数map0の、1マス分のピクセルの大きさ（仮置き）
+#define MAP_WIDTH 20 // 変数map0の横の数、ゲーム画面を横に20等分してる
+#define MAP_HEIGHT 16 // 変数map0の縦の数、ゲーム画面を縦に16等分してる
 
 /*  mapデータ */
 static int map0[MAP_HEIGHT][MAP_WIDTH] = {
-	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -108,15 +117,9 @@ typedef struct {
 }enemyinfo; // 敵の構造体
 
 
-/*  構造体の実体化  */
-
+/* グローバル変数 */
 //画像ファイルパス
 static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png"}; // 読み込む画像ファイルを指定
-
-// 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
-// 金塊、カメラ、棚、出入り口の数を設定する(あとからテキストファイルにしたりしてステージごとに作ったりできる？)
-//const int KOTEI_OBJECT_NUM =  KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUM;
-static objectinfo kotei_objects[KOTEI_OBJECT_NUM];
 
 // 固定オブジェクト、プレイヤーの初期位置を設定する
 static SDL_Rect kinkai_dst_rects[KINKAI_NUM] = {
@@ -132,20 +135,18 @@ static SDL_Rect entrance_dst_rects[ENTRANCE_NUM] = {
   {0, WINDOWHEIGHT-20,80,20}
 };
 static SDL_Rect player_dst_rects[PLAYER_NUM] = {
-  {150,850,24,24}
+  {0,100,24,24}
 };
 
-static SDL_Rect enemy_dst_rects[ENEMY_NUM] = {
-  {200,850,24,24},
-  {400,850,24,24}
-};
 static int enemy_lookangles[ENEMY_NUM] = {
   90,270
 };
 
+/*  構造体の実体化  */
 inputkeys key; //inputkeys構造体をinputという名前で実体化
 playerinfo player[PLAYER_NUM];  // プレイヤーの情報を格納したplayer構造体を実体化
 camerainfo camera[CAMERA_NUM];
 enemyinfo enemy[ENEMY_NUM];
+static objectinfo kotei_objects[KOTEI_OBJECT_NUM]; // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 
 #endif
