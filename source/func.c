@@ -187,6 +187,7 @@ void Imageload()
     kotei_objects[i].dst_rect =camera_dst_rects[j];
     SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
   }
+  //構造体playerに、プレイヤーの情報を格納
   for(i=0; i<PLAYER_NUM; i++){
     player[i].type = TYPE_PLAYER;
     s = IMG_Load(imgfiles[TYPE_PLAYER]);
@@ -198,6 +199,25 @@ void Imageload()
     player[i].dst_rect = player_dst_rects[i];
     SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     player[i].speed = PLAYER_SPEED;
+  }
+  //構造体enemyに、敵の情報を格納
+  for(i=0; i<ENEMY_NUM; i++){
+    enemy[i].type = TYPE_ENEMY;
+    s = IMG_Load(imgfiles[TYPE_ENEMY]);
+    enemy[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+    enemy[i].src_rect.x = 0;
+    enemy[i].src_rect.y = 0;
+    enemy[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+    enemy[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+    enemy[i].dst_rect = enemy_dst_rects[i];
+    SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    enemy[i].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+    enemy[i].isgodest = false;
+    enemy[i].look_angle = enemy_lookangles[i];
+    //       if(enemy_dst_rects[i].x > enemy_destination[i][0] && enemy_dst_rects[i].y > enemy_destination[i][1]) enemy[i].movemode = 0;
+    // else if(enemy_dst_rects[i].x > enemy_destination[i][0] && enemy_dst_rects[i].y < enemy_destination[i][1]) enemy[i].movemode = 1;
+    // else if(enemy_dst_rects[i].x < enemy_destination[i][0] && enemy_dst_rects[i].y > enemy_destination[i][1]) enemy[i].movemode = 2;
+    // else if(enemy_dst_rects[i].x < enemy_destination[i][0] && enemy_dst_rects[i].y < enemy_destination[i][1]) enemy[i].movemode = 3;
   }
 }
 
@@ -217,37 +237,6 @@ void MoveTriangle()
     if (camera[i].clockwise) {
       camera[i].theta[0]--; 
       camera[i].theta[1]--;
-    //構造体playerに、プレイヤーの情報を格納
-    for(i=0; i<PLAYER_NUM; i++){
-      player[i].type = TYPE_PLAYER;
-      s = IMG_Load(imgfiles[TYPE_PLAYER]);
-      player[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
-      player[i].src_rect.x = 0;
-      player[i].src_rect.y = 0;
-      player[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-      player[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-      player[i].dst_rect = player_dst_rects[i];
-      SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-      player[i].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
-    }
-    //構造体enemyに、敵の情報を格納
-    for(i=0; i<ENEMY_NUM; i++){
-      enemy[i].type = TYPE_ENEMY;
-      s = IMG_Load(imgfiles[TYPE_ENEMY]);
-      enemy[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
-      enemy[i].src_rect.x = 0;
-      enemy[i].src_rect.y = 0;
-      enemy[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-      enemy[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-      enemy[i].dst_rect = enemy_dst_rects[i];
-      SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-      enemy[i].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
-      enemy[i].isgodest = false;
-      enemy[i].look_angle = enemy_lookangles[i];
-    //       if(enemy_dst_rects[i].x > enemy_destination[i][0] && enemy_dst_rects[i].y > enemy_destination[i][1]) enemy[i].movemode = 0;
-    // else if(enemy_dst_rects[i].x > enemy_destination[i][0] && enemy_dst_rects[i].y < enemy_destination[i][1]) enemy[i].movemode = 1;
-    // else if(enemy_dst_rects[i].x < enemy_destination[i][0] && enemy_dst_rects[i].y > enemy_destination[i][1]) enemy[i].movemode = 2;
-    // else if(enemy_dst_rects[i].x < enemy_destination[i][0] && enemy_dst_rects[i].y < enemy_destination[i][1]) enemy[i].movemode = 3;
     }
     else{
       camera[i].theta[0]++;
@@ -257,27 +246,6 @@ void MoveTriangle()
     camera[i].tri[1][1] = camera[i].tri[1][0] + cos(camera[i].theta[0]*M_PI / 180.0)*130; //y2の計算
     camera[i].tri[0][2] = camera[i].tri[0][0] + sin(camera[i].theta[1]*M_PI / 180.0)*130; //x3の計算
     camera[i].tri[1][2] = camera[i].tri[1][0] + cos(camera[i].theta[1]*M_PI / 180.0)*130; //x3の計算
-  }
-}
-void MoveChara()
-{
-  int move_distance = PLAYER_SPEED ;
-  if(key.left){ //左入力
-    player[0].dst_rect.x -= move_distance;
-    if(player[0].dst_rect.x <0) player[0].dst_rect.x = 0;
-  }
-  if(key.right){ //右入力
-    player[0].dst_rect.x += move_distance;
-    if(player[0].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w) player[0].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w; 
-  }
-  if(key.up){ //上入力
-    player[0].dst_rect.y -= move_distance;
-    if(player[0].dst_rect.y < 0) player[0].dst_rect.y = 0; 
-
-  }
-  if(key.down){ //下入力
-    player[0].dst_rect.y += move_distance;
-    if(player[0].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h) player[0].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h; 
   }
 }
 
@@ -321,31 +289,50 @@ void Collision() {
     }
   }
   //ここまでカメラの判定 
+
 }
 
 void MoveChara()
 {
   // プレイヤーの移動
-  int move_distance = PLAYER_SPEED * 2; // プレイヤーの移動距離、設定したスピード
-
-  //キー入力状態に応じて移動
-  if (key.left)
-  {
+  int move_distance = PLAYER_SPEED ;
+  if(key.left){ //左入力
     player[0].dst_rect.x -= move_distance;
+    if(player[0].dst_rect.x <0) player[0].dst_rect.x = 0;
   }
-  else if (key.right)
-  {
+  if(key.right){ //右入力
     player[0].dst_rect.x += move_distance;
+    if(player[0].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w) player[0].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w; 
   }
-  else if (key.up)
-  {
+  if(key.up){ //上入力
     player[0].dst_rect.y -= move_distance;
+    if(player[0].dst_rect.y < 0) player[0].dst_rect.y = 0; 
+
   }
-  else if (key.down)
-  {
+  if(key.down){ //下入力
     player[0].dst_rect.y += move_distance;
+    if(player[0].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h) player[0].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h; 
   }
 
+  //敵キャラの移動
+  for (int i = 0; i < ENEMY_NUM; i++)
+  {
+    switch (enemy[i].look_angle)
+    {
+      case 0:
+        enemy[i].dst_rect.y -= ENEMY_SPEED;
+        break;
+      case 90:
+        enemy[i].dst_rect.x += ENEMY_SPEED;
+        break;
+      case 180:
+        enemy[i].dst_rect.y += ENEMY_SPEED;
+        break;
+      case 270:
+        enemy[i].dst_rect.x -= ENEMY_SPEED;
+        break;
+    }
+  }
   //棚との衝突判定
   for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
   {
@@ -373,84 +360,63 @@ void MoveChara()
       }
     }
   }
-
-  //敵キャラの移動
-  for (int i = 0; i < ENEMY_NUM; i++)
-  {
-    switch (enemy[i].look_angle)
-    {
-    case 0:
-      enemy[i].dst_rect.y -= ENEMY_SPEED;
-      break;
-    case 90:
-      enemy[i].dst_rect.x += ENEMY_SPEED;
-      break;
-    case 180:
-      enemy[i].dst_rect.y += ENEMY_SPEED;
-      break;
-    case 270:
-      enemy[i].dst_rect.x -= ENEMY_SPEED;
-      break;
-    }
-  }
 }
 
 void MakeMap()
 {
   /* マップの読み込みと配置 */
-    int i, j, k=0,mt;
-    SDL_Surface* s;
-    SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
-    SDL_Rect dst = {0};
-    for (j = 0; j < MAP_HEIGHT; j++, dst.y += MAP_CHIPSIZE)
+  int i, j, k=0,mt;
+  SDL_Surface* s;
+  SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
+  SDL_Rect dst = {0};
+  for (j = 0; j < MAP_HEIGHT; j++, dst.y += MAP_CHIPSIZE)
+  {
+    dst.x = 0;
+    for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
     {
-      dst.x = 0;
-      for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
+      mt = map0[j][i];
+      if (mt == MT_SHELF)
       {
-        mt = map0[j][i];
-        if (mt == MT_SHELF)
-        {
-          printf("j = %d\n", j);
-          kotei_objects[k].type = TYPE_SHELF;
-          s = IMG_Load(imgfiles[TYPE_SHELF]);
-          kotei_objects[k].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
-          kotei_objects[k].src_rect.x = 0;
-          kotei_objects[k].src_rect.y = 0;
-          kotei_objects[k].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-          kotei_objects[k].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+        printf("j = %d\n", j);
+        kotei_objects[k].type = TYPE_SHELF;
+        s = IMG_Load(imgfiles[TYPE_SHELF]);
+        kotei_objects[k].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
+        kotei_objects[k].src_rect.x = 0;
+        kotei_objects[k].src_rect.y = 0;
+        kotei_objects[k].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+        kotei_objects[k].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
 
-          kotei_objects[k].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
-          kotei_objects[k].dst_rect.y = dst.y;
-          kotei_objects[k].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
-          kotei_objects[k].dst_rect.h = MAP_CHIPSIZE;
-          SDL_RenderCopy(mainrenderer, kotei_objects[k].image_texture, &kotei_objects[k].src_rect, &kotei_objects[k].dst_rect); // テクスチャからレンダラーに出力
-          k++;
-        }
-        // else if (mt == MT_ENEMY)
-        // {
-        //   enemy_count++;
-        // }
-
-        // src.x = mt * MAP_ChipSize;
-        // src.y = 0;
-        // if (0 > SDL_BlitSurface(img, &src, map, &dst))
-        // {
-        //   ret = PrintError(SDL_GetError());
-        // }
-
-        // src.y = MAP_ChipSize;
-        // if (0 > SDL_BlitSurface(img, &src, gGame.mapMask, &dst))
-        // {
-        //   ret = PrintError(SDL_GetError());
-        // }
+        kotei_objects[k].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
+        kotei_objects[k].dst_rect.y = dst.y;
+        kotei_objects[k].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
+        kotei_objects[k].dst_rect.h = MAP_CHIPSIZE;
+        SDL_RenderCopy(mainrenderer, kotei_objects[k].image_texture, &kotei_objects[k].src_rect, &kotei_objects[k].dst_rect); // テクスチャからレンダラーに出力
+        k++;
       }
+      // else if (mt == MT_ENEMY)
+      // {
+      //   enemy_count++;
+      // }
+
+      // src.x = mt * MAP_ChipSize;
+      // src.y = 0;
+      // if (0 > SDL_BlitSurface(img, &src, map, &dst))
+      // {
+      //   ret = PrintError(SDL_GetError());
+      // }
+
+      // src.y = MAP_ChipSize;
+      // if (0 > SDL_BlitSurface(img, &src, gGame.mapMask, &dst))
+      // {
+      //   ret = PrintError(SDL_GetError());
+      // }
     }
-    /* マップはテクスチャに */
-    // if (NULL == (gGame.map = SDL_CreateTextureFromSurface(gGame.render, map)))
-    // {
-    //   ret = PrintError(SDL_GetError());
-    // }
   }
+  /* マップはテクスチャに */
+  // if (NULL == (gGame.map = SDL_CreateTextureFromSurface(gGame.render, map)))
+  // {
+  //   ret = PrintError(SDL_GetError());
+  // }
 }
 
 
