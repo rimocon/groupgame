@@ -6,7 +6,7 @@
 #define WINDOWWIDTH 1280 //ウィンドウの幅
 #define WINDOWHEIGHT 960 //ウィンドウの高さ
 
-#define PLAYER_NUM 1 // オブジェクトの数などはテキストファイルで読み込めるようにしたほうがいろんなマップに対応できるから後から修正したい
+#define PLAYER_NUM 3 // オブジェクトの数などはテキストファイルで読み込めるようにしたほうがいろんなマップに対応できるから後から修正したい
 #define PLAYER_SPEED 3
 
 #define KINKAI_NUM 1
@@ -52,7 +52,7 @@ typedef enum{
 	TYPE_ENTRANCE = 3,
 	TYPE_ENEMY = 4,
 	TYPE_PLAYER = 5,
-	TYPE_NUM = 6
+	TYPE_NUM = 8 //読み込む画像の数
 }objecttype;
 
 typedef struct {
@@ -113,7 +113,7 @@ typedef struct {
 /*  構造体の実体化  */
 
 //画像ファイルパス
-static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png"}; // 読み込む画像ファイルを指定
+static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png", "./images/player2.png", "./images/player3.png" }; // 読み込む画像ファイルを指定
 
 // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 // 金塊、カメラ、棚、出入り口の数を設定する(あとからテキストファイルにしたりしてステージごとに作ったりできる？)
@@ -134,7 +134,9 @@ static SDL_Rect entrance_dst_rects[ENTRANCE_NUM] = {
 	{0, WINDOWHEIGHT-20,80,20}
 };
 static SDL_Rect player_dst_rects[PLAYER_NUM] = {
-	{150,850,24,24}
+	{150,850,24,24}, //プレイヤー1の初期座標
+	{200,850,24,24}, //プレイヤー2の初期座標
+	{250,850,24,24}  //プレイヤー3の初期座標
 };
 
 static SDL_Rect enemy_dst_rects[ENEMY_NUM] = {
