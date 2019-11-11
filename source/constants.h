@@ -1,0 +1,51 @@
+#include <netinet/in.h>
+
+#define DEFAULT_PORT 51000 //デフォルトのポート番号51000
+#define MAX_LEN_NAME 10 //クライアントのユーザ名の最大長
+#define MAX_NUM_CLIENTS 5 //接続要求の受付最大数
+#define MAX_LEN_BUFFER 256 //メッセージの最大文字数
+#define MAX_LEN_ADDR 32 //目盛りの大きさ
+#define BROADCAST -1 //ブロードキャスト
+
+#define MESSAGE_COMMAND 'M' //メッセージの送信
+#define ZAHYO_COMMAND 'Z' //座標の送信
+#define KINKAI_COMMAND 'K' //金塊の状態
+#define QUIT_COMMAND 'Q' //チャットシステムの終了
+
+/*  関数のプロトタイプ宣言 */
+void setup_client(char *, u_short);
+int control_requests();
+void terminate_client();
+void joystick_send(int);
+static int input_command(void);
+static int execute_command(void);
+static void send_data(void *, int);
+static int receive_data(void *, int);
+static void handle_error(char *);
+
+
+/*  構造体の宣言  */
+typedef struct {
+  int cid;
+  int sock;
+  struct sockaddr_in addr;
+  char name[MAX_LEN_NAME];
+} CLIENT;
+
+typedef struct {
+  int cid;
+  char command;
+  char message[MAX_LEN_BUFFER];
+  int zahyo_x;
+  int zahyo_y;
+} CONTAINER;
+
+/*  ネット関連の変数  */
+static int num_clients;
+static int myid;
+static int sock;
+static int num_sock;
+static fd_set mask; //FD集合を表す構造体
+static CLIENT clients[MAX_NUM_CLIENTS];
+
+

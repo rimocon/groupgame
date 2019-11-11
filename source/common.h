@@ -10,6 +10,16 @@
 #include <time.h> //時間用
 #include <stdbool.h> //bool型を使うため
 #include <math.h> //数学用ライブラリ
+
+/*  ネット関連 */
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <errno.h>
+
+
 /*  SDL関連 */
 #include <SDL2/SDL.h> //SDLを使う
 #include <SDL2/SDL2_gfxPrimitives.h> //SDLで図形描画
@@ -17,6 +27,11 @@
 #include <SDL2/SDL_image.h> //SDLで画像を扱う
 #include <SDL2/SDL_mixer.h> //SDLで音楽を扱う
 
+/*  ネット関連の関数のプロトタイプ宣言  */
+extern void setup_client(char *, u_short);
+extern int control_requests();
+extern void terminate_client();
+extern void joystick_send(int);
 /*  関数のプロトタイプ宣言  */
 extern void Startup(void); //最初に呼び出される関数
 extern void Destroy(void); //SDL関連破棄する関数

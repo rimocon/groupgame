@@ -22,6 +22,8 @@
 #define MAP_WIDTH 20
 #define MAP_HEIGHT 16
 
+/*  変数  */
+bool kinkai_flag;
 /*  mapデータ */
 static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -75,17 +77,17 @@ typedef struct {
 	SDL_Rect src_rect;
 	SDL_Rect dst_rect;
 	bool flag_kinkai;
-  int tri[2][3];
-  float theta[2];
-  bool clockwise;
+	int tri[2][3];
+	float theta[2];
+	bool clockwise;
 }camerainfo;
 
 typedef struct { //キー入力用の構造体を型宣言
 	Uint32  left, //左矢印
-	 			  right, //右矢印
-				  up, //上矢印
-				  down, //下矢印
-          a;  //4ボタン(決定ボタン)
+		right, //右矢印
+		up, //上矢印
+		down, //下矢印
+		a;  //4ボタン(決定ボタン)
 }inputkeys;
 
 typedef enum{
@@ -120,27 +122,27 @@ static objectinfo kotei_objects[KOTEI_OBJECT_NUM];
 
 // 固定オブジェクト、プレイヤーの初期位置を設定する
 static SDL_Rect kinkai_dst_rects[KINKAI_NUM] = {
-  {1000, 100, 100, 100}
+	{1000, 100, 100, 100}
 };
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
-  {1200,900,80,60}
+	{1200,900,80,60}
 };
 static SDL_Rect shelf_dst_rects[SHELF_NUM] = {
-  {400, 100, 46, 108}
+	{400, 100, 46, 108}
 };
 static SDL_Rect entrance_dst_rects[ENTRANCE_NUM] = {
-  {0, WINDOWHEIGHT-20,80,20}
+	{0, WINDOWHEIGHT-20,80,20}
 };
 static SDL_Rect player_dst_rects[PLAYER_NUM] = {
-  {150,850,24,24}
+	{150,850,24,24}
 };
 
 static SDL_Rect enemy_dst_rects[ENEMY_NUM] = {
-  {200,850,24,24},
-  {400,850,24,24}
+	{200,850,24,24},
+	{400,850,24,24}
 };
 static int enemy_lookangles[ENEMY_NUM] = {
-  90,270
+	90,270
 };
 
 inputkeys key; //inputkeys構造体をinputという名前で実体化

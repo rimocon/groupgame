@@ -1,10 +1,12 @@
 #include "common.h"
 #include "func.h"
+#include "constants.h"
 
 void Startup()
 {
   // SDL関連すべて初期化,失敗したら終了
-  if (SDL_Init(SDL_INIT_EVERYTHING) == -1) SDL_Quit();
+  if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
+    SDL_Quit();
 
   if(SDL_NumJoysticks() > 0) {
     joystick = SDL_JoystickOpen(0); // ジョイスティックを開く
@@ -41,6 +43,7 @@ void Startup()
     camera[i].theta[0] = 90.0;
     camera[i].theta[1] = 120.0;
   }
+  kinkai_flag = true;                                   //金塊は最初は、配置されている
   mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0); //メインウィンドウに対するレンダラー生成
   Imageload();
   MakeMap();
@@ -94,27 +97,61 @@ void Input()
       else if(inputevent.jaxis.axis==3){
         //	printf("--- Four-Direction Key: Vertical Axis\n");
       }
-      break;
-      // ジョイスティックのボタンが押された時
-    case SDL_JOYBUTTONDOWN:
-      //	printf("The ID of the pressed button is %d.\n", inputevent.jbutton.button); // 押されたボタンのIDを表示（0から）
-      // ボタンIDに応じた処理
-      if(inputevent.jbutton.button==0){
-        //		printf("--- You pressed a button on the joystick.\n");
+  // ジョイスティックのボタンが押された時
+  case SDL_JOYBUTTONDOWN:
+    //	printf("The ID of the pressed button is %d.\n", inputevent.jbutton.button); // 押されたボタンのIDを表示（0から）
+    // ボタンIDに応じた処理
+    if (inputevent.jbutton.button == 0)
+    {
+      run = false;
+    }
+    if (inputevent.jbutton.button == 5)
+    {
+    }
+
+    //金塊を取る
+    if (inputevent.jbutton.button == 3)
+    {
+      //if (player[0].dst_rect.x >= 1000 && player[0].dst_rect.x <= 1100)
+      if (player[myid].dst_rect.x >= 300 && player[myid].dst_rect.x <= 400)
+      {
+        if (player[myid].dst_rect.y >= 100 && player[myid].dst_rect.y <= 200)
+        {
+          kinkai_flag = false;
+          //スティック操作がされた時、金塊情報などのデータ送信される
+          joystick_send(1);
+        }
       }
-      if(inputevent.jbutton.button== 11){ //終了ボタンが押された
-        run = false;
+      /*
+      if (player[1].dst_rect.x >= 1000 && player[1].dst_rect.x <= 1100)
+      {
+        if (player[1].dst_rect.y >= 100 && player[1].dst_rect.y <= 200)
+        {
+          kinkai_flag = false;
+          //スティック操作がされた時、金塊情報などのデータ送信される
+          joystick_send(1);
+        }
       }
-      break;
-      // ボタンが離された時
-    case SDL_JOYBUTTONUP:
-      //	printf("The ID of the released button is %d.\n",inputevent.jbutton.button); // 離されたボタンのIDを表示（0から）
-      // ボタンIDに応じた処理
-      if(inputevent.jbutton.button==0){
-        //		printf("--- You released a button on the joystick.\n");
-      }
-      break;
-  }
+      */
+    }
+
+    //終了ボタンが押された
+    if (inputevent.jbutton.button == 13)
+    {
+      run = false;
+    }
+    break;
+
+  // ボタンが離された時
+  case SDL_JOYBUTTONUP:
+    //	printf("The ID of the released button is %d.\n",inputevent.jbutton.button); // 離されたボタンのIDを表示（0から）
+    // ボタンIDに応じた処理
+    if (inputevent.jbutton.button == 0)
+    {
+      //		printf("--- You released a button on the joystick.\n");
+    }
+    break;
+    }
 }
 
 void Destroy()
@@ -126,7 +163,7 @@ void Destroy()
 void Imageload()
 {
   SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
-  SDL_RenderClear(mainrenderer); // 設定した描画色(白)でレンダラーをクリア
+  SDL_RenderClear(mainrenderer);                            // 設定した描画色(白)でレンダラーをクリア
 
   SDL_Surface *s; // サーフェイスを一時的に保存する変数
 
@@ -252,11 +289,17 @@ void MoveTriangle()
 void RenderWindow(void) //画面の描画(イベントが無い時)
 {
   SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
-  SDL_RenderClear(mainrenderer);       // 設定した描画色(白)でレンダラーをクリア
-  for(int i=0; i<KOTEI_OBJECT_NUM; i++){
-    SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
+  SDL_RenderClear(mainrenderer);                            // 設定した描画色(白)でレンダラーをクリア
+  for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
+  {
+    //描画対象が金塊で、金塊が地面に設置されていなければ、描画しない
+    if (!(kotei_objects[i].type == TYPE_KINKAI && kinkai_flag == false))
+    {
+      SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
+    }
   }
-  for(int i=0; i<PLAYER_NUM; i++){
+  for (int i = 0; i < PLAYER_NUM; i++)
+  {
     SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
   }
   for(int i=0; i<ENEMY_NUM; i++){
@@ -294,45 +337,28 @@ void Collision() {
 
 void MoveChara()
 {
-  // プレイヤーの移動
-  int move_distance = PLAYER_SPEED ;
-  if(key.left){ //左入力
-    player[0].dst_rect.x -= move_distance;
-    if(player[0].dst_rect.x <0) player[0].dst_rect.x = 0;
-  }
-  if(key.right){ //右入力
-    player[0].dst_rect.x += move_distance;
-    if(player[0].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w) player[0].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w; 
-  }
-  if(key.up){ //上入力
-    player[0].dst_rect.y -= move_distance;
-    if(player[0].dst_rect.y < 0) player[0].dst_rect.y = 0; 
-
-  }
-  if(key.down){ //下入力
-    player[0].dst_rect.y += move_distance;
-    if(player[0].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h) player[0].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h; 
-  }
-
-  //敵キャラの移動
-  for (int i = 0; i < ENEMY_NUM; i++)
+  int move_distance = PLAYER_SPEED * 2;
+  if (key.left)
   {
-    switch (enemy[i].look_angle)
-    {
-      case 0:
-        enemy[i].dst_rect.y -= ENEMY_SPEED;
-        break;
-      case 90:
-        enemy[i].dst_rect.x += ENEMY_SPEED;
-        break;
-      case 180:
-        enemy[i].dst_rect.y += ENEMY_SPEED;
-        break;
-      case 270:
-        enemy[i].dst_rect.x -= ENEMY_SPEED;
-        break;
-    }
+    player[myid].dst_rect.x -= move_distance;
+    joystick_send(0); //座標などのデータ送信される
   }
+  else if (key.right)
+  {
+    player[myid].dst_rect.x += move_distance;
+    joystick_send(0); //座標などのデータ送信される
+  }
+  else if (key.up)
+  {
+    player[myid].dst_rect.y -= move_distance;
+    joystick_send(0); //座標などのデータ送信される
+  }
+  else if (key.down)
+  {
+    player[myid].dst_rect.y += move_distance;
+    joystick_send(0); //座標などのデータ送信される
+  }
+
   //棚との衝突判定
   for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
   {
@@ -360,63 +386,272 @@ void MoveChara()
       }
     }
   }
-}
 
-void MakeMap()
-{
-  /* マップの読み込みと配置 */
-  int i, j, k=0,mt;
-  SDL_Surface* s;
-  SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
-  SDL_Rect dst = {0};
-  for (j = 0; j < MAP_HEIGHT; j++, dst.y += MAP_CHIPSIZE)
+  //敵キャラの移動
+  for (int i = 0; i < ENEMY_NUM; i++)
   {
-    dst.x = 0;
-    for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
+    switch (enemy[i].look_angle)
     {
-      mt = map0[j][i];
-      if (mt == MT_SHELF)
-      {
-        printf("j = %d\n", j);
-        kotei_objects[k].type = TYPE_SHELF;
-        s = IMG_Load(imgfiles[TYPE_SHELF]);
-        kotei_objects[k].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
-        kotei_objects[k].src_rect.x = 0;
-        kotei_objects[k].src_rect.y = 0;
-        kotei_objects[k].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-        kotei_objects[k].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-
-        kotei_objects[k].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
-        kotei_objects[k].dst_rect.y = dst.y;
-        kotei_objects[k].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
-        kotei_objects[k].dst_rect.h = MAP_CHIPSIZE;
-        SDL_RenderCopy(mainrenderer, kotei_objects[k].image_texture, &kotei_objects[k].src_rect, &kotei_objects[k].dst_rect); // テクスチャからレンダラーに出力
-        k++;
+    case 0:
+      enemy[i].dst_rect.y -= ENEMY_SPEED;
+      break;
+    case 90:
+        //if(enemy[i].dst_rect.x + ENEMY_SPEED > 1256){
+        if(enemy[i].dst_rect.x + ENEMY_SPEED > 756){
+        enemy[i].look_angle = 270;
+        break;
       }
-      // else if (mt == MT_ENEMY)
-      // {
-      //   enemy_count++;
-      // }
-
-      // src.x = mt * MAP_ChipSize;
-      // src.y = 0;
-      // if (0 > SDL_BlitSurface(img, &src, map, &dst))
-      // {
-      //   ret = PrintError(SDL_GetError());
-      // }
-
-      // src.y = MAP_ChipSize;
-      // if (0 > SDL_BlitSurface(img, &src, gGame.mapMask, &dst))
-      // {
-      //   ret = PrintError(SDL_GetError());
-      // }
+      enemy[i].dst_rect.x += ENEMY_SPEED;
+      break;
+    case 180:
+      enemy[i].dst_rect.y += ENEMY_SPEED;
+      break;
+    case 270:
+      if(enemy[i].dst_rect.x - ENEMY_SPEED < 0){
+        enemy[i].look_angle = 90;
+        break;
+      }
+      enemy[i].dst_rect.x -= ENEMY_SPEED;
+      break;
     }
   }
-  /* マップはテクスチャに */
-  // if (NULL == (gGame.map = SDL_CreateTextureFromSurface(gGame.render, map)))
-  // {
-  //   ret = PrintError(SDL_GetError());
-  // }
 }
 
+void setup_client(char *server_name, u_short port)
+{
+  struct hostent *server; //インターネットホスト名からアドレスへの割り当て
+  struct sockaddr_in sv_addr;
+
+  fprintf(stderr, "Trying to connect server %s (port = %d).\n", server_name, port);
+  /* gethostbyname関数
+     呼び出しで指定されたホスト名用の hostent 構造体へのポインターを戻す*/
+  if ((server = gethostbyname(server_name)) == NULL)
+  {
+    handle_error("gethostbyname()");
+  }
+
+  //ソケットの生成(クライアント側)
+  sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock < 0)
+  { //正常に実行されなかった場合
+    handle_error("socket()");
+  }
+
+  sv_addr.sin_family = AF_INET;   //ネットワークアドレスの種類(ここでは、インターネット)
+  sv_addr.sin_port = htons(port); //ポート番号
+  sv_addr.sin_addr.s_addr = *(u_int *)server->h_addr_list[0];
+
+  if (connect(sock, (struct sockaddr *)&sv_addr, sizeof(sv_addr)) != 0)
+  { //クライアントからサーバへの接続要求
+    handle_error("connect()");
+  }
+
+  fprintf(stderr, "Input your name: ");
+  char user_name[MAX_LEN_NAME]; //ユーザ名格納(最大10文字)
+  /*
+  ・fgets(user_name, sizeof(user_name), stdin)について
+  fgets関数は、改行までの文字列をまとめて読み込むための関数であり、改行コードも格納される
+  stdinと指定しているので、標準入力である。
+  */
+  if (fgets(user_name, sizeof(user_name), stdin) == NULL)
+  { //ユーザ名の取得
+    handle_error("fgets()");
+  }
+  //user_name[]の最後尾に含まれる改行コードをヌル文字に変更
+  user_name[strlen(user_name) - 1] = '\0';
+  send_data(user_name, MAX_LEN_NAME); //ユーザ名をサーバに送信
+
+  fprintf(stderr, "Waiting for other clients...\n");
+  receive_data(&num_clients, sizeof(int)); //サーバに接続されているクライアントの数の読み込み
+  fprintf(stderr, "Number of clients = %d.\n", num_clients);
+  receive_data(&myid, sizeof(int)); //クライアント自身の識別IDを読み込み
+  fprintf(stderr, "Your ID = %d.\n", myid);
+  int i;
+  for (i = 0; i < num_clients; i++)
+  { //全クライアントのデータの受信
+    receive_data(&clients[i], sizeof(CLIENT));
+  }
+
+  num_sock = sock + 1;
+  FD_ZERO(&mask);      //&maskをゼロクリア
+  FD_SET(0, &mask);    //0番目のFDに対応する値を1にセット
+  FD_SET(sock, &mask); //sock番目のFDに対応する値を1にセット
+  fprintf(stderr, "Input command (M=message, Q=quit): \n");
+}
+
+int control_requests()
+{
+  fd_set read_flag = mask;
+
+  struct timeval timeout; //タイマ値を指定する
+  timeout.tv_sec = 0;     //秒単位
+  timeout.tv_usec = 30;   //マイクロ秒単位
+
+  if (select(num_sock, (fd_set *)&read_flag, NULL, NULL, &timeout) == -1)
+  {
+    handle_error("select()");
+  }
+
+  int result = 1;
+  /*
+  FD集合&read_flagの、0番目のビットが立っているかどうか
+  立っていれば、0 以外の値を返し、存在しなければ 0 を返す
+  */
+
+  /*
+  //クライアント自身がコマンドを入力したとき
+  if (FD_ISSET(0, &read_flag))
+  {
+    result = input_command(); //サーバからコマンドが送信されてきたとき
+  }
+  */
+  if (FD_ISSET(sock, &read_flag))
+  {
+    result = execute_command();
+  }
+
+  return result;
+}
+
+void joystick_send(int num)
+{
+  CONTAINER data;
+  memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
+  if (num == 0)
+  {
+    //コマンドとして、座標の'Z'を代入
+    data.command = ZAHYO_COMMAND;           //コマンドを格納
+    data.cid = myid;                        //クライアントIDを格納
+    data.zahyo_x = player[myid].dst_rect.x; //プレイヤーのx座標を格納
+    data.zahyo_y = player[myid].dst_rect.y; //プレイヤーのy座標を格納
+    printf("myid = %d\n", myid);
+    printf("Player 0 : axis x = %d, axis y = %d\n", player[0].dst_rect.x, player[0].dst_rect.y);
+    printf("Player 1 : axis x = %d, axis y = %d\n", player[1].dst_rect.x, player[1].dst_rect.y);
+  }
+  else if (num == 1)
+  {
+    //コマンドとして、座標の'K'を代入
+    data.command = KINKAI_COMMAND; //コマンドを格納
+    data.cid = myid;               //クライアントIDを格納
+  }
+  send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
+}
+
+static int input_command()
+{ //クライアントがデータをインプットした時
+  CONTAINER data;
+  char com;
+  memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
+  com = getchar();                     //標準入力から１文字を受け取る('M'または'Q')
+  while (getchar() != '\n')
+    ; //改行コードが入力されるまで，1文字ずつ文字を受けとる
+
+  switch (com)
+  {
+  case MESSAGE_COMMAND: //'M'のとき
+    fprintf(stderr, "Input message: ");
+    if (fgets(data.message, MAX_LEN_BUFFER, stdin) == NULL)
+    { //メッセージの受け取り
+      handle_error("fgets()");
+    }
+    data.command = MESSAGE_COMMAND;                //コマンドを格納
+    data.message[strlen(data.message) - 1] = '\0'; //メッセージの最後にヌル文字を代入
+    data.cid = myid;                               //クライアントIDを格納
+    send_data(&data, sizeof(CONTAINER));           //クライアントのデータを送信
+    break;
+  case QUIT_COMMAND:                     //'Q'のとき
+    data.command = QUIT_COMMAND;         //コマンドを格納
+    data.cid = myid;                     //クライアントIDを格納
+    send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
+    break;
+  default: //その他の文字が入力された場合
+    fprintf(stderr, "%c is not a valid command.\n", com);
+  }
+
+  return 1;
+}
+
+static int execute_command()
+{ //サーバからデータを受け取ったとき
+  CONTAINER data;
+  int result = 1;
+  memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
+  receive_data(&data, sizeof(data));   //クライアントのデータを受信
+
+  switch (data.command)
+  {
+  case ZAHYO_COMMAND: //'Z'のとき
+    //自分の座標は、スティックを動かした段階で更新してるので、ここでは、更新せず。
+    if (myid != data.cid)
+    {
+      player[data.cid].dst_rect.x = data.zahyo_x; //クライアントのx座標を各プレイヤーの座標を反映
+      player[data.cid].dst_rect.y = data.zahyo_y; //クライアントのy座標を各プレイヤーの座標を反映
+    }
+    //fprintf(stderr, "client[%d], name : %s,zahyo_x = %d, zahyo_y = %d \n", data.cid, clients[data.cid].name, data.zahyo_x, data.zahyo_y);
+    result = 1;
+    break;
+  case KINKAI_COMMAND: //'K'のとき
+    fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
+    //send_data(BROADCAST, &data, sizeof(data));
+    kinkai_flag = false;
+    result = 1;
+    break;
+  case MESSAGE_COMMAND: //'M'のとき
+    fprintf(stderr, "client[%d] %s: %s\n", data.cid, clients[data.cid].name, data.message);
+    result = 1;
+    break;
+  case QUIT_COMMAND: //'Q'のとき
+    fprintf(stderr, "client[%d] %s sent quit command.\n", data.cid, clients[data.cid].name);
+    result = 0;
+    break;
+  default: //その他の文字が入力された場合
+    fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
+    exit(1); //異常終了
+  }
+
+  return result;
+}
+
+static void send_data(void *data, int size)
+{
+  if ((data == NULL) || (size <= 0))
+  { //CONTAINER構造体で宣言されたdataに不具合がある場合
+    fprintf(stderr, "send_data(): data is illeagal.\n");
+    exit(1); //異常終了
+  }
+  //引数2が指すバッファーから、ファイルディスクリプター引数1が参照するファイルへ、最大引数3のバイト数分を書き込む
+  if (write(sock, data, size) == -1)
+  {
+    handle_error("write()");
+  }
+}
+
+static int receive_data(void *data, int size)
+{
+  if ((data == NULL) || (size <= 0))
+  { //CONTAINER構造体で宣言されたdataに不具合がある場合
+    fprintf(stderr, "receive_data(): data is illeagal.\n");
+    exit(1); //異常終了
+  }
+
+  return (read(sock, data, size)); //コネクションからバッファへのデータの読み込み
+}
+
+static void handle_error(char *message)
+{
+  perror(message); //システム・エラー・メッセージを伴うエラー・メッセージ
+  /* 
+  errno : システムコールや一部のライブラリ関数の実行に失敗した際、 
+  どのような原因で失敗したのかを教えてくれる
+  */
+  fprintf(stderr, "%d\n", errno);
+  exit(1); //エラー終了
+}
+
+void terminate_client()
+{
+  fprintf(stderr, "Connection is closed.\n");
+  close(sock); ////ソケットを切断
+  exit(0);     //正常終了
+}
 
