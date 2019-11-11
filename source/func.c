@@ -222,7 +222,7 @@ void Imageload()
 }
 
 void MoveTriangle()
-{ 
+{
   //tri[0][1] = x2
   //tri[1][1] = y2
   //tri[0][2] = x3
@@ -235,7 +235,7 @@ void MoveTriangle()
       camera[i].clockwise = true; //時計回り
     }
     if (camera[i].clockwise) {
-      camera[i].theta[0]--; 
+      camera[i].theta[0]--;
       camera[i].theta[1]--;
     }
     else{
@@ -274,7 +274,7 @@ void Collision() {
   //00,10,01,11->00,10,02,12->01,11,01,11->01,11,02,12で判定
   //カメラの判定
   for (int i = 0; i < CAMERA_NUM;i++){ //カメラの数だけ
-    for(int j = 0; j < 2; j++) { 
+    for(int j = 0; j < 2; j++) {
       for(int k = 1; k < 3; k++) {
         bool judge = SDL_IntersectRectAndLine(&player[0].dst_rect,
             &camera[i].tri[0][j],
@@ -288,7 +288,7 @@ void Collision() {
       }
     }
   }
-  //ここまでカメラの判定 
+  //ここまでカメラの判定
 
 }
 
@@ -302,16 +302,16 @@ void MoveChara()
   }
   if(key.right){ //右入力
     player[0].dst_rect.x += move_distance;
-    if(player[0].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w) player[0].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w; 
+    if(player[0].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w) player[0].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w;
   }
   if(key.up){ //上入力
     player[0].dst_rect.y -= move_distance;
-    if(player[0].dst_rect.y < 0) player[0].dst_rect.y = 0; 
+    if(player[0].dst_rect.y < 0) player[0].dst_rect.y = 0;
 
   }
   if(key.down){ //下入力
     player[0].dst_rect.y += move_distance;
-    if(player[0].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h) player[0].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h; 
+    if(player[0].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h) player[0].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h;
   }
 
   //敵キャラの移動
@@ -342,22 +342,10 @@ void MoveChara()
         break;
 
       // ぶつかったぶんの距離プレイヤーの位置を戻す
-      if (key.left)
-      {
-        player[0].dst_rect.x += move_distance;
-      }
-      else if (key.right)
-      {
-        player[0].dst_rect.x -= move_distance;
-      }
-      else if (key.up)
-      {
-        player[0].dst_rect.y += move_distance;
-      }
-      else if (key.down)
-      {
-        player[0].dst_rect.y -= move_distance;
-      }
+      if (key.left) player[0].dst_rect.x += move_distance;
+      if (key.right) player[0].dst_rect.x -= move_distance;
+      if (key.up) player[0].dst_rect.y += move_distance;
+      if (key.down) player[0].dst_rect.y -= move_distance;
     }
   }
 }
