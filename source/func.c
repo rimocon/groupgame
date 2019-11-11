@@ -1,8 +1,7 @@
 #include "common.h"
 #include "func.h"
 
-void Startup()
-{
+void Startup() {
   // SDL関連すべて初期化,失敗したら終了
   if (SDL_Init(SDL_INIT_EVERYTHING) == -1) SDL_Quit();
 
@@ -28,6 +27,11 @@ void Startup()
     SDL_Quit(); //終了
   }
   run = true; //動かす
+  camera[0].angle = 30.0;
+  camera[1].angle = 70.0;
+  camera[2].angle = 180.0;
+  camera[3].angle = 280.0;
+  camera[3].angle = 80.0;
   for(int i = 0;i<CAMERA_NUM; i++) {
     /*
        camera[i].dst_rects.x = 1200;
@@ -36,10 +40,19 @@ void Startup()
        camera[i].dst_rects.h = 60;
      */
     camera[i].clockwise = true;
-    camera[i].tri[0][0] = 640.0;
-    camera[i].tri[1][0] = 480.0;
-    camera[i].theta[0] = 90.0;
-    camera[i].theta[1] = 120.0;
+    // camera[i].tri[0][0] = camera_dst_rects[i].x + camera_dst_rects[i].w;
+    // camera[i].tri[1][0] = camera_dst_rects[i].y + camera_dst_rects[i].h /2;
+    Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w, //回転後の座標を計算して検知の一点に格納
+        camera_dst_rects[i].y + camera_dst_rects[i].h /2,
+        camera_dst_rects[i].x + camera_dst_rects[i].w /2,
+        camera_dst_rects[i].y + camera_dst_rects[i].h /2,
+        camera[i].angle,
+        &camera[i].tri[0][0],
+        &camera[i].tri[1][0]);
+    printf("x2 %d\n",camera[i].tri[0][0]);
+    printf("y2 %d\n",camera[i].tri[1][0]);
+    camera[i].theta[0] = 90.0 - camera[i].angle;
+    camera[i].theta[1] = 120.0 - camera[i].angle;
   }
   mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0); //メインウィンドウに対するレンダラー生成
   Imageload();
@@ -175,17 +188,15 @@ void Imageload()
     SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     i++;
   }
-  for(int j = 0; j<CAMERA_NUM; j++){
-    printf("j = %d\n",j);
-    kotei_objects[i].type = TYPE_CAMERA;
+  for(int i = 0; i<CAMERA_NUM; i++){ //カメラ表示
+    printf("cameralord \n");
     s = IMG_Load(imgfiles[TYPE_CAMERA]);
-    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
-    kotei_objects[i].src_rect.x = 0;
-    kotei_objects[i].src_rect.y = 0;
-    kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-    kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-    kotei_objects[i].dst_rect =camera_dst_rects[j];
-    SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    camera[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+    camera[i].src_rect.x = 0;
+    camera[i].src_rect.y = 0;
+    camera[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+    camera[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+    camera[i].dst_rect =camera_dst_rects[i];
   }
   //構造体playerに、プレイヤーの情報を格納
   for(i=0; i<PLAYER_NUM; i++){
@@ -228,10 +239,10 @@ void MoveTriangle()
   //tri[0][2] = x3
   //tri[1][2] = y3
   for (int i = 0; i<CAMERA_NUM;i++) {  //カメラの数だけ繰り返す
-    if ( camera[i].theta[0] < 90 || camera[i].theta[1] < 90 ) {
+    if ( camera[i].theta[0] < 105 - camera[i].angle -90 || camera[i].theta[1] < 105 - camera[i].angle - 90) {
       camera[i].clockwise = false; //反時計回り
     }
-    else if(camera[i].theta[0] > 270 || camera[i].theta[1] >270) {
+    else if(camera[i].theta[0] > 255 - camera[i].angle - 90 || camera[i].theta[1] > 255 - camera[i].angle - 90) {
       camera[i].clockwise = true; //時計回り
     }
     if (camera[i].clockwise) {
@@ -242,10 +253,10 @@ void MoveTriangle()
       camera[i].theta[0]++;
       camera[i].theta[1]++;
     }
-    camera[i].tri[0][1] = camera[i].tri[0][0] + sin(camera[i].theta[0]*M_PI / 180.0)*130; //x2の計算
-    camera[i].tri[1][1] = camera[i].tri[1][0] + cos(camera[i].theta[0]*M_PI / 180.0)*130; //y2の計算
-    camera[i].tri[0][2] = camera[i].tri[0][0] + sin(camera[i].theta[1]*M_PI / 180.0)*130; //x3の計算
-    camera[i].tri[1][2] = camera[i].tri[1][0] + cos(camera[i].theta[1]*M_PI / 180.0)*130; //x3の計算
+    camera[i].tri[0][1] = camera[i].tri[0][0] + sin(camera[i].theta[0]*M_PI / 180.0)*180; //x2の計算
+    camera[i].tri[1][1] = camera[i].tri[1][0] + cos(camera[i].theta[0]*M_PI / 180.0)*180; //y2の計算
+    camera[i].tri[0][2] = camera[i].tri[0][0] + sin(camera[i].theta[1]*M_PI / 180.0)*180; //x3の計算
+    camera[i].tri[1][2] = camera[i].tri[1][0] + cos(camera[i].theta[1]*M_PI / 180.0)*180; //x3の計算
   }
 }
 
@@ -265,6 +276,8 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
   for(int i = 0;  i<CAMERA_NUM; i++){
     filledTrigonColor(mainrenderer,camera[i].tri[0][0],camera[i].tri[1][0],camera[i].tri[0][1],camera[i].tri[1][1],camera[i].tri[0][2],camera[i].tri[1][2],0xff0000ff);
+
+    SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,camera[i].angle,NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
   }
   // filledTrigonColor(mainrenderer,640,480,700,400,580,400,0xff0000ff);
   SDL_RenderPresent(mainrenderer);              // 描画データを表示
@@ -282,7 +295,11 @@ void Collision() {
             &camera[i].tri[0][k],
             &camera[i].tri[1][k]);
         if(judge) {
-          run = false;
+        printf("tri 0 %d = %d\n",j,camera[i].tri[0][j]);
+        printf("tri 1 %d = %d\n",j,camera[i].tri[1][j]);
+        printf("tri 0 %d = %d\n",k,camera[i].tri[0][k]);
+        printf("tri 1 %d = %d\n",k,camera[i].tri[1][k]);
+        run = false;
           break;
         }
       }
@@ -291,7 +308,6 @@ void Collision() {
   //ここまでカメラの判定 
 
 }
-
 void MoveChara()
 {
   // プレイヤーの移動
@@ -361,10 +377,9 @@ void MoveChara()
     }
   }
 }
-
 void MakeMap()
-{
-  /* マップの読み込みと配置 */
+{ 
+  // マップの読み込みと配置 
   int i, j, k=0,mt;
   SDL_Surface* s;
   SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
@@ -412,11 +427,16 @@ void MakeMap()
       // }
     }
   }
-  /* マップはテクスチャに */
+  // マップはテクスチャに 
   // if (NULL == (gGame.map = SDL_CreateTextureFromSurface(gGame.render, map)))
   // {
   //   ret = PrintError(SDL_GetError());
   // }
+
 }
 
-
+//xとyと角度を与えると回転後の座標を返す関数
+float Rotation(int x1,int y1,int a,int b,double theta,int *x2,int *y2){
+  *x2 = (x1-a)*cos(theta*M_PI/180.0) - (y1-b)*sin(theta*M_PI/180.0) + a;
+  *y2 = (x1-a)*sin(theta*M_PI/180.0) + (y1-b)*cos(theta*M_PI/180.0) + b;
+}

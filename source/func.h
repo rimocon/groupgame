@@ -10,10 +10,11 @@
 #define PLAYER_SPEED 3
 
 #define KINKAI_NUM 1
-#define CAMERA_NUM 1
 #define SHELF_NUM 10
 #define ENTRANCE_NUM 1
-#define  KOTEI_OBJECT_NUM 13 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
+#define  KOTEI_OBJECT_NUM 12 // KINKAI_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
+
+#define CAMERA_NUM 5
 
 #define ENEMY_NUM 2
 #define ENEMY_SPEED 1
@@ -22,6 +23,8 @@
 #define MAP_WIDTH 20
 #define MAP_HEIGHT 16
 
+/*  関数のプロトタイプ宣言 */
+extern float Rotation(int x1, int y1,int a,int b, double theta,int *x2,int *y2); //回転計算
 /*  mapデータ */
 static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -78,6 +81,7 @@ typedef struct {
   int tri[2][3];
   float theta[2];
   bool clockwise;
+  double angle;
 }camerainfo;
 
 typedef struct { //キー入力用の構造体を型宣言
@@ -115,16 +119,20 @@ static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png",".
 
 // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 // 金塊、カメラ、棚、出入り口の数を設定する(あとからテキストファイルにしたりしてステージごとに作ったりできる？)
-//const int KOTEI_OBJECT_NUM =  KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUM;
-static objectinfo kotei_objects[KOTEI_OBJECT_NUM];
-
 // 固定オブジェクト、プレイヤーの初期位置を設定する
 static SDL_Rect kinkai_dst_rects[KINKAI_NUM] = {
   {1000, 100, 100, 100}
 };
+
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
-  {1200,900,80,60}
+  {900,700,120,100},
+  {500,400,120,100},
+  {300,100,120,100},
+  {100,800,120,100},
+  {200,300,120,100}
 };
+
+
 static SDL_Rect shelf_dst_rects[SHELF_NUM] = {
   {400, 100, 46, 108}
 };
@@ -147,5 +155,8 @@ inputkeys key; //inputkeys構造体をinputという名前で実体化
 playerinfo player[PLAYER_NUM];  // プレイヤーの情報を格納したplayer構造体を実体化
 camerainfo camera[CAMERA_NUM];
 enemyinfo enemy[ENEMY_NUM];
+//const int KOTEI_OBJECT_NUM =  KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUM;
+objectinfo kotei_objects[KOTEI_OBJECT_NUM];
+
 
 #endif
