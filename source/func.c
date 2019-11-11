@@ -43,6 +43,7 @@ void Startup()
   }
   mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0); //メインウィンドウに対するレンダラー生成
   Imageload();
+  MakeMap();
 }
 
 void Input()
@@ -146,7 +147,6 @@ void Imageload()
     SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     i++; // 金塊、カメラ、棚、出入り口のデータをkotei_objectsに保存するためにiをインクリメント
   }
-
   for(int j = 0; j<SHELF_NUM; j++){
     printf("j = %d\n",j);
     kotei_objects[i].type = TYPE_SHELF;
@@ -398,13 +398,8 @@ void MoveChara()
 void MakeMap()
 {
   /* マップの読み込みと配置 */
-  /* ファイルオープン */
-  FILE *fp = fopen(mapdatafile, "r");
-  if (fp == NULL)
-  {
-    ret = PrintError("failed to open map data.");
-  }
-    int i, j;
+    int i, j, k=0,mt;
+    SDL_Surface* s;
     SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
     SDL_Rect dst = {0};
     for (j = 0; j < MAP_HEIGHT; j++, dst.y += MAP_CHIPSIZE)
@@ -412,61 +407,50 @@ void MakeMap()
       dst.x = 0;
       for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
       {
-        /* 値の読込(意味はMapTypeに準ずる) */
-        if (fscanf(fp, "%u", &mt) != 1)
+        mt = map0[j][i];
+        if (mt == MT_SHELF)
         {
-          ret = PrintError("failed to load map data.");
-        }
-
-        if (mt == TYPE_SHELF)
-        {
-          kotei_objects[i].type = TYPE_SHELF;
+          printf("j = %d\n", j);
+          kotei_objects[k].type = TYPE_SHELF;
           s = IMG_Load(imgfiles[TYPE_SHELF]);
-          kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
-          kotei_objects[i].src_rect.x = 0;
-          kotei_objects[i].src_rect.y = 0;
-          kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-          kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-          kotei_objects[i].dst_rect = shelf_dst_rects[j];
-          SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+          kotei_objects[k].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
+          kotei_objects[k].src_rect.x = 0;
+          kotei_objects[k].src_rect.y = 0;
+          kotei_objects[k].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+          kotei_objects[k].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
 
-          SetInitPoint(CT_Station, dst);
-          mt = MT_None;
+          kotei_objects[k].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
+          kotei_objects[k].dst_rect.y = dst.y;
+          kotei_objects[k].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
+          kotei_objects[k].dst_rect.h = MAP_CHIPSIZE;
+          SDL_RenderCopy(mainrenderer, kotei_objects[k].image_texture, &kotei_objects[k].src_rect, &kotei_objects[k].dst_rect); // テクスチャからレンダラーに出力
+          k++;
         }
-        else if (mt == MT_Player)
-        {
-          SetInitPoint(CT_Player, dst);
-          mt = MT_None;
-        }
+        // else if (mt == MT_ENEMY)
+        // {
+        //   enemy_count++;
+        // }
 
-        src.x = mt * MAP_ChipSize;
-        src.y = 0;
-        if (0 > SDL_BlitSurface(img, &src, map, &dst))
-        {
-          ret = PrintError(SDL_GetError());
-        }
+        // src.x = mt * MAP_ChipSize;
+        // src.y = 0;
+        // if (0 > SDL_BlitSurface(img, &src, map, &dst))
+        // {
+        //   ret = PrintError(SDL_GetError());
+        // }
 
-        src.y = MAP_ChipSize;
-        if (0 > SDL_BlitSurface(img, &src, gGame.mapMask, &dst))
-        {
-          ret = PrintError(SDL_GetError());
-        }
+        // src.y = MAP_ChipSize;
+        // if (0 > SDL_BlitSurface(img, &src, gGame.mapMask, &dst))
+        // {
+        //   ret = PrintError(SDL_GetError());
+        // }
       }
     }
     /* マップはテクスチャに */
-    if (NULL == (gGame.map = SDL_CreateTextureFromSurface(gGame.render, map)))
-    {
-      ret = PrintError(SDL_GetError());
-    }
+    // if (NULL == (gGame.map = SDL_CreateTextureFromSurface(gGame.render, map)))
+    // {
+    //   ret = PrintError(SDL_GetError());
+    // }
   }
-
-  SDL_SaveBMP(gGame.mapMask, "test.bmp");
-
-  /* ファイルを閉じる */
-  fclose(fp);
-  /* サーフェイス解放(テクスチャに転送後はゲーム中に使わないので) */
-  SDL_FreeSurface(map);
-  SDL_FreeSurface(img);
-
-  return ret;
 }
+
+

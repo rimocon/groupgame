@@ -24,9 +24,9 @@ extern void Input(void); //入力関数
 extern void Imageload(void); //画像読み込み関数
 extern void RenderWindow(void); //画像の描画(イベントが無い時の)
 extern void MoveChara(void); // キャラクター移動のための関数
-<<<<<<< HEAD
 extern void MoveTriangle(void); //三角形移動
 extern void Collision(); //当たり判定
+extern void MakeMap(void);
 
 /*  define関連  */
 #define WINDOWWIDTH 1280 //ウィンドウの幅
@@ -37,16 +37,16 @@ extern void Collision(); //当たり判定
 
 #define KINKAI_NUM 1
 #define CAMERA_NUM 1
-#define SHELF_NUM 1
+#define SHELF_NUM 10
 #define ENTRANCE_NUM 1
-#define  KOTEI_OBJECT_NUM 4 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
+#define  KOTEI_OBJECT_NUM 13 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
 
 #define ENEMY_NUM 2
 #define ENEMY_SPEED 1
 
-#define MAP_CHIPSIZE 40 //仮
-#define MAP_WIDTH 32
-#define MAP_HEIGHT 24
+#define MAP_CHIPSIZE 64 //仮
+#define MAP_WIDTH 20
+#define MAP_HEIGHT 16
 
 /*  グローバル変数  */
 int status; //ゲームの現在の状態
@@ -56,8 +56,31 @@ SDL_Renderer *mainrenderer; //メイン画面用レンダラー
 SDL_Surface *background; //背景用サーフェイス
 SDL_Joystick *joystick; //ジョイスティックを特定,利用するための構造体
 SDL_Event inputevent; //入力用
+static int map0[MAP_HEIGHT][MAP_WIDTH] = {
+	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+};
 
-
+typedef enum{
+	MT_NONE = 0,
+	MT_SHELF = 1,
+	MT_ENEMY = 2,
+	MT_ENTRANCE = 3
+}maptype;
 
 typedef enum{
 	TYPE_KINKAI = 0,
