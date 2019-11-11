@@ -28,9 +28,19 @@ void Startup()
     SDL_Quit(); //終了
   }
   run = true; //動かす
-  clockwise = true; //時計回り
-  theta = 90;
-  theta2 = 120;
+  for(int i = 0;i<CAMERA_NUM; i++) {
+    /*
+       camera[i].dst_rects.x = 1200;
+       camera[i].dst_rects.y = 900;
+       camera[i].dst_rects.w = 80;
+       camera[i].dst_rects.h = 60;
+     */
+    camera[i].clockwise = true;
+    camera[i].tri[0][0] = 640.0;
+    camera[i].tri[1][0] = 480.0;
+    camera[i].theta[0] = 90.0;
+    camera[i].theta[1] = 120.0;
+  }
   mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0); //メインウィンドウに対するレンダラー生成
   Imageload();
 }
@@ -197,38 +207,27 @@ void MoveTriangle()
   //tri[1][1] = y2
   //tri[0][2] = x3
   //tri[1][2] = y3
-  if ( theta < 90 || theta2 < 90 ) clockwise = false;
-  else if(theta > 270 || theta2 >270) clockwise = true;
-  if (clockwise) {
-    theta--;
-    theta2--;
+  for (int i = 0; i<CAMERA_NUM;i++) {  //カメラの数だけ繰り返す
+    if ( camera[i].theta[0] < 90 || camera[i].theta[1] < 90 ) {
+      camera[i].clockwise = false; //反時計回り
+    }
+    else if(camera[i].theta[0] > 270 || camera[i].theta[1] >270) {
+      camera[i].clockwise = true; //時計回り
+    }
+    if (camera[i].clockwise) {
+      camera[i].theta[0]--; 
+      camera[i].theta[1]--;
+    }
+    else{
+      camera[i].theta[0]++;
+      camera[i].theta[1]++;
+    }
+    camera[i].tri[0][1] = camera[i].tri[0][0] + sin(camera[i].theta[0]*M_PI / 180.0)*130; //x2の計算
+    camera[i].tri[1][1] = camera[i].tri[1][0] + cos(camera[i].theta[0]*M_PI / 180.0)*130; //y2の計算
+    camera[i].tri[0][2] = camera[i].tri[0][0] + sin(camera[i].theta[1]*M_PI / 180.0)*130; //x3の計算
+    camera[i].tri[1][2] = camera[i].tri[1][0] + cos(camera[i].theta[1]*M_PI / 180.0)*130; //x3の計算
   }
-  else{
-    theta++;
-    theta2++;
-  }
-  tri[0][1] = tri[0][0] + sin(theta*M_PI / 180.0)*130;
-  tri[1][1] = tri[1][0] + cos(theta*M_PI / 180.0)*130;
-  tri[0][2] = tri[0][0] + sin(theta2*M_PI / 180.0)*130;
-  tri[1][2] = tri[1][0] + cos(theta2*M_PI / 180.0)*130;
-
 }
-void RenderWindow(void) //画面の描画(イベントが無い時)
-{
-  SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
-  SDL_RenderClear(mainrenderer);       // 設定した描画色(白)でレンダラーをクリア
-  for(int i=0; i<KOTEI_OBJECT_NUM; i++){
-    SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
-  }
-  for(int i=0; i<PLAYER_NUM; i++){
-    SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
-  }
-  //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
-  filledTrigonColor(mainrenderer,tri[0][0],tri[1][0],tri[0][1],tri[1][1],tri[0][2],tri[1][2],0xff0000ff);
- // filledTrigonColor(mainrenderer,640,480,700,400,580,400,0xff0000ff);
-  SDL_RenderPresent(mainrenderer);              // 描画データを表示
-}
-
 void MoveChara()
 {
   int move_distance = PLAYER_SPEED ;
@@ -250,3 +249,43 @@ void MoveChara()
     if(player[0].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h) player[0].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h; 
   }
 }
+
+void RenderWindow(void) //画面の描画(イベントが無い時)
+{
+  SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
+  SDL_RenderClear(mainrenderer);       // 設定した描画色(白)でレンダラーをクリア
+  for(int i=0; i<KOTEI_OBJECT_NUM; i++){
+    SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
+  }
+  for(int i=0; i<PLAYER_NUM; i++){
+    SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
+  }
+  //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
+  for(int i = 0;  i<CAMERA_NUM; i++){
+    filledTrigonColor(mainrenderer,camera[i].tri[0][0],camera[i].tri[1][0],camera[i].tri[0][1],camera[i].tri[1][1],camera[i].tri[0][2],camera[i].tri[1][2],0xff0000ff);
+  }
+  // filledTrigonColor(mainrenderer,640,480,700,400,580,400,0xff0000ff);
+  SDL_RenderPresent(mainrenderer);              // 描画データを表示
+}
+
+void Collision() {
+  //00,10,01,11->00,10,02,12->01,11,01,11->01,11,02,12で判定
+  //カメラの判定
+  for (int i = 0; i < CAMERA_NUM;i++){ //カメラの数だけ
+    for(int j = 0; j < 2; j++) { 
+      for(int k = 1; k < 3; k++) {
+        bool judge = SDL_IntersectRectAndLine(&player[0].dst_rect,
+            &camera[i].tri[0][j],
+            &camera[i].tri[1][j],
+            &camera[i].tri[0][k],
+            &camera[i].tri[1][k]);
+        if(judge) {
+          run = false;
+          break;
+        }
+      }
+    }
+  }
+  //ここまでカメラの判定 
+}
+

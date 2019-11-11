@@ -17,8 +17,6 @@
 
 
 /*  func.c内のグローバル変数  */
-float tri[2][3] = { { 640, 590, 690},
-                   { 480, 360, 360} };
 bool clockwise;
 float theta; //角度
 float theta2; //角度
@@ -51,13 +49,13 @@ typedef struct {
 
 
 typedef struct {
-	int rotate_range;
-	objecttype type;
 	SDL_Texture * image_texture;
 	SDL_Rect src_rect;
 	SDL_Rect dst_rect;
 	bool flag_kinkai;
-	int speed;
+  int tri[2][3];
+  float theta[2];
+  bool clockwise;
 }camerainfo;
 
 typedef struct { //キー入力用の構造体を型宣言
@@ -97,7 +95,6 @@ static SDL_Rect player_dst_rects[PLAYER_NUM] = {
 
 inputkeys key; //inputkeys構造体をinputという名前で実体化
 playerinfo player[PLAYER_NUM];  // プレイヤーの情報を格納したplayer構造体を実体化
-
-
+camerainfo camera[CAMERA_NUM];
 
 #endif
