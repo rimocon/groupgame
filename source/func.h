@@ -13,8 +13,8 @@
 #define KINKAI_NUM 1
 #define CAMERA_NUM 1
 #define SHELF_NUM 10 // 棚の数、マップデータ(map0)の棚の数と合わせる
-#define ENTRANCE_NUM 1
-#define  KOTEI_OBJECT_NUM 13 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
+#define ENTRANCE_NUM 3
+#define  KOTEI_OBJECT_NUM 16 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
 
 #define ENEMY_NUM 2
 #define ENEMY_SPEED 1
@@ -29,26 +29,25 @@
 
 #define MAP_CHIPSIZE 64 //変数map0の、1マス分のピクセルの大きさ（仮置き）
 #define MAP_WIDTH 20 // 変数map0の横の数、ゲーム画面を横に20等分してる
-#define MAP_HEIGHT 16 // 変数map0の縦の数、ゲーム画面を縦に16等分してる
+#define MAP_HEIGHT 15 // 変数map0の縦の数、ゲーム画面を縦に16等分してる
 
 /*  mapデータ */
 static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 
 /*  構造体宣言  */
@@ -99,9 +98,12 @@ typedef struct { //キー入力用の構造体を型宣言
 
 typedef enum{
 	MT_NONE = 0,
-	MT_SHELF = 1,
-	MT_ENEMY = 2,
-	MT_ENTRANCE = 3
+	MT_KINKAI = 1,
+	MT_SHELF = 2,
+	MT_CAMERA = 3,
+	MT_ENTRANCE = 4,
+	MT_ENEMY = 5,
+	MT_PLAYER = 6
 }maptype;
 
 typedef struct {
@@ -122,20 +124,8 @@ typedef struct {
 static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png"}; // 読み込む画像ファイルを指定
 
 // 固定オブジェクト、プレイヤーの初期位置を設定する
-static SDL_Rect kinkai_dst_rects[KINKAI_NUM] = {
-  {1000, 100, 100, 100}
-};
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
   {1200,900,80,60}
-};
-static SDL_Rect shelf_dst_rects[SHELF_NUM] = {
-  {400, 100, 46, 108}
-};
-static SDL_Rect entrance_dst_rects[ENTRANCE_NUM] = {
-  {0, WINDOWHEIGHT-20,80,20}
-};
-static SDL_Rect player_dst_rects[PLAYER_NUM] = {
-  {0,100,24,24}
 };
 
 static int enemy_lookangles[ENEMY_NUM] = {
@@ -148,5 +138,8 @@ playerinfo player[PLAYER_NUM];  // プレイヤーの情報を格納したplayer
 camerainfo camera[CAMERA_NUM];
 enemyinfo enemy[ENEMY_NUM];
 static objectinfo kotei_objects[KOTEI_OBJECT_NUM]; // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
+
+/* 関数プロトタイプ宣言 */
+int InitObjectFromMap(int index, maptype mt, SDL_Rect dst);
 
 #endif

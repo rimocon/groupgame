@@ -42,7 +42,6 @@ void Startup()
     camera[i].theta[1] = 120.0;
   }
   mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0); //メインウィンドウに対するレンダラー生成
-  Imageload();
   MakeMap();
 }
 
@@ -123,81 +122,6 @@ void Destroy()
   SDL_DestroyRenderer(mainrenderer);
 }
 
-void Imageload()
-{
-  SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
-  SDL_RenderClear(mainrenderer); // 設定した描画色(白)でレンダラーをクリア
-
-  SDL_Surface *s; // サーフェイスを一時的に保存する変数
-
-  // 順番的に先に背景を描画する必要あり
-
-  // 「kotei_objects」構造体（金塊、カメラ、棚、出入り口）にグローバル変数で設定した位置、画像をに設定する
-  int i= 0;
-  for(int j = 0; j<KINKAI_NUM; j++){
-    printf("j = %d\n",j);
-    kotei_objects[i].type = TYPE_KINKAI;
-    s = IMG_Load(imgfiles[TYPE_KINKAI]);
-    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
-    kotei_objects[i].src_rect.x = 0;
-    kotei_objects[i].src_rect.y = 0;
-    kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-    kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-    kotei_objects[i].dst_rect =kinkai_dst_rects[j];
-    i++; // 金塊、カメラ、棚、出入り口のデータをkotei_objectsに保存するためにiをインクリメント
-  }
-  for(int j = 0; j<SHELF_NUM; j++){
-    printf("j = %d\n",j);
-    kotei_objects[i].type = TYPE_SHELF;
-    s = IMG_Load(imgfiles[TYPE_SHELF]);
-    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
-    kotei_objects[i].src_rect.x = 0;
-    kotei_objects[i].src_rect.y = 0;
-    kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-    kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-    kotei_objects[i].dst_rect = shelf_dst_rects[j];
-    i++;
-  }
-
-  for(int j = 0; j<ENTRANCE_NUM; j++){
-    printf("j = %d\n",j);
-    kotei_objects[i].type = TYPE_ENTRANCE;
-    s = IMG_Load(imgfiles[TYPE_ENTRANCE]);
-    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
-    kotei_objects[i].src_rect.x = 0;
-    kotei_objects[i].src_rect.y = 0;
-    kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-    kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-    printf("j = %d\n",j);
-    kotei_objects[i].dst_rect = entrance_dst_rects[j];
-    i++;
-  }
-  for(int j = 0; j<CAMERA_NUM; j++){
-    printf("j = %d\n",j);
-    kotei_objects[i].type = TYPE_CAMERA;
-    s = IMG_Load(imgfiles[TYPE_CAMERA]);
-    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
-    kotei_objects[i].src_rect.x = 0;
-    kotei_objects[i].src_rect.y = 0;
-    kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-    kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-    kotei_objects[i].dst_rect =camera_dst_rects[j];
-  }
-  //構造体playerに、プレイヤーの情報を格納
-  for(i=0; i<PLAYER_NUM; i++){
-    player[i].type = TYPE_PLAYER;
-    s = IMG_Load(imgfiles[TYPE_PLAYER]);
-    player[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
-    player[i].src_rect.x = 0;
-    player[i].src_rect.y = 0;
-    player[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-    player[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-    player[i].dst_rect = player_dst_rects[i];
-    SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-    player[i].speed = PLAYER_SPEED;
-  }
-
-}
 
 void MoveTriangle()
 {
@@ -232,7 +156,7 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
   SDL_RenderClear(mainrenderer);       // 設定した描画色(白)でレンダラーをクリア
   for(int i=0; i<KOTEI_OBJECT_NUM; i++){
-    SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
+    SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力
   }
   for(int i=0; i<PLAYER_NUM; i++){
     SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
@@ -331,57 +255,93 @@ void MoveChara()
 void MakeMap()
 {
   /* マップの読み込みと配置 */
-  int i, j, k=0,l=0,mt;
-  SDL_Surface* s;
+  int i, j, index=0,enemy_index=0,player_index=0,mt;
+  SDL_Surface *s;
   SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
   SDL_Rect dst = {0};
+
   for (j = 0; j < MAP_HEIGHT; j++, dst.y += MAP_CHIPSIZE)
   {
     dst.x = 0;
     for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
     {
       mt = map0[j][i];
-      if (mt == MT_SHELF)
+      if (mt == MT_SHELF || mt == MT_ENTRANCE || mt == MT_KINKAI)
       {
-        kotei_objects[k].type = TYPE_SHELF;
-        s = IMG_Load(imgfiles[TYPE_SHELF]);
-        kotei_objects[k].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
-        kotei_objects[k].src_rect.x = 0;
-        kotei_objects[k].src_rect.y = 0;
-        kotei_objects[k].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-        kotei_objects[k].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-
-        kotei_objects[k].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
-        kotei_objects[k].dst_rect.y = dst.y;
-        kotei_objects[k].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
-        kotei_objects[k].dst_rect.h = MAP_CHIPSIZE;
-        SDL_RenderCopy(mainrenderer, kotei_objects[k].image_texture, &kotei_objects[k].src_rect, &kotei_objects[k].dst_rect); // テクスチャからレンダラーに出力
-        k++;
+        index = InitObjectFromMap(index, mt,dst);
       }
       else if (mt == MT_ENEMY)
       {
         //構造体enemyに、敵の情報を格納
-        enemy[l].type = TYPE_ENEMY;
-        s = IMG_Load(imgfiles[TYPE_ENEMY]);
-        enemy[l].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
-        enemy[l].src_rect.x = 0;
-        enemy[l].src_rect.y = 0;
-        enemy[l].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-        enemy[l].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-
-        enemy[l].dst_rect.x = dst.x + ((MAP_CHIPSIZE - s->w)/2); // マップで指定された場所 + MAP_CHIPSIZEの中心になるように足し算
-        enemy[l].dst_rect.y = dst.y+ ((MAP_CHIPSIZE - s->h)/2);
-        enemy[l].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
-        enemy[l].dst_rect.h = s->h;
-        SDL_RenderCopy(mainrenderer, enemy[l].image_texture, &enemy[l].src_rect, &enemy[l].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-        enemy[l].speed = PLAYER_SPEED;                                                                // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
-        enemy[l].isgodest = false;
-        enemy[l].look_angle = enemy_lookangles[l];
-        l++;
+        enemy_index = InitObjectFromMap(enemy_index, mt,dst);
       }
-
+      else if(mt == MT_PLAYER){
+        player_index = InitObjectFromMap(player_index,mt,dst);
+      }
     }
   }
+  printf("%d\n",kotei_objects[0].dst_rect.x);
 }
 
+int InitObjectFromMap(int index, maptype mt, SDL_Rect dst)
+{
+  SDL_Surface *s;
+  if(mt == MT_SHELF || mt == MT_ENTRANCE || mt == MT_KINKAI){
+    kotei_objects[index].type = mt-1; // type = マップタイプ - 1
+    s = IMG_Load(imgfiles[mt - 1]); // 画像ファイルのパス ＝ マップタイプ - 1
+    if (s == NULL)
+      fprintf(stderr, "Missing Open Surface: maptype %d", mt);
+    kotei_objects[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
+    kotei_objects[index].src_rect.x = 0;
+    kotei_objects[index].src_rect.y = 0;
+    kotei_objects[index].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+    kotei_objects[index].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
 
+    kotei_objects[index].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
+    kotei_objects[index].dst_rect.y = dst.y;
+    kotei_objects[index].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
+    kotei_objects[index].dst_rect.h = MAP_CHIPSIZE;
+    index++;
+    printf("kotei index = %d\n", index);
+  }
+  else if(mt == MT_ENEMY){
+    //構造体enemyに、敵の情報を格納
+    enemy[index].type = TYPE_ENEMY;
+    s = IMG_Load(imgfiles[TYPE_ENEMY]);
+    if (s == NULL) fprintf(stderr,"Missing Open Surface: maptype %d",mt);
+    enemy[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
+    enemy[index].src_rect.x = 0;
+    enemy[index].src_rect.y = 0;
+    enemy[index].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+    enemy[index].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+
+    enemy[index].dst_rect.x = dst.x + ((MAP_CHIPSIZE - s->w) / 2); // マップで指定された場所 + MAP_CHIPSIZEの中心になるように足し算
+    enemy[index].dst_rect.y = dst.y + ((MAP_CHIPSIZE - s->h) / 2);
+    enemy[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
+    enemy[index].dst_rect.h = s->h;
+    enemy[index].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+    enemy[index].isgodest = false;
+    enemy[index].look_angle = enemy_lookangles[index];
+    index++;
+  }
+  else if(mt == MT_PLAYER){
+    //構造体playerに、敵の情報を格納
+    player[index].type = TYPE_PLAYER;
+    s = IMG_Load(imgfiles[TYPE_PLAYER]);
+    if (s == NULL) fprintf(stderr,"Missing Open Surface: maptype %d",mt);
+    player[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
+    player[index].src_rect.x = 0;
+    player[index].src_rect.y = 0;
+    player[index].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+    player[index].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+
+    player[index].dst_rect.x = dst.x + ((MAP_CHIPSIZE - s->w) / 2); // マップで指定された場所 + MAP_CHIPSIZEの中心になるように足し算
+    player[index].dst_rect.y = dst.y + ((MAP_CHIPSIZE - s->h) / 2);
+    player[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
+    player[index].dst_rect.h = s->h;
+    player[index].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+
+    index++;
+  }
+  return index;
+}
