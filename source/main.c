@@ -11,6 +11,10 @@ int main (int argc, char *argv[]) {
     MoveTriangle(); //三角形移動
     RenderWindow(); //描画
     Collision(); //当たり判定
+    SDL_Delay(10);
+    MoveChara();
+
+    RenderWindow();
     //Destroy(); //破棄関連
   }
   return 0;
