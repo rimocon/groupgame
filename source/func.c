@@ -219,7 +219,12 @@ void MoveChara()
   //敵キャラの移動
   for (int i = 0; i < ENEMY_NUM; i++)
   {
-    switch (enemy[i].look_angle)
+    // for(int j=0; j < KOTEI_OBJECT_NUM; j++){
+    //   if(kotei_objects.type >= MT_ENEMY_MOVING_FLOOR_DL)
+    //   if(SDL_IntersectRect(&(kotei_objects[i].dst_rect), &(enemy[i].dst_rect)))
+    // }
+    //向いている方向（look_angle）に進んでいく
+    switch (enemy[i].move_angle)
     {
       case 0:
         enemy[i].dst_rect.y -= ENEMY_SPEED;
@@ -260,27 +265,29 @@ void MakeMap()
   SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
   SDL_Rect dst = {0};
 
+  // マップデータをfor文で1マスずつ読み込んでいく
   for (j = 0; j < MAP_HEIGHT; j++, dst.y += MAP_CHIPSIZE)
   {
     dst.x = 0;
     for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
     {
-      mt = map0[j][i];
-      if (mt == MT_SHELF || mt == MT_ENTRANCE || mt == MT_KINKAI)
+      mt = map0[j][i]; // マップデータを格納する
+      if (mt == MT_SHELF || mt == MT_ENTRANCE || mt == MT_KINKAI) //読み込んだマップデータが棚、出入り口、金塊のとき
       {
+        // 棚、出入り口、金塊の情報をkotei_objectに格納
         index = InitObjectFromMap(index, mt,dst);
       }
-      else if (mt == MT_ENEMY)
+      else if (mt == MT_ENEMY) // 読み込んだマップデータが敵のとき
       {
         //構造体enemyに、敵の情報を格納
         enemy_index = InitObjectFromMap(enemy_index, mt,dst);
       }
-      else if(mt == MT_PLAYER){
+      else if(mt == MT_PLAYER){ // 読み込んだマップデータがプレイヤーのとき
+        //構造体playerに、プレイヤーの情報を格納
         player_index = InitObjectFromMap(player_index,mt,dst);
       }
     }
   }
-  printf("%d\n",kotei_objects[0].dst_rect.x);
 }
 
 int InitObjectFromMap(int index, maptype mt, SDL_Rect dst)
@@ -302,7 +309,6 @@ int InitObjectFromMap(int index, maptype mt, SDL_Rect dst)
     kotei_objects[index].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
     kotei_objects[index].dst_rect.h = MAP_CHIPSIZE;
     index++;
-    printf("kotei index = %d\n", index);
   }
   else if(mt == MT_ENEMY){
     //構造体enemyに、敵の情報を格納
@@ -319,9 +325,10 @@ int InitObjectFromMap(int index, maptype mt, SDL_Rect dst)
     enemy[index].dst_rect.y = dst.y + ((MAP_CHIPSIZE - s->h) / 2);
     enemy[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
     enemy[index].dst_rect.h = s->h;
-    enemy[index].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+    enemy[index].speed = ENEMY_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
     enemy[index].isgodest = false;
     enemy[index].look_angle = enemy_lookangles[index];
+    enemy[index].move_angle = enemy_moveangles[index];
     index++;
   }
   else if(mt == MT_PLAYER){

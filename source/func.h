@@ -103,7 +103,12 @@ typedef enum{
 	MT_CAMERA = 3,
 	MT_ENTRANCE = 4,
 	MT_ENEMY = 5,
-	MT_PLAYER = 6
+	MT_PLAYER = 6,
+	MT_ENEMY_MOVING_FLOOR_UR = 7,
+	MT_ENEMY_MOVING_FLOOR_UL = 8,
+	MT_ENEMY_MOVING_FLOOR_DL = 9,
+	MT_ENEMY_MOVING_FLOOR_DR = 10,
+	MT_ENEMY_MOVING_FLOOR_REV = 11
 }maptype;
 
 typedef struct {
@@ -115,6 +120,7 @@ typedef struct {
 	bool flag_kinkai; // 金塊をとったかどうか
 	int speed; //敵の移動速度
 	int look_angle; // 敵が向いている方向(0度〜360度)、視野の描画する方法によるので仮
+	int move_angle;
 	bool isgodest; // 目的地まで行ってるかどうか
 }enemyinfo; // 敵の構造体
 
@@ -123,13 +129,17 @@ typedef struct {
 //画像ファイルパス
 static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png"}; // 読み込む画像ファイルを指定
 
-// 固定オブジェクト、プレイヤーの初期位置を設定する
+// カメラの初期位置を設定する
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
   {1200,900,80,60}
 };
 
+// 敵が最初に向いている方向を指定する
 static int enemy_lookangles[ENEMY_NUM] = {
   90,270
+};
+static int enemy_moveangles[ENEMY_NUM] = {
+	90,270
 };
 
 /*  構造体の実体化  */
@@ -140,7 +150,7 @@ enemyinfo enemy[ENEMY_NUM];
 static objectinfo kotei_objects[KOTEI_OBJECT_NUM]; // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 
 /* 関数プロトタイプ宣言 */
-extern int InitObjectFromMap(int index, maptype mt, SDL_Rect dst);
+extern int InitObjectFromMap(int index, maptype mt, SDL_Rect dst); // マップデータを読み込んでその位置にオブジェクトを初期化する関数
 extern void Imageload(void); //画像読み込み関数
 
 #endif
