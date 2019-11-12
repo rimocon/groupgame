@@ -398,25 +398,25 @@ void MoveChara()
   if (key.left)
   {
     player[myid].dst_rect.x -= move_distance;
-    if(player[0].dst_rect.x <0) player[0].dst_rect.x = 0;
+    if(player[myid].dst_rect.x <0) player[myid].dst_rect.x = 0;
     joystick_send(0); //座標などのデータ送信される
   }
   else if (key.right)
   {
     player[myid].dst_rect.x += move_distance;
-    if(player[0].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w) player[0].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w; 
+    if(player[myid].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w) player[myid].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w; 
     joystick_send(0); //座標などのデータ送信される
   }
   else if (key.up)
   {
     player[myid].dst_rect.y -= move_distance;
-    if(player[0].dst_rect.y < 0) player[0].dst_rect.y = 0;
+    if(player[myid].dst_rect.y < 0) player[myid].dst_rect.y = 0;
     joystick_send(0); //座標などのデータ送信される
   }
   else if (key.down)
   {
     player[myid].dst_rect.y += move_distance;
-    if(player[0].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h) player[0].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h; 
+    if(player[myid].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h) player[myid].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h; 
     joystick_send(0); //座標などのデータ送信される
   }
 
