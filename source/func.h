@@ -140,6 +140,7 @@ enemyinfo enemy[ENEMY_NUM];
 static objectinfo kotei_objects[KOTEI_OBJECT_NUM]; // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 
 /* 関数プロトタイプ宣言 */
-int InitObjectFromMap(int index, maptype mt, SDL_Rect dst);
+extern int InitObjectFromMap(int index, maptype mt, SDL_Rect dst);
+extern void Imageload(void); //画像読み込み関数
 
 #endif
