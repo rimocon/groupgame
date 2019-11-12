@@ -1,5 +1,6 @@
 #include "common.h"
 #include "constants.h"
+#include "func.h"
 
 int main (int argc, char *argv[]) {
 
@@ -36,8 +37,8 @@ int main (int argc, char *argv[]) {
     control_requests();
     SDL_Delay(3);
     RenderWindow();
-    
-    SDL_RenderPresent(mainrenderer);
+    printf("%d\n",camera[0].tri[0][0]);
+    //SDL_RenderPresent(mainrenderer);
   }
   terminate_client(); //ソケットの切断
   return 0;

@@ -7,7 +7,7 @@
 #define WINDOWHEIGHT 960 //ウィンドウの高さ
 
 #define PLAYER_NUM 3 // オブジェクトの数などはテキストファイルで読み込めるようにしたほうがいろんなマップに対応できるから後から修正したい
-#define PLAYER_SPEED 3
+#define PLAYER_SPEED 1
 
 #define KINKAI_NUM 1
 #define CAMERA_NUM 1
@@ -23,7 +23,9 @@
 #define MAP_HEIGHT 16
 
 /*  変数  */
-bool kinkai_flag;
+bool kinkai_flag; //金塊を描画するかしないか
+bool player_flag[3]; //プレイヤーを描画するか、しないか
+
 /*  mapデータ */
 static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -150,6 +152,9 @@ static int enemy_lookangles[ENEMY_NUM] = {
 inputkeys key; //inputkeys構造体をinputという名前で実体化
 playerinfo player[PLAYER_NUM];  // プレイヤーの情報を格納したplayer構造体を実体化
 camerainfo camera[CAMERA_NUM];
+/*カメラの当たり判定に使っているライブラリが、何かに接触すると、その物体に張り付く動作をするライブラリであったので、
+  カメラの張り付く前の座標を保持しておき、張り付いた後に、カメラの座標に代入することにより、カメラを固定する。*/
+camerainfo camera_before[CAMERA_NUM]; 
 enemyinfo enemy[ENEMY_NUM];
 
 #endif
