@@ -738,8 +738,9 @@ static int execute_command()
     result = 0;
     break;
   default: //その他の文字が入力された場合
-    fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
-    exit(1); //異常終了
+    //fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
+    //exit(1); //異常終了
+    break;
   }
 
   return result;
