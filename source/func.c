@@ -220,7 +220,7 @@ void MoveChara()
   for (int i = 0; i < ENEMY_NUM; i++)
   {
     // for(int j=0; j < KOTEI_OBJECT_NUM; j++){
-    //   if(kotei_objects.type >= MT_ENEMY_MOVING_FLOOR_DL)
+    //   if(kotei_objects.type >= TYPE_ENEMY_MOVING_FLOOR_DL)
     //   if(SDL_IntersectRect(&(kotei_objects[i].dst_rect), &(enemy[i].dst_rect)))
     // }
     //向いている方向（look_angle）に進んでいく
@@ -260,7 +260,7 @@ void MoveChara()
 void MakeMap()
 {
   /* マップの読み込みと配置 */
-  int i, j, index=0,enemy_index=0,player_index=0,mt;
+  int i, j, index=0,enemy_index=0,player_index=0,loadmap_objecttype;
   SDL_Surface *s;
   SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
   SDL_Rect dst = {0};
@@ -271,33 +271,33 @@ void MakeMap()
     dst.x = 0;
     for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
     {
-      mt = map0[j][i]; // マップデータを格納する
-      if (mt == MT_SHELF || mt == MT_ENTRANCE || mt == MT_KINKAI) //読み込んだマップデータが棚、出入り口、金塊のとき
+      loadmap_objecttype = map0[j][i]; // マップデータを格納する
+      if (loadmap_objecttype == TYPE_SHELF || loadmap_objecttype == TYPE_ENTRANCE || loadmap_objecttype == TYPE_KINKAI) //読み込んだマップデータが棚、出入り口、金塊のとき
       {
         // 棚、出入り口、金塊の情報をkotei_objectに格納
-        index = InitObjectFromMap(index, mt,dst);
+        index = InitObjectFromMap(index, loadmap_objecttype,dst);
       }
-      else if (mt == MT_ENEMY) // 読み込んだマップデータが敵のとき
+      else if (loadmap_objecttype == TYPE_ENEMY) // 読み込んだマップデータが敵のとき
       {
         //構造体enemyに、敵の情報を格納
-        enemy_index = InitObjectFromMap(enemy_index, mt,dst);
+        enemy_index = InitObjectFromMap(enemy_index, loadmap_objecttype,dst);
       }
-      else if(mt == MT_PLAYER){ // 読み込んだマップデータがプレイヤーのとき
+      else if(loadmap_objecttype == TYPE_PLAYER){ // 読み込んだマップデータがプレイヤーのとき
         //構造体playerに、プレイヤーの情報を格納
-        player_index = InitObjectFromMap(player_index,mt,dst);
+        player_index = InitObjectFromMap(player_index,loadmap_objecttype,dst);
       }
     }
   }
 }
 
-int InitObjectFromMap(int index, maptype mt, SDL_Rect dst)
+int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 {
   SDL_Surface *s;
-  if(mt == MT_SHELF || mt == MT_ENTRANCE || mt == MT_KINKAI){
-    kotei_objects[index].type = mt-1; // type = マップタイプ - 1
-    s = IMG_Load(imgfiles[mt - 1]); // 画像ファイルのパス ＝ マップタイプ - 1
+  if(loadmap_objecttype == TYPE_SHELF || loadmap_objecttype == TYPE_ENTRANCE || loadmap_objecttype == TYPE_KINKAI){
+    kotei_objects[index].type = loadmap_objecttype;
+    s = IMG_Load(imgfiles[loadmap_objecttype]);
     if (s == NULL)
-      fprintf(stderr, "Missing Open Surface: maptype %d", mt);
+      fprintf(stderr, "Missing Open Surface: maptype %d", loadmap_objecttype);
     kotei_objects[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     kotei_objects[index].src_rect.x = 0;
     kotei_objects[index].src_rect.y = 0;
@@ -310,11 +310,11 @@ int InitObjectFromMap(int index, maptype mt, SDL_Rect dst)
     kotei_objects[index].dst_rect.h = MAP_CHIPSIZE;
     index++;
   }
-  else if(mt == MT_ENEMY){
+  else if(loadmap_objecttype == TYPE_ENEMY){
     //構造体enemyに、敵の情報を格納
     enemy[index].type = TYPE_ENEMY;
     s = IMG_Load(imgfiles[TYPE_ENEMY]);
-    if (s == NULL) fprintf(stderr,"Missing Open Surface: maptype %d",mt);
+    if (s == NULL) fprintf(stderr,"Missing Open Surface: maptype %d",loadmap_objecttype);
     enemy[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     enemy[index].src_rect.x = 0;
     enemy[index].src_rect.y = 0;
@@ -331,11 +331,11 @@ int InitObjectFromMap(int index, maptype mt, SDL_Rect dst)
     enemy[index].move_angle = enemy_moveangles[index];
     index++;
   }
-  else if(mt == MT_PLAYER){
+  else if(loadmap_objecttype == TYPE_PLAYER){
     //構造体playerに、敵の情報を格納
     player[index].type = TYPE_PLAYER;
     s = IMG_Load(imgfiles[TYPE_PLAYER]);
-    if (s == NULL) fprintf(stderr,"Missing Open Surface: maptype %d",mt);
+    if (s == NULL) fprintf(stderr,"Missing Open Surface: maptype %d",loadmap_objecttype);
     player[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     player[index].src_rect.x = 0;
     player[index].src_rect.y = 0;

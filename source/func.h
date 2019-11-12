@@ -51,14 +51,29 @@ static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 };
 
 /*  構造体宣言  */
+// typedef enum{
+// 	TYPE_KINKAI = 0,
+// 	TYPE_SHELF = 1,
+// 	TYPE_CAMERA = 2,
+// 	TYPE_ENTRANCE = 3,
+// 	TYPE_ENEMY = 4,
+// 	TYPE_PLAYER = 5,
+// 	TYPE_NUM = 6
+// }objecttype;
 typedef enum{
-	TYPE_KINKAI = 0,
-	TYPE_SHELF = 1,
-	TYPE_CAMERA = 2,
-	TYPE_ENTRANCE = 3,
-	TYPE_ENEMY = 4,
-	TYPE_PLAYER = 5,
-	TYPE_NUM = 6
+	TYPE_NONE = 0,
+	TYPE_KINKAI = 1,
+	TYPE_SHELF = 2,
+	TYPE_CAMERA = 3,
+	TYPE_ENTRANCE = 4,
+	TYPE_ENEMY = 5,
+	TYPE_PLAYER = 6,
+	TYPE_ENEMY_MOVING_FLOOR_UR = 7,
+	TYPE_ENEMY_MOVING_FLOOR_UL = 8,
+	TYPE_ENEMY_MOVING_FLOOR_DL = 9,
+	TYPE_ENEMY_MOVING_FLOOR_DR = 10,
+	TYPE_ENEMY_MOVING_FLOOR_REV = 11,
+	TYPE_NUM = 12
 }objecttype;
 
 typedef struct {
@@ -96,20 +111,7 @@ typedef struct { //キー入力用の構造体を型宣言
           a;  //4ボタン(決定ボタン)
 }inputkeys;
 
-typedef enum{
-	MT_NONE = 0,
-	MT_KINKAI = 1,
-	MT_SHELF = 2,
-	MT_CAMERA = 3,
-	MT_ENTRANCE = 4,
-	MT_ENEMY = 5,
-	MT_PLAYER = 6,
-	MT_ENEMY_MOVING_FLOOR_UR = 7,
-	MT_ENEMY_MOVING_FLOOR_UL = 8,
-	MT_ENEMY_MOVING_FLOOR_DL = 9,
-	MT_ENEMY_MOVING_FLOOR_DR = 10,
-	MT_ENEMY_MOVING_FLOOR_REV = 11
-}maptype;
+
 
 typedef struct {
 	int rotate_range; // 敵の回転速度
@@ -127,7 +129,7 @@ typedef struct {
 
 /* グローバル変数 */
 //画像ファイルパス
-static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png"}; // 読み込む画像ファイルを指定
+static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png"}; // 読み込む画像ファイルを指定
 
 // カメラの初期位置を設定する
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
@@ -150,7 +152,7 @@ enemyinfo enemy[ENEMY_NUM];
 static objectinfo kotei_objects[KOTEI_OBJECT_NUM]; // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 
 /* 関数プロトタイプ宣言 */
-extern int InitObjectFromMap(int index, maptype mt, SDL_Rect dst); // マップデータを読み込んでその位置にオブジェクトを初期化する関数
+extern int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst); // マップデータを読み込んでその位置にオブジェクトを初期化する関数
 extern void Imageload(void); //画像読み込み関数
 
 #endif
