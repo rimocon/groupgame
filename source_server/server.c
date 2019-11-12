@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include "../constants.h"
+//#include "./common.h"
 
 static CLIENT clients[MAX_NUM_CLIENTS];
 static int num_clients;
@@ -186,6 +187,10 @@ int control_requests()
         break;
       case KINKAI_COMMAND: //'K'のとき
         fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", clients[i].cid, clients[i].name);
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case PLAYER_COMMAND: //'P'のとき
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;
         break;

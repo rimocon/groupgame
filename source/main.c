@@ -1,6 +1,11 @@
-#include "common.h"
-#include "constants.h"
+#include "../common.h"
+#include "../constants.h"
 #include "func.h"
+
+extern void setup_client(char *, u_short);
+extern int control_requests();
+extern void terminate_client();
+extern void joystick_send(int);
 
 int main (int argc, char *argv[]) {
 

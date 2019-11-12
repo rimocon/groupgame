@@ -1,6 +1,24 @@
-#include "common.h"
+#include "../common.h"
+#include "../constants.h"
 #include "func.h"
-#include "constants.h"
+
+static int num_clients;
+static int myid;
+static int sock;
+static int num_sock;
+static fd_set mask; //FD集合を表す構造体
+static CLIENT clients[MAX_NUM_CLIENTS];
+
+void setup_client(char *, u_short);
+int control_requests();
+void terminate_client();
+void joystick_send(int);
+
+static int input_command(void);
+static int execute_command(void);
+static void send_data(void *, int);
+static int receive_data(void *, int);
+static void handle_error(char *);
 
 void Startup()
 {
@@ -361,6 +379,7 @@ void Collision()
         {
           //run = false;
           player_flag[myid] = false;
+          joystick_send(2); //プレイヤーが消えたことが他のクライアントに通知される。
           camera[i].tri[0][j] = camera_before[i].tri[0][j];
           camera[i].tri[1][j] = camera_before[i].tri[1][j];
           camera[i].tri[0][k] = camera_before[i].tri[0][k];
@@ -614,11 +633,11 @@ int control_requests()
   return result;
 }
 
-void joystick_send(int num)
+void joystick_send(int num) //ジョイスティックの操作に関する情報を送信する関数
 {
   CONTAINER data;
   memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
-  if (num == 0)
+  if (num == 0) //座標の情報を送信
   {
     //コマンドとして、座標の'Z'を代入
     data.command = ZAHYO_COMMAND;           //コマンドを格納
@@ -629,10 +648,15 @@ void joystick_send(int num)
     printf("Player 0 : axis x = %d, axis y = %d\n", player[0].dst_rect.x, player[0].dst_rect.y);
     printf("Player 1 : axis x = %d, axis y = %d\n", player[1].dst_rect.x, player[1].dst_rect.y);
   }
-  else if (num == 1)
+  else if (num == 1) //金塊の設置の可否を送信
   {
     //コマンドとして、座標の'K'を代入
     data.command = KINKAI_COMMAND; //コマンドを格納
+    data.cid = myid;               //クライアントIDを格納
+  }
+  else if (num == 2){
+    //コマンドとして、プレイヤーの'P'を代入
+    data.command = PLAYER_COMMAND; //コマンドを格納
     data.cid = myid;               //クライアントIDを格納
   }
   send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
@@ -693,7 +717,15 @@ static int execute_command()
     break;
   case KINKAI_COMMAND: //'K'のとき
     fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
-    //send_data(BROADCAST, &data, sizeof(data));
+    kinkai_flag = false;
+    result = 1;
+    break;
+  case PLAYER_COMMAND: //'P'のとき
+    if (myid != data.cid)
+    {
+      player_flag[data.cid] = false; //他のクライアントから消えたと通知がきたプレイヤーを描画しないようにする
+    }
+    //fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
     kinkai_flag = false;
     result = 1;
     break;
