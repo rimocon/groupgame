@@ -194,6 +194,30 @@ int control_requests()
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;
         break;
+      case RIGHT_COMMAND: //'R'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case LEFT_COMMAND: //'L'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case UP_COMMAND: //'U'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case DOWN_COMMAND: //'D'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case CENTER_COMMAND: //'C'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case AENTER_COMMAND: //'A'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
       case MESSAGE_COMMAND: //'M'のとき
         fprintf(stderr, "client[%d] %s: message = %s\n", clients[i].cid, clients[i].name, data.message);
         send_data(BROADCAST, &data, sizeof(data));

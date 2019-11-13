@@ -85,42 +85,49 @@ void Input()
       printf("--- Analog-Direction Key: 0 Axis\n");
       if (inputevent.jaxis.value > 0)
       { //右キーが押されたら
-        key.right = 1;
-        key.left = 0;
+        //key.right = 1;
+        //key.left = 0;
+        //スティック操作(右),コマンド送信される
+        joystick_send(3);
       }
       else if (inputevent.jaxis.value < 0)
       { //左キーが押されたら
-        printf("press left\n");
-        key.right = 0;
-        key.left = 1;
+        //key.right = 0;
+        //key.left = 1;
+        //スティック操作(左),コマンド送信される
+        joystick_send(4);
       }
       else if (inputevent.jaxis.value == 0)
       { //真ん中にスティックが戻ったら
-        printf("reverse center\n");
-        key.right = 0;
-        key.left = 0;
+        //key.right = 0;
+        //key.left = 0;
+        //スティック操作(真ん中),コマンド送信される
+        joystick_send(7);
       }
     }
     else if (inputevent.jaxis.axis == 1)
     {
       printf("--- Analag-Direction Key: 1 Axis\n");
       if (inputevent.jaxis.value > 0)
-      {                         //下キーが押されたら
-        printf("press down\n"); //確認用
-        key.up = 0;
-        key.down = 1;
+      { //下キーが押されたら
+        //key.up = 0;
+        //key.down = 1;
+        //スティック操作(下),コマンド送信される
+        joystick_send(6);
       }
       else if (inputevent.jaxis.value < 0)
-      {                       //上キーが押されたら
-        printf("press up\n"); //確認用
-        key.up = 1;
-        key.down = 0;
+      { //上キーが押されたら
+        //key.up = 1;
+        //key.down = 0;
+        //スティック操作(上),コマンド送信される
+        joystick_send(5);
       }
       else if (inputevent.jaxis.value == 0)
       { //真ん中にスティックが戻ったら
-        printf("reverse center\n");
-        key.up = 0;
-        key.down = 0;
+        //key.up = 0;
+        //key.down = 0;
+        //スティック操作(真ん中),コマンド送信される
+        joystick_send(8);
       }
     }
     else if (inputevent.jaxis.axis == 2)
@@ -395,55 +402,68 @@ void Collision()
 void MoveChara()
 {
   int move_distance = PLAYER_SPEED * 2;
-  if (key.left)
+  for (int i = 0; i < 3; i++)
   {
-    player[myid].dst_rect.x -= move_distance;
-    if(player[myid].dst_rect.x <0) player[myid].dst_rect.x = 0;
-    joystick_send(0); //座標などのデータ送信される
-  }
-  else if (key.right)
-  {
-    player[myid].dst_rect.x += move_distance;
-    if(player[myid].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w) player[myid].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w; 
-    joystick_send(0); //座標などのデータ送信される
-  }
-  else if (key.up)
-  {
-    player[myid].dst_rect.y -= move_distance;
-    if(player[myid].dst_rect.y < 0) player[myid].dst_rect.y = 0;
-    joystick_send(0); //座標などのデータ送信される
-  }
-  else if (key.down)
-  {
-    player[myid].dst_rect.y += move_distance;
-    if(player[myid].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h) player[myid].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h; 
-    joystick_send(0); //座標などのデータ送信される
-  }
-
-  //棚との衝突判定
-  for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
-  {
-    if (SDL_HasIntersection(&(kotei_objects[i].dst_rect), &(player[0].dst_rect))) // プレイヤーと固定オブジェクトが重なった時
+    if (player[i].key.left)
     {
-      if (kotei_objects[i].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
-        break;
+      //player[myid].dst_rect.x -= move_distance;
+      //if(player[myid].dst_rect.x <0) player[myid].dst_rect.x = 0;
+      player[i].dst_rect.x -= move_distance;
+      if (player[i].dst_rect.x < 0)
+        player[i].dst_rect.x = 0;
+      //joystick_send(0); //座標などのデータ送信される
+    }
+    else if (player[i].key.right)
+    {
+      //player[myid].dst_rect.x += move_distance;
+      //if(player[myid].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w) player[myid].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w;
+      player[i].dst_rect.x += move_distance;
+      if (player[i].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w)
+        player[i].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w;
+      //joystick_send(0); //座標などのデータ送信される
+    }
+    //else if (player[i].key.up)
+    if (player[i].key.up)
+    {
+      //player[myid].dst_rect.y -= move_distance;
+      //if(player[myid].dst_rect.y < 0) player[myid].dst_rect.y = 0;
+      player[i].dst_rect.y -= move_distance;
+      if (player[i].dst_rect.y < 0)
+        player[i].dst_rect.y = 0;
+      //joystick_send(0); //座標などのデータ送信される
+    }
+    else if (player[i].key.down)
+    {
+      player[i].dst_rect.y += move_distance;
+      if (player[i].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h)
+        player[i].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h;
+      //joystick_send(0); //座標などのデータ送信される
+    }
 
-      // ぶつかったぶんの距離プレイヤーの位置を戻す
-      if (key.left)
+    //棚との衝突判定
+    for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
+    {
+      if (SDL_HasIntersection(&(kotei_objects[i].dst_rect), &(player[0].dst_rect))) // プレイヤーと固定オブジェクトが重なった時
       {
-        player[0].dst_rect.x += move_distance;
-      }
-      else if (key.right)
-      {
-        player[0].dst_rect.x -= move_distance;
-      }
-      else if (key.up)
-      {
-        player[0].dst_rect.y += move_distance;
-      }
-      else if (key.down)
-      {
-        player[0].dst_rect.y -= move_distance;
+        if (kotei_objects[i].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
+          break;
+        // ぶつかったぶんの距離プレイヤーの位置を戻す
+        if (player[i].key.left)
+        {
+          player[i].dst_rect.x += move_distance;
+        }
+        else if (player[i].key.right)
+        {
+          player[i].dst_rect.x -= move_distance;
+        }
+        else if (player[i].key.up)
+        {
+          player[i].dst_rect.y += move_distance;
+        }
+        else if (player[i].key.down)
+        {
+          player[i].dst_rect.y -= move_distance;
+        }
       }
     }
   }
@@ -637,7 +657,7 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
 {
   CONTAINER data;
   memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
-  if (num == 0) //座標の情報を送信
+  if (num == 0)                        //座標の情報を送信
   {
     //コマンドとして、座標の'Z'を代入
     data.command = ZAHYO_COMMAND;           //コマンドを格納
@@ -654,9 +674,46 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
     data.command = KINKAI_COMMAND; //コマンドを格納
     data.cid = myid;               //クライアントIDを格納
   }
-  else if (num == 2){
+  else if (num == 2)
+  {
     //コマンドとして、プレイヤーの'P'を代入
     data.command = PLAYER_COMMAND; //コマンドを格納
+    data.cid = myid;               //クライアントIDを格納
+  }
+  else if (num == 3)
+  { //右のスティック操作
+    //コマンドとして、プレイヤーの'R'を代入
+    data.command = RIGHT_COMMAND; //コマンドを格納
+    data.cid = myid;              //クライアントIDを格納
+  }
+  else if (num == 4)
+  { //左のスティック操作
+    //コマンドとして、プレイヤーの'L'を代入
+    data.command = LEFT_COMMAND; //コマンドを格納
+    data.cid = myid;             //クライアントIDを格納
+  }
+  else if (num == 5)
+  { //上のスティック操作
+    //コマンドとして、プレイヤーの'U'を代入
+    data.command = UP_COMMAND; //コマンドを格納
+    data.cid = myid;           //クライアントIDを格納
+  }
+  else if (num == 6)
+  { //下のスティック操作
+    //コマンドとして、プレイヤーの'D'を代入
+    data.command = DOWN_COMMAND; //コマンドを格納
+    data.cid = myid;             //クライアントIDを格納
+  }
+  else if (num == 7)
+  { //真ん中(左右)のスティック操作
+    //コマンドとして、プレイヤーの'C'を代入
+    data.command = CENTER_COMMAND; //コマンドを格納
+    data.cid = myid;               //クライアントIDを格納
+  }
+  else if (num == 8)
+  { //真ん中(上下)のスティック操作
+    //コマンドとして、プレイヤーの'A'を代入
+    data.command = AENTER_COMMAND; //コマンドを格納
     data.cid = myid;               //クライアントIDを格納
   }
   send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
@@ -727,6 +784,36 @@ static int execute_command()
     }
     //fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
     kinkai_flag = false;
+    result = 1;
+    break;
+  case RIGHT_COMMAND:               //'R'のとき
+    player[data.cid].key.right = 1; //スティックが右に入っていることを維持
+    player[data.cid].key.left = 0;
+    result = 1;
+    break;
+  case LEFT_COMMAND: //'L'のとき
+    player[data.cid].key.right = 0;
+    player[data.cid].key.left = 1; //スティックが右に入っていることを維持
+    result = 1;
+    break;
+  case UP_COMMAND:               //'U'のとき
+    player[data.cid].key.up = 1; //スティックが上に入っていることを維持
+    player[data.cid].key.down = 0;
+    result = 1;
+    break;
+  case DOWN_COMMAND: //'D'のとき
+    player[data.cid].key.up = 0;
+    player[data.cid].key.down = 1; //スティックが右に入っていることを維持
+    result = 1;
+    break;
+  case CENTER_COMMAND: //'C'のとき
+    player[data.cid].key.right = 0;
+    player[data.cid].key.left = 0;
+    result = 1;
+    break;
+  case AENTER_COMMAND: //'A'のとき
+    player[data.cid].key.up = 0;
+    player[data.cid].key.down = 0;
     result = 1;
     break;
   case MESSAGE_COMMAND: //'M'のとき

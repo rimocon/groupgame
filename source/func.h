@@ -64,6 +64,14 @@ typedef struct {
 	SDL_Rect dst_rect;
 } objectinfo;
 
+typedef struct { //キー入力用の構造体を型宣言
+	Uint32  left, //左矢印
+		right, //右矢印
+		up, //上矢印
+		down, //下矢印
+		a;  //4ボタン(決定ボタン)
+}inputkeys;
+
 typedef struct {
 	objecttype type;
 	SDL_Texture * image_texture;
@@ -71,6 +79,7 @@ typedef struct {
 	SDL_Rect dst_rect;
 	bool flag_kinkai;
 	int speed;
+    inputkeys key; //inputkeys構造体をinputという名前で実体化
 }playerinfo;
 
 
@@ -84,13 +93,7 @@ typedef struct {
 	bool clockwise;
 }camerainfo;
 
-typedef struct { //キー入力用の構造体を型宣言
-	Uint32  left, //左矢印
-		right, //右矢印
-		up, //上矢印
-		down, //下矢印
-		a;  //4ボタン(決定ボタン)
-}inputkeys;
+
 
 typedef enum{
 	MT_NONE = 0,
@@ -149,7 +152,7 @@ static int enemy_lookangles[ENEMY_NUM] = {
 	90,270
 };
 
-inputkeys key; //inputkeys構造体をinputという名前で実体化
+//inputkeys key; //inputkeys構造体をinputという名前で実体化
 playerinfo player[PLAYER_NUM];  // プレイヤーの情報を格納したplayer構造体を実体化
 camerainfo camera[CAMERA_NUM];
 /*カメラの当たり判定に使っているライブラリが、何かに接触すると、その物体に張り付く動作をするライブラリであったので、

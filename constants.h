@@ -11,6 +11,12 @@
 #define ZAHYO_COMMAND 'Z' //座標の送信
 #define KINKAI_COMMAND 'K' //金塊の状態
 #define PLAYER_COMMAND 'P' //プレイヤーが死んだことを示す
+#define UP_COMMAND 'U' //上へのスティック操作が行われたことを示す
+#define DOWN_COMMAND 'D' //下へのスティック操作が行われたことを示す
+#define RIGHT_COMMAND 'R' //右へのスティック操作が行われたことを示す
+#define LEFT_COMMAND 'L' //左へのスティック操作が行われたことを示す
+#define CENTER_COMMAND 'C' //真ん中(左右)へのスティック操作が行われたことを示す
+#define AENTER_COMMAND 'A' //真ん中(上下)へのスティック操作が行われたことを示す
 #define QUIT_COMMAND 'Q' //チャットシステムの終了
 
 /*  関数のプロトタイプ宣言 */
