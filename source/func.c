@@ -219,11 +219,24 @@ void MoveChara()
   //敵キャラの移動
   for (int i = 0; i < ENEMY_NUM; i++)
   {
-    // for(int j=0; j < KOTEI_OBJECT_NUM; j++){
-    //   if(kotei_objects.type >= TYPE_ENEMY_MOVING_FLOOR_DL)
-    //   if(SDL_IntersectRect(&(kotei_objects[i].dst_rect), &(enemy[i].dst_rect)))
-    // }
-    //向いている方向（look_angle）に進んでいく
+    for(int j=0; j < KOTEI_OBJECT_NUM; j++){
+      if(!(kotei_objects[j].type >= TYPE_ENEMY_MOVING_FLOOR_DL)) break;
+      printf("aaa");
+      SDL_Rect overrap_rect;
+      if(SDL_IntersectRect(&(kotei_objects[j].dst_rect), &(enemy[i].dst_rect), &overrap_rect)){
+      //&&
+   //                       overrap_rect.w >= enemy[i].dst_rect.w &&
+   //                       overrap_rect.h >= enemy[i].dst_rect.h){
+                            printf("overlap\n");
+                          //&&
+//                          abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w/2) - (kotei_objects[j].dst_rect.x + kotei_objects[j].dst_rect.w)) <= 4){ // 敵の移動床と、敵が完全に重なって、敵の座標が移動床の真ん中に近い（4px以内）のとき
+        if(enemy[i].prev_overlap_rect.w == 0 || (abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.x) > 5 && abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.y)) > 5){
+          ChangeEnemyMoveAngle(&enemy[i],kotei_objects[j].dst_rect,kotei_objects[j].type); // 敵の動く方向をかえる
+          enemy[i].prev_overlap_rect = overrap_rect;
+        }
+      }
+    }
+    //動く方向を格納してる変数（move_angle）に進んでいく
     switch (enemy[i].move_angle)
     {
       case 0:
@@ -257,6 +270,31 @@ void MoveChara()
   }
 }
 
+int ChangeEnemyMoveAngle(enemyinfo *e,SDL_Rect movefloor, objecttype type){
+  SDL_Rect adjusted_rect = e->dst_rect;
+  adjusted_rect.x = movefloor.x + movefloor.w / 2 - e->dst_rect.w/2;
+  adjusted_rect.y = movefloor.y + movefloor.h / 2 - e->dst_rect.h/2;
+  e->dst_rect = adjusted_rect;
+  switch(type){
+    case TYPE_ENEMY_MOVING_FLOOR_UR:
+      if(e->move_angle == 270) e->move_angle = 0;
+      if(e->move_angle == 180) e->move_angle = 90;
+      break;
+    case TYPE_ENEMY_MOVING_FLOOR_UL:
+      if(e->move_angle == 90) e->move_angle = 0;
+      if(e->move_angle == 180) e->move_angle = 270;
+      break;
+    case TYPE_ENEMY_MOVING_FLOOR_DL:
+      if(e->move_angle == 90) e->move_angle = 180;
+      if(e->move_angle == 0) e->move_angle = 270;
+      break;
+    case TYPE_ENEMY_MOVING_FLOOR_DR:
+      if(e->move_angle == 270) e->move_angle = 180;
+      if(e->move_angle == 0) e->move_angle = 90;
+      break;
+  }
+}
+
 void MakeMap()
 {
   /* マップの読み込みと配置 */
@@ -272,12 +310,8 @@ void MakeMap()
     for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
     {
       loadmap_objecttype = map0[j][i]; // マップデータを格納する
-      if (loadmap_objecttype == TYPE_SHELF || loadmap_objecttype == TYPE_ENTRANCE || loadmap_objecttype == TYPE_KINKAI) //読み込んだマップデータが棚、出入り口、金塊のとき
-      {
-        // 棚、出入り口、金塊の情報をkotei_objectに格納
-        index = InitObjectFromMap(index, loadmap_objecttype,dst);
-      }
-      else if (loadmap_objecttype == TYPE_ENEMY) // 読み込んだマップデータが敵のとき
+      if(loadmap_objecttype == TYPE_NONE) break; // マップデータなしのとき、break
+      if (loadmap_objecttype == TYPE_ENEMY) // 読み込んだマップデータが敵のとき
       {
         //構造体enemyに、敵の情報を格納
         enemy_index = InitObjectFromMap(enemy_index, loadmap_objecttype,dst);
@@ -286,6 +320,11 @@ void MakeMap()
         //構造体playerに、プレイヤーの情報を格納
         player_index = InitObjectFromMap(player_index,loadmap_objecttype,dst);
       }
+      else
+      {
+        // 棚、出入り口、金塊の情報をkotei_objectに格納
+        index = InitObjectFromMap(index, loadmap_objecttype,dst);
+      }
     }
   }
 }
@@ -293,24 +332,8 @@ void MakeMap()
 int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 {
   SDL_Surface *s;
-  if(loadmap_objecttype == TYPE_SHELF || loadmap_objecttype == TYPE_ENTRANCE || loadmap_objecttype == TYPE_KINKAI){
-    kotei_objects[index].type = loadmap_objecttype;
-    s = IMG_Load(imgfiles[loadmap_objecttype]);
-    if (s == NULL)
-      fprintf(stderr, "Missing Open Surface: maptype %d", loadmap_objecttype);
-    kotei_objects[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
-    kotei_objects[index].src_rect.x = 0;
-    kotei_objects[index].src_rect.y = 0;
-    kotei_objects[index].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
-    kotei_objects[index].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
 
-    kotei_objects[index].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
-    kotei_objects[index].dst_rect.y = dst.y;
-    kotei_objects[index].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
-    kotei_objects[index].dst_rect.h = MAP_CHIPSIZE;
-    index++;
-  }
-  else if(loadmap_objecttype == TYPE_ENEMY){
+  if(loadmap_objecttype == TYPE_ENEMY){
     //構造体enemyに、敵の情報を格納
     enemy[index].type = TYPE_ENEMY;
     s = IMG_Load(imgfiles[TYPE_ENEMY]);
@@ -329,6 +352,10 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].isgodest = false;
     enemy[index].look_angle = enemy_lookangles[index];
     enemy[index].move_angle = enemy_moveangles[index];
+    enemy[index].prev_overlap_rect.x = 0;
+    enemy[index].prev_overlap_rect.y = 0;
+    enemy[index].prev_overlap_rect.w = 0;
+    enemy[index].prev_overlap_rect.h = 0;
     index++;
   }
   else if(loadmap_objecttype == TYPE_PLAYER){
@@ -348,6 +375,23 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].dst_rect.h = s->h;
     player[index].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
 
+    index++;
+  }
+  else{
+    kotei_objects[index].type = loadmap_objecttype;
+    s = IMG_Load(imgfiles[loadmap_objecttype]);
+    if (s == NULL)
+      fprintf(stderr, "Missing Open Surface: maptype %d", loadmap_objecttype);
+    kotei_objects[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
+    kotei_objects[index].src_rect.x = 0;
+    kotei_objects[index].src_rect.y = 0;
+    kotei_objects[index].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+    kotei_objects[index].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+
+    kotei_objects[index].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
+    kotei_objects[index].dst_rect.y = dst.y;
+    kotei_objects[index].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
+    kotei_objects[index].dst_rect.h = MAP_CHIPSIZE;
     index++;
   }
   return index;
