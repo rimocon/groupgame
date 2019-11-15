@@ -64,7 +64,7 @@ void Startup()
     camera[i].theta[0] = 90.0;
     camera[i].theta[1] = 120.0;
   }
-  kinkai_flag = true;                                   //金塊は最初は、配置されている
+  //kinkai_flag = true;                                   //金塊は最初は、配置されている
   player_flag[0] = true;                                //プレイヤー1 は最初は、生存
   player_flag[1] = true;                                //プレイヤー2 は最初は、生存
   player_flag[2] = true;                                //プレイヤー3 は最初は、生存
@@ -157,7 +157,7 @@ void Input()
       {
         if (player[myid].dst_rect.y >= 100 && player[myid].dst_rect.y <= 200)
         {
-          kinkai_flag = false;
+          //kinkai_flag = false;
           //スティック操作がされた時、金塊情報などのデータ送信される
           joystick_send(1);
         }
@@ -229,7 +229,7 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
   {
     //描画対象が金塊で、金塊が地面に設置されていなければ、描画しない
-    if (!(kotei_objects[i].type == TYPE_KINKAI && kinkai_flag == false))
+    if (!(kotei_objects[i].type == TYPE_KINKAI))
     {
       SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
     }
@@ -681,7 +681,7 @@ static int execute_command()
     break;
   case KINKAI_COMMAND: //'K'のとき
     fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
-    kinkai_flag = false;
+    //kinkai_flag = false;
     result = 1;
     break;
   case PLAYER_COMMAND: //'P'のとき
