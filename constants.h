@@ -10,19 +10,17 @@
 #define MESSAGE_COMMAND 'M' //メッセージの送信
 #define ZAHYO_COMMAND 'Z' //座標の送信
 #define KINKAI_COMMAND 'K' //金塊の状態
+#define PLAYER_COMMAND 'P' //プレイヤーが死んだことを示す
+#define UP_COMMAND 'U' //上へのスティック操作が行われたことを示す
+#define DOWN_COMMAND 'D' //下へのスティック操作が行われたことを示す
+#define RIGHT_COMMAND 'R' //右へのスティック操作が行われたことを示す
+#define LEFT_COMMAND 'L' //左へのスティック操作が行われたことを示す
+#define CENTER_COMMAND 'C' //真ん中(左右)へのスティック操作が行われたことを示す
+#define AENTER_COMMAND 'A' //真ん中(上下)へのスティック操作が行われたことを示す
 #define QUIT_COMMAND 'Q' //チャットシステムの終了
 
 /*  関数のプロトタイプ宣言 */
-void setup_client(char *, u_short);
-int control_requests();
-void terminate_client();
-void joystick_send(int);
-static int input_command(void);
-static int execute_command(void);
-static void send_data(void *, int);
-static int receive_data(void *, int);
-static void handle_error(char *);
-
+//またあとで
 
 /*  構造体の宣言  */
 typedef struct {
@@ -40,12 +38,5 @@ typedef struct {
   int zahyo_y;
 } CONTAINER;
 
-/*  ネット関連の変数  */
-static int num_clients;
-static int myid;
-static int sock;
-static int num_sock;
-static fd_set mask; //FD集合を表す構造体
-static CLIENT clients[MAX_NUM_CLIENTS];
 
 
