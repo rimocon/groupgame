@@ -451,7 +451,7 @@ void MakeMap()
         //構造体enemyに、敵の情報を格納
         enemy_index = InitObjectFromMap(enemy_index, loadmap_objecttype,dst);
       }
-      else if(loadmap_objecttype == TYPE_PLAYER){ // 読み込んだマップデータがプレイヤーのとき
+      else if(loadmap_objecttype == TYPE_PLAYER1 || loadmap_objecttype == TYPE_PLAYER2 || loadmap_objecttype == TYPE_PLAYER3){ // 読み込んだマップデータがプレイヤーのとき
         //構造体playerに、プレイヤーの情報を格納
         player_index = InitObjectFromMap(player_index,loadmap_objecttype,dst);
       }
@@ -811,10 +811,10 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].prev_overlap_rect.h = 0;
     index++;
   }
-  else if(loadmap_objecttype == TYPE_PLAYER){
+  else if(loadmap_objecttype == TYPE_PLAYER1 || loadmap_objecttype == TYPE_PLAYER2 || loadmap_objecttype == TYPE_PLAYER3){
     //構造体playerに、敵の情報を格納
-    player[index].type = TYPE_PLAYER;
-    s = IMG_Load(imgfiles[TYPE_PLAYER]);
+    player[index].type = loadmap_objecttype;
+    s = IMG_Load(imgfiles[loadmap_objecttype]);
     if (s == NULL) fprintf(stderr,"Missing Open Surface: maptype %d",loadmap_objecttype);
     player[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     player[index].src_rect.x = 0;

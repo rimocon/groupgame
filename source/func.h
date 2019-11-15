@@ -42,7 +42,7 @@ static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 7, 0, 0, 0, 0, 1, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -71,13 +71,15 @@ typedef enum{
 	TYPE_CAMERA = 3,
 	TYPE_ENTRANCE = 4,
 	TYPE_ENEMY = 5,
-	TYPE_PLAYER = 6, // TYPEを追加する場合はPLAYERとMOVING_FLOORの間にする
-	TYPE_ENEMY_MOVING_FLOOR_UR = 7, // TYPE_ENEMY_MOVING_FLOOR_UR >= iって条件にしてるため、これ以降は移動床の宣言
-	TYPE_ENEMY_MOVING_FLOOR_UL = 8,
-	TYPE_ENEMY_MOVING_FLOOR_DL = 9,
-	TYPE_ENEMY_MOVING_FLOOR_DR = 10,
-	TYPE_ENEMY_MOVING_FLOOR_REV = 11,
-	TYPE_NUM = 12
+	TYPE_PLAYER1 = 6, // TYPEを追加する場合はPLAYERとMOVING_FLOORの間にする
+	TYPE_PLAYER2 = 7,
+	TYPE_PLAYER3 = 8,
+	TYPE_ENEMY_MOVING_FLOOR_UR = 9, // TYPE_ENEMY_MOVING_FLOOR_UR >= iって条件にしてるため、これ以降は移動床の宣言
+	TYPE_ENEMY_MOVING_FLOOR_UL = 10,
+	TYPE_ENEMY_MOVING_FLOOR_DL = 11,
+	TYPE_ENEMY_MOVING_FLOOR_DR = 12,
+	TYPE_ENEMY_MOVING_FLOOR_REV = 13,
+	TYPE_NUM = 14
 }objecttype;
 
 typedef struct {
