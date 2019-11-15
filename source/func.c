@@ -229,7 +229,7 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
   {
     //描画対象が金塊で、金塊が地面に設置されていなければ、描画しない
-    if (!(kotei_objects[i].type == TYPE_KINKAI))
+    if (!(kotei_objects[i].type == TYPE_KINKAI && kinkai_flag == false))
     {
       SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
     }

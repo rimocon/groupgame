@@ -10,7 +10,7 @@
 #define PLAYER_SPEED 1
 
 // 金塊、カメラ、棚、出入り口の数
-#define KINKAI_NUM 1
+#define KINKAI_NUM 2
 #define CAMERA_NUM 1
 #define SHELF_NUM 10 // 棚の数、マップデータ(map0)の棚の数と合わせる
 #define ENTRANCE_NUM 3
