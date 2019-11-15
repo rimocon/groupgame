@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include "../constants.h"
+//#include "./common.h"
 
 static CLIENT clients[MAX_NUM_CLIENTS];
 static int num_clients;
@@ -189,6 +190,34 @@ int control_requests()
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;
         break;
+      case PLAYER_COMMAND: //'P'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case RIGHT_COMMAND: //'R'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case LEFT_COMMAND: //'L'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case UP_COMMAND: //'U'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case DOWN_COMMAND: //'D'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case CENTER_COMMAND: //'C'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case AENTER_COMMAND: //'A'のとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
       case MESSAGE_COMMAND: //'M'のとき
         fprintf(stderr, "client[%d] %s: message = %s\n", clients[i].cid, clients[i].name, data.message);
         send_data(BROADCAST, &data, sizeof(data));
@@ -202,6 +231,7 @@ int control_requests()
       default: //その他の文字が入力された場合
         fprintf(stderr, "control_requests(): %c is not a valid command.\n", data.command);
         exit(1); //異常終了
+        break;
       }
     }
   }

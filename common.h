@@ -27,11 +27,6 @@
 #include <SDL2/SDL_image.h> //SDLで画像を扱う
 #include <SDL2/SDL_mixer.h> //SDLで音楽を扱う
 
-/*  ネット関連の関数のプロトタイプ宣言  */
-extern void setup_client(char *, u_short);
-extern int control_requests();
-extern void terminate_client();
-extern void joystick_send(int);
 /*  関数のプロトタイプ宣言  */
 extern void Startup(void); //最初に呼び出される関数
 extern void Destroy(void); //SDL関連破棄する関数

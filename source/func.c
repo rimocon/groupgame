@@ -1,6 +1,24 @@
-#include "common.h"
+#include "../common.h"
+#include "../constants.h"
 #include "func.h"
-#include "constants.h"
+
+static int num_clients;
+static int myid;
+static int sock;
+static int num_sock;
+static fd_set mask; //FD集合を表す構造体
+static CLIENT clients[MAX_NUM_CLIENTS];
+
+void setup_client(char *, u_short);
+int control_requests();
+void terminate_client();
+void joystick_send(int);
+
+static int input_command(void);
+static int execute_command(void);
+static void send_data(void *, int);
+static int receive_data(void *, int);
+static void handle_error(char *);
 
 void Startup()
 {
@@ -8,12 +26,14 @@ void Startup()
   if (SDL_Init(SDL_INIT_EVERYTHING) == -1)
     SDL_Quit();
 
-  if(SDL_NumJoysticks() > 0) {
-    joystick = SDL_JoystickOpen(0); // ジョイスティックを開く
+  if (SDL_NumJoysticks() > 0)
+  {
+    joystick = SDL_JoystickOpen(0);             // ジョイスティックを開く
     printf("%s\n", SDL_JoystickName(joystick)); //開いたジョイスティック名を表示
   }
   // ジョイスティックが開けなかったら
-  if(!joystick) {
+  if (!joystick)
+  {
     printf("failed to open joystick.\n");
     exit(-1);
   }
@@ -30,7 +50,8 @@ void Startup()
     SDL_Quit(); //終了
   }
   run = true; //動かす
-  for(int i = 0;i<CAMERA_NUM; i++) {
+  for (int i = 0; i < CAMERA_NUM; i++)
+  {
     /*
        camera[i].dst_rects.x = 1200;
        camera[i].dst_rects.y = 900;
@@ -44,6 +65,9 @@ void Startup()
     camera[i].theta[1] = 120.0;
   }
   kinkai_flag = true;                                   //金塊は最初は、配置されている
+  player_flag[0] = true;                                //プレイヤー1 は最初は、生存
+  player_flag[1] = true;                                //プレイヤー2 は最初は、生存
+  player_flag[2] = true;                                //プレイヤー3 は最初は、生存
   mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0); //メインウィンドウに対するレンダラー生成
   Imageload();
   MakeMap();
@@ -53,50 +77,67 @@ void Input()
 {
   switch (inputevent.type)
   {
-    // ジョイスティックの方向キーまたはアナログキー（スティック)が押された時
-    case SDL_JOYAXISMOTION:
-      printf("The axis ID of the operated key is %d.\n",inputevent.jaxis.axis); // 操作された方向キーの方向軸を表示（0：アナログキー，1：アナログキー，2：方向キー左右方向，3：方向キー上下方向）
-      if(inputevent.jaxis.axis==0){
-        printf("--- Analog-Direction Key: 0 Axis\n");
-        if(inputevent.jaxis.value > 0) { //右キーが押されたら
-          key.right = 1;
-          key.left = 0;
-        }
-        else if(inputevent.jaxis.value < 0) { //左キーが押されたら
-          printf("press left\n");
-          key.right = 0;
-          key.left = 1;
-        }
-        else if(inputevent.jaxis.value == 0) { //真ん中にスティックが戻ったら
-          printf("reverse center\n");
-          key.right = 0;
-          key.left = 0;
-        }
+  // ジョイスティックの方向キーまたはアナログキー（スティック)が押された時
+  case SDL_JOYAXISMOTION:
+    printf("The axis ID of the operated key is %d.\n", inputevent.jaxis.axis); // 操作された方向キーの方向軸を表示（0：アナログキー，1：アナログキー，2：方向キー左右方向，3：方向キー上下方向）
+    if (inputevent.jaxis.axis == 0)
+    {
+      printf("--- Analog-Direction Key: 0 Axis\n");
+      if (inputevent.jaxis.value > 0)
+      { //右キーが押されたら
+        //key.right = 1;
+        //key.left = 0;
+        //スティック操作(右),コマンド送信される
+        joystick_send(3);
       }
-      else if(inputevent.jaxis.axis==1){
-        printf("--- Analag-Direction Key: 1 Axis\n");
-        if(inputevent.jaxis.value > 0) { //下キーが押されたら
-          printf("press down\n"); //確認用
-          key.up = 0;
-          key.down = 1;
-        }
-        else if(inputevent.jaxis.value < 0) { //上キーが押されたら
-          printf("press up\n"); //確認用
-          key.up = 1;
-          key.down = 0;
-        }
-        else if(inputevent.jaxis.value == 0) { //真ん中にスティックが戻ったら
-          printf("reverse center\n");
-          key.up= 0;
-          key.down= 0;
-        }
+      else if (inputevent.jaxis.value < 0)
+      { //左キーが押されたら
+        //key.right = 0;
+        //key.left = 1;
+        //スティック操作(左),コマンド送信される
+        joystick_send(4);
       }
-      else if(inputevent.jaxis.axis==2){
-        //	printf("--- Four-Direction Key: Horizontal Axis\n");
+      else if (inputevent.jaxis.value == 0)
+      { //真ん中にスティックが戻ったら
+        //key.right = 0;
+        //key.left = 0;
+        //スティック操作(真ん中),コマンド送信される
+        joystick_send(7);
       }
-      else if(inputevent.jaxis.axis==3){
-        //	printf("--- Four-Direction Key: Vertical Axis\n");
+    }
+    else if (inputevent.jaxis.axis == 1)
+    {
+      printf("--- Analag-Direction Key: 1 Axis\n");
+      if (inputevent.jaxis.value > 0)
+      { //下キーが押されたら
+        //key.up = 0;
+        //key.down = 1;
+        //スティック操作(下),コマンド送信される
+        joystick_send(6);
       }
+      else if (inputevent.jaxis.value < 0)
+      { //上キーが押されたら
+        //key.up = 1;
+        //key.down = 0;
+        //スティック操作(上),コマンド送信される
+        joystick_send(5);
+      }
+      else if (inputevent.jaxis.value == 0)
+      { //真ん中にスティックが戻ったら
+        //key.up = 0;
+        //key.down = 0;
+        //スティック操作(真ん中),コマンド送信される
+        joystick_send(8);
+      }
+    }
+    else if (inputevent.jaxis.axis == 2)
+    {
+      //	printf("--- Four-Direction Key: Horizontal Axis\n");
+    }
+    else if (inputevent.jaxis.axis == 3)
+    {
+      //	printf("--- Four-Direction Key: Vertical Axis\n");
+    }
   // ジョイスティックのボタンが押された時
   case SDL_JOYBUTTONDOWN:
     //	printf("The ID of the pressed button is %d.\n", inputevent.jbutton.button); // 押されたボタンのIDを表示（0から）
@@ -122,17 +163,6 @@ void Input()
           joystick_send(1);
         }
       }
-      /*
-      if (player[1].dst_rect.x >= 1000 && player[1].dst_rect.x <= 1100)
-      {
-        if (player[1].dst_rect.y >= 100 && player[1].dst_rect.y <= 200)
-        {
-          kinkai_flag = false;
-          //スティック操作がされた時、金塊情報などのデータ送信される
-          joystick_send(1);
-        }
-      }
-      */
     }
 
     //終了ボタンが押された
@@ -151,7 +181,7 @@ void Input()
       //		printf("--- You released a button on the joystick.\n");
     }
     break;
-    }
+  }
 }
 
 void Destroy()
@@ -170,25 +200,27 @@ void Imageload()
   // 順番的に先に背景を描画する必要あり
 
   // 「kotei_objects」構造体（金塊、カメラ、棚、出入り口）にグローバル変数で設定した位置、画像をに設定する
-  int i= 0;
-  for(int j = 0; j<KINKAI_NUM; j++){
-    printf("j = %d\n",j);
+  int i = 0;
+  for (int j = 0; j < KINKAI_NUM; j++)
+  {
+    printf("j = %d\n", j);
     kotei_objects[i].type = TYPE_KINKAI;
     s = IMG_Load(imgfiles[TYPE_KINKAI]);
-    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     kotei_objects[i].src_rect.x = 0;
     kotei_objects[i].src_rect.y = 0;
     kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
     kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-    kotei_objects[i].dst_rect =kinkai_dst_rects[j];
+    kotei_objects[i].dst_rect = kinkai_dst_rects[j];
     SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-    i++; // 金塊、カメラ、棚、出入り口のデータをkotei_objectsに保存するためにiをインクリメント
+    i++;                                                                                                                  // 金塊、カメラ、棚、出入り口のデータをkotei_objectsに保存するためにiをインクリメント
   }
-  for(int j = 0; j<SHELF_NUM; j++){
-    printf("j = %d\n",j);
+  for (int j = 0; j < SHELF_NUM; j++)
+  {
+    printf("j = %d\n", j);
     kotei_objects[i].type = TYPE_SHELF;
     s = IMG_Load(imgfiles[TYPE_SHELF]);
-    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     kotei_objects[i].src_rect.x = 0;
     kotei_objects[i].src_rect.y = 0;
     kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
@@ -198,37 +230,40 @@ void Imageload()
     i++;
   }
 
-  for(int j = 0; j<ENTRANCE_NUM; j++){
-    printf("j = %d\n",j);
+  for (int j = 0; j < ENTRANCE_NUM; j++)
+  {
+    printf("j = %d\n", j);
     kotei_objects[i].type = TYPE_ENTRANCE;
     s = IMG_Load(imgfiles[TYPE_ENTRANCE]);
-    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     kotei_objects[i].src_rect.x = 0;
     kotei_objects[i].src_rect.y = 0;
     kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
     kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-    printf("j = %d\n",j);
+    printf("j = %d\n", j);
     kotei_objects[i].dst_rect = entrance_dst_rects[j];
     SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     i++;
   }
-  for(int j = 0; j<CAMERA_NUM; j++){
-    printf("j = %d\n",j);
+  for (int j = 0; j < CAMERA_NUM; j++)
+  {
+    printf("j = %d\n", j);
     kotei_objects[i].type = TYPE_CAMERA;
     s = IMG_Load(imgfiles[TYPE_CAMERA]);
-    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+    kotei_objects[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     kotei_objects[i].src_rect.x = 0;
     kotei_objects[i].src_rect.y = 0;
     kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
     kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
-    kotei_objects[i].dst_rect =camera_dst_rects[j];
+    kotei_objects[i].dst_rect = camera_dst_rects[j];
     SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
   }
   //構造体playerに、プレイヤーの情報を格納
-  for(i=0; i<PLAYER_NUM; i++){
+  for (i = 0; i < PLAYER_NUM; i++)
+  {
     player[i].type = TYPE_PLAYER;
     s = IMG_Load(imgfiles[TYPE_PLAYER + i]); //各プレイヤーの画像を読み込み
-    player[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+    player[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     player[i].src_rect.x = 0;
     player[i].src_rect.y = 0;
     player[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
@@ -238,17 +273,18 @@ void Imageload()
     player[i].speed = PLAYER_SPEED;
   }
   //構造体enemyに、敵の情報を格納
-  for(i=0; i<ENEMY_NUM; i++){
+  for (i = 0; i < ENEMY_NUM; i++)
+  {
     enemy[i].type = TYPE_ENEMY;
     s = IMG_Load(imgfiles[TYPE_ENEMY]);
-    enemy[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+    enemy[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     enemy[i].src_rect.x = 0;
     enemy[i].src_rect.y = 0;
     enemy[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
     enemy[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
     enemy[i].dst_rect = enemy_dst_rects[i];
     SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-    enemy[i].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+    enemy[i].speed = PLAYER_SPEED;                                                                // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
     enemy[i].isgodest = false;
     enemy[i].look_angle = enemy_lookangles[i];
     //       if(enemy_dst_rects[i].x > enemy_destination[i][0] && enemy_dst_rects[i].y > enemy_destination[i][1]) enemy[i].movemode = 0;
@@ -259,30 +295,35 @@ void Imageload()
 }
 
 void MoveTriangle()
-{ 
+{
   //tri[0][1] = x2
   //tri[1][1] = y2
   //tri[0][2] = x3
   //tri[1][2] = y3
-  for (int i = 0; i<CAMERA_NUM;i++) {  //カメラの数だけ繰り返す
-    if ( camera[i].theta[0] < 90 || camera[i].theta[1] < 90 ) {
+  for (int i = 0; i < CAMERA_NUM; i++)
+  { //カメラの数だけ繰り返す
+    if (camera[i].theta[0] < 90 || camera[i].theta[1] < 90)
+    {
       camera[i].clockwise = false; //反時計回り
     }
-    else if(camera[i].theta[0] > 270 || camera[i].theta[1] >270) {
+    else if (camera[i].theta[0] > 270 || camera[i].theta[1] > 270)
+    {
       camera[i].clockwise = true; //時計回り
     }
-    if (camera[i].clockwise) {
-      camera[i].theta[0]--; 
+    if (camera[i].clockwise)
+    {
+      camera[i].theta[0]--;
       camera[i].theta[1]--;
     }
-    else{
+    else
+    {
       camera[i].theta[0]++;
       camera[i].theta[1]++;
     }
-    camera[i].tri[0][1] = camera[i].tri[0][0] + sin(camera[i].theta[0]*M_PI / 180.0)*130; //x2の計算
-    camera[i].tri[1][1] = camera[i].tri[1][0] + cos(camera[i].theta[0]*M_PI / 180.0)*130; //y2の計算
-    camera[i].tri[0][2] = camera[i].tri[0][0] + sin(camera[i].theta[1]*M_PI / 180.0)*130; //x3の計算
-    camera[i].tri[1][2] = camera[i].tri[1][0] + cos(camera[i].theta[1]*M_PI / 180.0)*130; //x3の計算
+    camera[i].tri[0][1] = camera[i].tri[0][0] + sin(camera[i].theta[0] * M_PI / 180.0) * 130; //x2の計算
+    camera[i].tri[1][1] = camera[i].tri[1][0] + cos(camera[i].theta[0] * M_PI / 180.0) * 130; //y2の計算
+    camera[i].tri[0][2] = camera[i].tri[0][0] + sin(camera[i].theta[1] * M_PI / 180.0) * 130; //x3の計算
+    camera[i].tri[1][2] = camera[i].tri[1][0] + cos(camera[i].theta[1] * M_PI / 180.0) * 130; //x3の計算
   }
 }
 
@@ -300,89 +341,129 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   }
   for (int i = 0; i < PLAYER_NUM; i++)
   {
-    SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
+    //描画対象がプレイヤーで、プレイヤーが消えていれば(カメラにバレるなどして)、描画しない
+    if (player_flag[i] == true)
+    {
+      SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
+    }
   }
-  for(int i=0; i<ENEMY_NUM; i++){
+  for (int i = 0; i < ENEMY_NUM; i++)
+  {
     SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); //敵をレンダーに出力
   }
   //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
-  for(int i = 0;  i<CAMERA_NUM; i++){
-    filledTrigonColor(mainrenderer,camera[i].tri[0][0],camera[i].tri[1][0],camera[i].tri[0][1],camera[i].tri[1][1],camera[i].tri[0][2],camera[i].tri[1][2],0xff0000ff);
+  for (int i = 0; i < CAMERA_NUM; i++)
+  {
+    filledTrigonColor(mainrenderer, camera[i].tri[0][0], camera[i].tri[1][0], camera[i].tri[0][1], camera[i].tri[1][1], camera[i].tri[0][2], camera[i].tri[1][2], 0xff0000ff);
   }
   // filledTrigonColor(mainrenderer,640,480,700,400,580,400,0xff0000ff);
-  SDL_RenderPresent(mainrenderer);              // 描画データを表示
+  SDL_RenderPresent(mainrenderer); // 描画データを表示
 }
 
-void Collision() {
+void Collision()
+{
   //00,10,01,11->00,10,02,12->01,11,01,11->01,11,02,12で判定
   //カメラの判定
-  for (int i = 0; i < CAMERA_NUM;i++){ //カメラの数だけ
-    for(int j = 0; j < 2; j++) { 
-      for(int k = 1; k < 3; k++) {
-        bool judge = SDL_IntersectRectAndLine(&player[0].dst_rect,
-            &camera[i].tri[0][j],
-            &camera[i].tri[1][j],
-            &camera[i].tri[0][k],
-            &camera[i].tri[1][k]);
-        if(judge) {
-          run = false;
+  for (int i = 0; i < CAMERA_NUM; i++)
+  { //カメラの数だけ
+    for (int j = 0; j < 2; j++)
+    {
+      for (int k = 1; k < 3; k++)
+      {
+        /*カメラの当たり判定に使っているライブラリが、何かに接触すると、その物体に張り付く動作をするライブラリであったので、
+          カメラの張り付く前の座標を保持しておき、張り付いた後に、カメラの座標に代入することにより、カメラを固定する。*/
+        camera_before[i].tri[0][j] = camera[i].tri[0][j];
+        camera_before[i].tri[1][j] = camera[i].tri[1][j];
+        camera_before[i].tri[0][k] = camera[i].tri[0][k];
+        camera_before[i].tri[1][k] = camera[i].tri[1][k];
+        bool judge = SDL_IntersectRectAndLine(&player[myid].dst_rect,
+                                              &camera[i].tri[0][j],
+                                              &camera[i].tri[1][j],
+                                              &camera[i].tri[0][k],
+                                              &camera[i].tri[1][k]);
+        //カメラとプレイヤーがぶつかった時
+        if (judge)
+        {
+          //run = false;
+          player_flag[myid] = false;
+          joystick_send(2); //プレイヤーが消えたことが他のクライアントに通知される。
+          camera[i].tri[0][j] = camera_before[i].tri[0][j];
+          camera[i].tri[1][j] = camera_before[i].tri[1][j];
+          camera[i].tri[0][k] = camera_before[i].tri[0][k];
+          camera[i].tri[1][k] = camera_before[i].tri[1][k];
           break;
         }
       }
     }
   }
-  //ここまでカメラの判定 
-
+  //ここまでカメラの判定
 }
 
 void MoveChara()
 {
   int move_distance = PLAYER_SPEED * 2;
-  if (key.left)
+  for (int i = 0; i < 3; i++)
   {
-    player[myid].dst_rect.x -= move_distance;
-    joystick_send(0); //座標などのデータ送信される
-  }
-  else if (key.right)
-  {
-    player[myid].dst_rect.x += move_distance;
-    joystick_send(0); //座標などのデータ送信される
-  }
-  else if (key.up)
-  {
-    player[myid].dst_rect.y -= move_distance;
-    joystick_send(0); //座標などのデータ送信される
-  }
-  else if (key.down)
-  {
-    player[myid].dst_rect.y += move_distance;
-    joystick_send(0); //座標などのデータ送信される
-  }
-
-  //棚との衝突判定
-  for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
-  {
-    if (SDL_HasIntersection(&(kotei_objects[i].dst_rect), &(player[0].dst_rect))) // プレイヤーと固定オブジェクトが重なった時
+    if (player[i].key.left)
     {
-      if (kotei_objects[i].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
-        break;
+      //player[myid].dst_rect.x -= move_distance;
+      //if(player[myid].dst_rect.x <0) player[myid].dst_rect.x = 0;
+      player[i].dst_rect.x -= move_distance;
+      if (player[i].dst_rect.x < 0)
+        player[i].dst_rect.x = 0;
+      //joystick_send(0); //座標などのデータ送信される
+    }
+    else if (player[i].key.right)
+    {
+      //player[myid].dst_rect.x += move_distance;
+      //if(player[myid].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w) player[myid].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w;
+      player[i].dst_rect.x += move_distance;
+      if (player[i].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w)
+        player[i].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w;
+      //joystick_send(0); //座標などのデータ送信される
+    }
+    //else if (player[i].key.up)
+    if (player[i].key.up)
+    {
+      //player[myid].dst_rect.y -= move_distance;
+      //if(player[myid].dst_rect.y < 0) player[myid].dst_rect.y = 0;
+      player[i].dst_rect.y -= move_distance;
+      if (player[i].dst_rect.y < 0)
+        player[i].dst_rect.y = 0;
+      //joystick_send(0); //座標などのデータ送信される
+    }
+    else if (player[i].key.down)
+    {
+      player[i].dst_rect.y += move_distance;
+      if (player[i].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h)
+        player[i].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h;
+      //joystick_send(0); //座標などのデータ送信される
+    }
 
-      // ぶつかったぶんの距離プレイヤーの位置を戻す
-      if (key.left)
+    //棚との衝突判定
+    for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
+    {
+      if (SDL_HasIntersection(&(kotei_objects[i].dst_rect), &(player[0].dst_rect))) // プレイヤーと固定オブジェクトが重なった時
       {
-        player[0].dst_rect.x += move_distance;
-      }
-      else if (key.right)
-      {
-        player[0].dst_rect.x -= move_distance;
-      }
-      else if (key.up)
-      {
-        player[0].dst_rect.y += move_distance;
-      }
-      else if (key.down)
-      {
-        player[0].dst_rect.y -= move_distance;
+        if (kotei_objects[i].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
+          break;
+        // ぶつかったぶんの距離プレイヤーの位置を戻す
+        if (player[i].key.left)
+        {
+          player[i].dst_rect.x += move_distance;
+        }
+        else if (player[i].key.right)
+        {
+          player[i].dst_rect.x -= move_distance;
+        }
+        else if (player[i].key.up)
+        {
+          player[i].dst_rect.y += move_distance;
+        }
+        else if (player[i].key.down)
+        {
+          player[i].dst_rect.y -= move_distance;
+        }
       }
     }
   }
@@ -396,8 +477,9 @@ void MoveChara()
       enemy[i].dst_rect.y -= ENEMY_SPEED;
       break;
     case 90:
-        //if(enemy[i].dst_rect.x + ENEMY_SPEED > 1256){
-        if(enemy[i].dst_rect.x + ENEMY_SPEED > 756){
+      //if(enemy[i].dst_rect.x + ENEMY_SPEED > 1256){
+      if (enemy[i].dst_rect.x + ENEMY_SPEED > 756)
+      {
         enemy[i].look_angle = 270;
         break;
       }
@@ -407,7 +489,8 @@ void MoveChara()
       enemy[i].dst_rect.y += ENEMY_SPEED;
       break;
     case 270:
-      if(enemy[i].dst_rect.x - ENEMY_SPEED < 0){
+      if (enemy[i].dst_rect.x - ENEMY_SPEED < 0)
+      {
         enemy[i].look_angle = 90;
         break;
       }
@@ -420,8 +503,8 @@ void MoveChara()
 void MakeMap()
 {
   /* マップの読み込みと配置 */
-  int i, j, k=0,mt;
-  SDL_Surface* s;
+  int i, j, k = 0, mt;
+  SDL_Surface *s;
   SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
   SDL_Rect dst = {0};
   for (j = 0; j < MAP_HEIGHT; j++, dst.y += MAP_CHIPSIZE)
@@ -473,7 +556,6 @@ void MakeMap()
   //   ret = PrintError(SDL_GetError());
   // }
 }
-
 
 void setup_client(char *server_name, u_short port)
 {
@@ -571,11 +653,11 @@ int control_requests()
   return result;
 }
 
-void joystick_send(int num)
+void joystick_send(int num) //ジョイスティックの操作に関する情報を送信する関数
 {
   CONTAINER data;
   memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
-  if (num == 0)
+  if (num == 0)                        //座標の情報を送信
   {
     //コマンドとして、座標の'Z'を代入
     data.command = ZAHYO_COMMAND;           //コマンドを格納
@@ -586,10 +668,52 @@ void joystick_send(int num)
     printf("Player 0 : axis x = %d, axis y = %d\n", player[0].dst_rect.x, player[0].dst_rect.y);
     printf("Player 1 : axis x = %d, axis y = %d\n", player[1].dst_rect.x, player[1].dst_rect.y);
   }
-  else if (num == 1)
+  else if (num == 1) //金塊の設置の可否を送信
   {
     //コマンドとして、座標の'K'を代入
     data.command = KINKAI_COMMAND; //コマンドを格納
+    data.cid = myid;               //クライアントIDを格納
+  }
+  else if (num == 2)
+  {
+    //コマンドとして、プレイヤーの'P'を代入
+    data.command = PLAYER_COMMAND; //コマンドを格納
+    data.cid = myid;               //クライアントIDを格納
+  }
+  else if (num == 3)
+  { //右のスティック操作
+    //コマンドとして、プレイヤーの'R'を代入
+    data.command = RIGHT_COMMAND; //コマンドを格納
+    data.cid = myid;              //クライアントIDを格納
+  }
+  else if (num == 4)
+  { //左のスティック操作
+    //コマンドとして、プレイヤーの'L'を代入
+    data.command = LEFT_COMMAND; //コマンドを格納
+    data.cid = myid;             //クライアントIDを格納
+  }
+  else if (num == 5)
+  { //上のスティック操作
+    //コマンドとして、プレイヤーの'U'を代入
+    data.command = UP_COMMAND; //コマンドを格納
+    data.cid = myid;           //クライアントIDを格納
+  }
+  else if (num == 6)
+  { //下のスティック操作
+    //コマンドとして、プレイヤーの'D'を代入
+    data.command = DOWN_COMMAND; //コマンドを格納
+    data.cid = myid;             //クライアントIDを格納
+  }
+  else if (num == 7)
+  { //真ん中(左右)のスティック操作
+    //コマンドとして、プレイヤーの'C'を代入
+    data.command = CENTER_COMMAND; //コマンドを格納
+    data.cid = myid;               //クライアントIDを格納
+  }
+  else if (num == 8)
+  { //真ん中(上下)のスティック操作
+    //コマンドとして、プレイヤーの'A'を代入
+    data.command = AENTER_COMMAND; //コマンドを格納
     data.cid = myid;               //クライアントIDを格納
   }
   send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
@@ -650,8 +774,46 @@ static int execute_command()
     break;
   case KINKAI_COMMAND: //'K'のとき
     fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
-    //send_data(BROADCAST, &data, sizeof(data));
     kinkai_flag = false;
+    result = 1;
+    break;
+  case PLAYER_COMMAND: //'P'のとき
+    if (myid != data.cid)
+    {
+      player_flag[data.cid] = false; //他のクライアントから消えたと通知がきたプレイヤーを描画しないようにする
+    }
+    //fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
+    kinkai_flag = false;
+    result = 1;
+    break;
+  case RIGHT_COMMAND:               //'R'のとき
+    player[data.cid].key.right = 1; //スティックが右に入っていることを維持
+    player[data.cid].key.left = 0;
+    result = 1;
+    break;
+  case LEFT_COMMAND: //'L'のとき
+    player[data.cid].key.right = 0;
+    player[data.cid].key.left = 1; //スティックが右に入っていることを維持
+    result = 1;
+    break;
+  case UP_COMMAND:               //'U'のとき
+    player[data.cid].key.up = 1; //スティックが上に入っていることを維持
+    player[data.cid].key.down = 0;
+    result = 1;
+    break;
+  case DOWN_COMMAND: //'D'のとき
+    player[data.cid].key.up = 0;
+    player[data.cid].key.down = 1; //スティックが右に入っていることを維持
+    result = 1;
+    break;
+  case CENTER_COMMAND: //'C'のとき
+    player[data.cid].key.right = 0;
+    player[data.cid].key.left = 0;
+    result = 1;
+    break;
+  case AENTER_COMMAND: //'A'のとき
+    player[data.cid].key.up = 0;
+    player[data.cid].key.down = 0;
     result = 1;
     break;
   case MESSAGE_COMMAND: //'M'のとき
@@ -663,8 +825,9 @@ static int execute_command()
     result = 0;
     break;
   default: //その他の文字が入力された場合
-    fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
-    exit(1); //異常終了
+    //fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
+    //exit(1); //異常終了
+    break;
   }
 
   return result;
@@ -712,4 +875,3 @@ void terminate_client()
   close(sock); ////ソケットを切断
   exit(0);     //正常終了
 }
-
