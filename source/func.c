@@ -310,7 +310,7 @@ void MakeMap()
     for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
     {
       loadmap_objecttype = map0[j][i]; // マップデータを格納する
-      if(loadmap_objecttype == TYPE_NONE) break; // マップデータなしのとき、break
+      fprintf(stderr,"map0[%d][%d]  = %d\n",j,i,loadmap_objecttype);
       if (loadmap_objecttype == TYPE_ENEMY) // 読み込んだマップデータが敵のとき
       {
         //構造体enemyに、敵の情報を格納
@@ -320,7 +320,7 @@ void MakeMap()
         //構造体playerに、プレイヤーの情報を格納
         player_index = InitObjectFromMap(player_index,loadmap_objecttype,dst);
       }
-      else
+      else if(loadmap_objecttype == TYPE_KINKAI || loadmap_objecttype == TYPE_SHELF)
       {
         // 棚、出入り口、金塊の情報をkotei_objectに格納
         index = InitObjectFromMap(index, loadmap_objecttype,dst);

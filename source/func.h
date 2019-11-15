@@ -11,7 +11,7 @@
 
 // 金塊、カメラ、棚、出入り口の数
 #define KINKAI_NUM 1
-#define CAMERA_NUM 0
+#define CAMERA_NUM 1
 #define SHELF_NUM 10 // 棚の数、マップデータ(map0)の棚の数と合わせる
 #define ENTRANCE_NUM 3
 #define  KOTEI_OBJECT_NUM 16 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
