@@ -64,7 +64,7 @@ void Startup()
     camera[i].theta[0] = 90.0;
     camera[i].theta[1] = 120.0;
   }
-  //kinkai_flag = true;                                   //金塊は最初は、配置されている
+  kinkai_flag = true;                                   //金塊は最初は、配置されている
   player_flag[0] = true;                                //プレイヤー1 は最初は、生存
   player_flag[1] = true;                                //プレイヤー2 は最初は、生存
   player_flag[2] = true;                                //プレイヤー3 は最初は、生存
