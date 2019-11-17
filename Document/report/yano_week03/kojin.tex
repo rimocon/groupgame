@@ -1,0 +1,56 @@
+\documentclass{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings,jlisting,url,here}
+
+\lstset{%
+  language={C},
+  basicstyle={\small},%
+  identifierstyle={\small},%
+  commentstyle={\small\itshape},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small},%
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  numbers=left,%
+  xrightmargin=0zw,%
+  xleftmargin=3zw,%
+  numberstyle={\scriptsize},% stepnumber=1,
+  numbersep=1zw,%
+  lineskip=-0.5ex%
+}
+
+
+\title{個人レポート}
+\author{6119019207 矢野大暉}
+\date{2019/11/17 提出}
+
+\begin{document}
+\maketitle
+
+\section{開発期間11/11～11/17の進捗状況} 
+\subsection{進展事項}
+今回の開発期間では，ゲームの設計として主に
+\begin{itemize}
+\item 当たり判定の修正
+\item マップ作成機能の実装
+\end{itemize}
+を行った．以下にその詳細を示す．
+
+
+\subsection{棚の当たり判定を実装}
+ネットワーク通信下だとプレイヤーと棚の間が重なった際の当たり判定がなくなった．そのため，修正した．
+
+\subsection{マップ作成の実装}
+前回の試作していたマップの作成を実装した．また，役割が重複していた変数があったので統合した．
+
+\section{次回開発期間での予定}
+\begin{itemize}
+\item NPCの移動方向をマップごとに変えられる機能を実装
+\item NPCの視界の実装
+\end{itemize}
+
+今回の開発期間では，実装したマップ作成機能を元に，NPCの移動の方向をマップによって変更するように途中まで実装していたがうまくいかず開発がストップしていたので，それを続けたい．
+また，3人の画面でNPCを移動させたときに同期のズレが発生しているので，そのことも念頭に置きつつ，開発を進めていきたい．
+\end{document}

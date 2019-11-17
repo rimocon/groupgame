@@ -1,0 +1,72 @@
+\documentclass{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings,jlisting,url,here}
+
+\lstset{%
+  language={C},
+  basicstyle={\small},%
+  identifierstyle={\small},%
+  commentstyle={\small\itshape},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small},%
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  numbers=left,%
+  xrightmargin=0zw,%
+  xleftmargin=3zw,%
+  numberstyle={\scriptsize},% stepnumber=1,
+  numbersep=1zw,%
+  lineskip=-0.5ex%
+}
+
+
+\title{グループレポート}
+\author{6119019092 織田武瑠 6119019207 矢野大暉 6119019056 山口力也}
+\date{2019/11/17 提出}
+
+\begin{document}
+\maketitle
+
+\section{開発期間11/11～11/17の進捗状況} 
+\subsection{進展事項}
+今回の開発期間では，ゲームの設計として主に
+\begin{itemize}
+\item 当たり判定の修正
+\item 監視カメラの角度の設定，量産化
+\item 3人でのネットワーク通信を実現
+\item 監視カメラの視野に入ったプレイヤーを消えるように実装
+\item ネットワークのラグを解消
+\item プログラムが終了すると，サーバーも終了するように改良
+\item それぞれの班員で作ったプログラムを統合して不具合を解消
+\end{itemize}
+を行った．以下にその詳細を示す．
+
+\subsection{当たり判定の修正}
+ネットワーク通信時に，プレイヤーが棚に重なった際に当たり判定がされず，貫通してしまうバグが発生した．
+そのバグの修正を行い，当たり判定をネットワーク通信下でもできるようにした．
+
+\subsection{監視カメラの角度の設定，量産化}
+監視カメラの角度の設定と，量産が可能になった．
+これにより，ゲーム画面上に監視カメラを複数台配置することができるようになった．
+
+\subsection{3人でのネットワーク通信を実現}
+これまで2人のネットワーク通信を試験的に実装していたが，3人でのネットワーク通信が実装された．
+各プレイヤーに割り当てられた自機をゲームパッドによって動かすことが可能である．
+
+\subsection{監視カメラの視野に入ったプレイヤーを消えるように実装}
+監視カメラの視野にプレイヤーが入ったときに，プレイヤーが消えるようになった．
+1人のプレイヤーが消えると，ネットワーク通信により他の画面からもその消えたプレイヤーを確認することができる．
+
+\subsection{ネットワークのラグを解消}
+ネットワーク通信方式を座標をサーバーに送信する方法から，キー入力状態が変更されたときにその情報をサーバーに送信する方法に変更した．
+これによってクライアントからサーバーへの通信の回数が減り，ラグが解消された．
+
+\subsection{プログラムが終了すると，サーバーも終了するように改良}
+プログラム終了時にサーバーも同時に終了するように改良された．
+
+\subsection{それぞれの班員で作ったプログラムを統合して不具合を解消}
+それぞれの班員で分担して作成していたプログラムを統合した．
+
+\end{document}
