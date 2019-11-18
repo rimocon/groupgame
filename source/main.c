@@ -1,11 +1,5 @@
 #include "../common.h"
 #include "../constants.h"
-#include "func.h"
-
-extern void setup_client(char *, u_short);
-extern int control_requests();
-extern void terminate_client();
-extern void joystick_send(int);
 
 int main (int argc, char *argv[]) {
 
@@ -33,17 +27,28 @@ int main (int argc, char *argv[]) {
 
   Startup(); //$B:G=i$NFI$_9~$_4XO"(B
   while (run) {
-    if((SDL_PollEvent(&inputevent))){
-      Input(); //$BF~NO(B
+    if((SDL_PollEvent(&inputevent)))
+    {
+      Input(); 
     }
-    MoveTriangle(); //$B;03Q7A0\F0(B
-    Collision(); //$BEv$?$jH=Dj(B
-    MoveChara(); //$B%-%c%i0\F0(B
     control_requests();
-    SDL_Delay(3);
-    RenderWindow();
-    printf("%d\n",camera[0].tri[0][0]);
-    //SDL_RenderPresent(mainrenderer);
+    switch(status){
+      case MENUMODE:
+        DrawMenu();
+        break;
+      case GAMEMODE:
+        MoveChara(); //$B%-%c%i0\F0(B
+        MoveTriangle(); //$B;03Q7A0\F0(B
+        RenderWindow(); //$BIA2h(B
+        Collision(); //$BEv$?$jH=Dj(B
+        MoveChara();
+        //Destroy(); //$BGK4~4XO"(B
+        SDL_Delay(3);
+        break;
+      case RESULTMODE:
+        //DrawResult();
+        break;
+    }
   }
   terminate_client(); //ソケットの切断
   return 0;
