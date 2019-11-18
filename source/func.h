@@ -12,17 +12,11 @@
 // 金塊、カメラ、棚、出入り口の数
 // #define KINKAI_NUM 2
 #define CAMERA_NUM 1
-// #define SHELF_NUM 18 // 棚の数、マップデータ(map0)の棚の数と合わせる
-// #define ENTRANCE_NUM 3
-// #define MOVING_FLOOR_NUM 9
-//#define  KOTEI_OBJECT_NUM 33 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
 
 #define ENEMY_NUM 2
 #define ENEMY_SPEED 1
 
-// 各オブジェクトの最大数、実装予定
-// #define SHELF_NUM_MAX 100 //
-#define  KOTEI_OBJECT_NUM_MAX 300 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
+#define  KOTEI_OBJECT_NUM_MAX 300 // オブジェクト
 
 //敵の最大数と敵のスピード、実装予定
 // #define ENEMY_NUM_MAX 2

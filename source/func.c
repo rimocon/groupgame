@@ -344,7 +344,7 @@ void MoveChara()
     {
       for (int j = 0; j < PLAYER_NUM; j++)
       {
-        if (SDL_HasIntersection(&(kotei_objects[i].dst_rect), &(player[j].dst_rect))) // プレイヤーと固定オブジェクトが重なった時
+        if (SDL_HasIntersection(&kotei_objects[i].dst_rect, &player[j].dst_rect)) // プレイヤーと固定オブジェクトが重なった時
         {
           if (kotei_objects[i].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
             break;
@@ -374,8 +374,15 @@ void MoveChara()
   for (int i = 0; i < ENEMY_NUM; i++)
   {
     for(int j=0; j < kotei_object_num; j++){
+      // 敵が壁に当たった時、反転する
+      if(SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+        enemy[i].move_angle += 180;
+        if(enemy[i].move_angle >= 360) enemy[i].move_angle -= 360;
+      }
+
+      // 敵が移動床に乗った時の処理
       SDL_Rect overrap_rect;
-      if(SDL_IntersectRect(&(kotei_objects[j].dst_rect), &(enemy[i].dst_rect), &overrap_rect) &&
+      if(SDL_IntersectRect(&kotei_objects[j].dst_rect, &enemy[i].dst_rect, &overrap_rect) &&
                         kotei_objects[j].type >= TYPE_ENEMY_MOVING_FLOOR_UL && // 敵が移動床に乗って、かつ
                         overrap_rect.w >= enemy[i].dst_rect.w  &&  overrap_rect.h >= enemy[i].dst_rect.h && // 敵と、移動床が完全に重なって、かつ
                         abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w/2) - (kotei_objects[j].dst_rect.x + kotei_objects[j].dst_rect.w/2)) <= 2 && // 敵のx座標が移動床の真ん中に近くなって、かつ
@@ -395,11 +402,12 @@ void MoveChara()
     }
 
     // 敵が画面外に行こうとしたときに向きを反転する
-    if(enemy[i].dst_rect.x + enemy[i].dst_rect.w >= WINDOWWIDTH || enemy[i].dst_rect.x <= 0 || enemy[i].dst_rect.y + enemy[i].dst_rect.h >= WINDOWHEIGHT || enemy[i].dst_rect.y <= 0 ){
+    if(enemy[i].dst_rect.x + enemy[i].dst_rect.w >= WINDOWWIDTH || enemy[i].dst_rect.x <= 0 || enemy[i].dst_rect.y + enemy[i].dst_rect.h >= WINDOWHEIGHT || enemy[i].dst_rect.y <= 0){
       enemy[i].move_angle += 180;
       if(enemy[i].move_angle >= 360) enemy[i].move_angle -= 360;
     }
-    //動く方向を格納してる変数（move_angle）に進んでいく
+
+    //動く方向を格納してる変数（move_angle）にしたがって進んでいく
     switch (enemy[i].move_angle)
     {
       case 0:
