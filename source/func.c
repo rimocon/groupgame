@@ -152,18 +152,22 @@ void Input()
     //金塊を取る
     if (inputevent.jbutton.button == 3)
     {
-      //if (player[0].dst_rect.x >= 1000 && player[0].dst_rect.x <= 1100)
-      if (player[myid].dst_rect.x >= 300 && player[myid].dst_rect.x <= 400)
+      for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
       {
-        if (player[myid].dst_rect.y >= 100 && player[myid].dst_rect.y <= 200)
+        if (kotei_objects[i].type == TYPE_KINKAI)
         {
-          //kinkai_flag = false;
-          //スティック操作がされた時、金塊情報などのデータ送信される
-          joystick_send(1);
+          if (player[myid].dst_rect.x >= kotei_objects[i].dst_rect.x && player[myid].dst_rect.x <= kotei_objects[i].dst_rect.x + 100)
+          {
+            if (player[myid].dst_rect.y >= kotei_objects[i].dst_rect.y && player[myid].dst_rect.y <= kotei_objects[i].dst_rect.y + 100)
+            {
+              //kinkai_flag = false;
+              //スティック操作がされた時、金塊情報などのデータ送信される
+              joystick_send(1);
+            }
+          }
         }
       }
     }
-
     //終了ボタンが押された
     if (inputevent.jbutton.button == 13)
     {
@@ -694,7 +698,7 @@ static int execute_command()
     break;
   case KINKAI_COMMAND: //'K'のとき
     fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
-    //kinkai_flag = false;
+    kinkai_flag = false;
     result = 1;
     break;
   case PLAYER_COMMAND: //'P'のとき
