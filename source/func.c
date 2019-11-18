@@ -26,37 +26,20 @@ void Startup() {
     printf("ウィンドウを生成できませんでした\n");
     SDL_Quit(); //終了
   }
-  run = true; //動かす
-  camera[0].angle = 30.0;
-  camera[1].angle = 70.0;
-  camera[2].angle = 180.0;
-  camera[3].angle = 280.0;
-  camera[3].angle = 80.0;
-  for(int i = 0;i<CAMERA_NUM; i++) {
-    /*
-       camera[i].dst_rects.x = 1200;
-       camera[i].dst_rects.y = 900;
-       camera[i].dst_rects.w = 80;
-       camera[i].dst_rects.h = 60;
-     */
-    camera[i].clockwise = true;
-    // camera[i].tri[0][0] = camera_dst_rects[i].x + camera_dst_rects[i].w;
-    // camera[i].tri[1][0] = camera_dst_rects[i].y + camera_dst_rects[i].h /2;
-    Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w, //回転後の座標を計算して検知の一点に格納
-        camera_dst_rects[i].y + camera_dst_rects[i].h /2,
-        camera_dst_rects[i].x + camera_dst_rects[i].w /2,
-        camera_dst_rects[i].y + camera_dst_rects[i].h /2,
-        camera[i].angle,
-        &camera[i].tri[0][0],
-        &camera[i].tri[1][0]);
-    printf("x2 %d\n",camera[i].tri[0][0]);
-    printf("y2 %d\n",camera[i].tri[1][0]);
-    camera[i].theta[0] = 90.0 - camera[i].angle;
-    camera[i].theta[1] = 120.0 - camera[i].angle;
-  }
   mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0); //メインウィンドウに対するレンダラー生成
-  Imageload();
+
+  TTF_Init(); //ttfを初期化
+  japanesefont = TTF_OpenFont("fonts-japanese-gothic.ttf",80);  //フォント読み込み
+
+  Imageload(); //画像読み込み
+  Fontload(); //フォント読み込み
+  SetCamera(); //カメラの値設定
   MakeMap();
+  run = true; //動かす
+  status = MENUMODE; //メニューモードに状態を設定
+  position = 0; //メニュー画面用
+  up = false;
+  down = false;
 }
 
 void Input()
@@ -115,6 +98,10 @@ void Input()
       if(inputevent.jbutton.button==0){
         //		printf("--- You pressed a button on the joystick.\n");
       }
+      if(inputevent.jbutton.button==3){
+        key.a = 1;
+      }
+
       if(inputevent.jbutton.button== 11){ //終了ボタンが押された
         run = false;
       }
@@ -125,6 +112,9 @@ void Input()
       // ボタンIDに応じた処理
       if(inputevent.jbutton.button==0){
         //		printf("--- You released a button on the joystick.\n");
+      }
+      if(inputevent.jbutton.button==3){
+        key.a = 0;
       }
       break;
   }
@@ -157,7 +147,7 @@ void Imageload()
     kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
     kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
     kotei_objects[i].dst_rect =kinkai_dst_rects[j];
-    SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    //SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     i++; // 金塊、カメラ、棚、出入り口のデータをkotei_objectsに保存するためにiをインクリメント
   }
   for(int j = 0; j<SHELF_NUM; j++){
@@ -170,7 +160,7 @@ void Imageload()
     kotei_objects[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
     kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
     kotei_objects[i].dst_rect = shelf_dst_rects[j];
-    SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    //SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     i++;
   }
 
@@ -185,7 +175,7 @@ void Imageload()
     kotei_objects[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
     printf("j = %d\n",j);
     kotei_objects[i].dst_rect = entrance_dst_rects[j];
-    SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    //SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     i++;
   }
   for(int i = 0; i<CAMERA_NUM; i++){ //カメラ表示
@@ -208,7 +198,7 @@ void Imageload()
     player[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
     player[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
     player[i].dst_rect = player_dst_rects[i];
-    SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    //SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     player[i].speed = PLAYER_SPEED;
   }
   //構造体enemyに、敵の情報を格納
@@ -221,7 +211,7 @@ void Imageload()
     enemy[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
     enemy[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
     enemy[i].dst_rect = enemy_dst_rects[i];
-    SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    //SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     enemy[i].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
     enemy[i].isgodest = false;
     enemy[i].look_angle = enemy_lookangles[i];
@@ -229,6 +219,19 @@ void Imageload()
     // else if(enemy_dst_rects[i].x > enemy_destination[i][0] && enemy_dst_rects[i].y < enemy_destination[i][1]) enemy[i].movemode = 1;
     // else if(enemy_dst_rects[i].x < enemy_destination[i][0] && enemy_dst_rects[i].y > enemy_destination[i][1]) enemy[i].movemode = 2;
     // else if(enemy_dst_rects[i].x < enemy_destination[i][0] && enemy_dst_rects[i].y < enemy_destination[i][1]) enemy[i].movemode = 3;
+  }
+  for(int i = 0; i<BACKGROUND_NUM; i++){ //背景画像読み込み
+    printf("backgroundlord \n");
+    s = IMG_Load(imgfiles[TYPE_BACKGROUND]);
+    background[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+    background[i].src_rect.x = 0;
+    background[i].src_rect.y = 0;
+    background[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+    background[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+    background[i].dst_rect.x = 0;
+    background[i].dst_rect.y = 0;
+    background[i].dst_rect.w = WINDOWWIDTH;
+    background[i].dst_rect.h = WINDOWHEIGHT;
   }
 }
 
@@ -295,11 +298,11 @@ void Collision() {
             &camera[i].tri[0][k],
             &camera[i].tri[1][k]);
         if(judge) {
-        printf("tri 0 %d = %d\n",j,camera[i].tri[0][j]);
-        printf("tri 1 %d = %d\n",j,camera[i].tri[1][j]);
-        printf("tri 0 %d = %d\n",k,camera[i].tri[0][k]);
-        printf("tri 1 %d = %d\n",k,camera[i].tri[1][k]);
-        run = false;
+          printf("tri 0 %d = %d\n",j,camera[i].tri[0][j]);
+          printf("tri 1 %d = %d\n",j,camera[i].tri[1][j]);
+          printf("tri 0 %d = %d\n",k,camera[i].tri[0][k]);
+          printf("tri 1 %d = %d\n",k,camera[i].tri[1][k]);
+          run = false;
           break;
         }
       }
@@ -405,7 +408,7 @@ void MakeMap()
         kotei_objects[k].dst_rect.y = dst.y;
         kotei_objects[k].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
         kotei_objects[k].dst_rect.h = MAP_CHIPSIZE;
-        SDL_RenderCopy(mainrenderer, kotei_objects[k].image_texture, &kotei_objects[k].src_rect, &kotei_objects[k].dst_rect); // テクスチャからレンダラーに出力
+        //SDL_RenderCopy(mainrenderer, kotei_objects[k].image_texture, &kotei_objects[k].src_rect, &kotei_objects[k].dst_rect); // テクスチャからレンダラーに出力
         k++;
       }
       // else if (mt == MT_ENEMY)
@@ -440,3 +443,72 @@ float Rotation(int x1,int y1,int a,int b,double theta,int *x2,int *y2){
   *x2 = (x1-a)*cos(theta*M_PI/180.0) - (y1-b)*sin(theta*M_PI/180.0) + a;
   *y2 = (x1-a)*sin(theta*M_PI/180.0) + (y1-b)*cos(theta*M_PI/180.0) + b;
 }
+
+void SetCamera() { //カメラの初期値セット
+  camera[0].angle = 30.0;
+  camera[1].angle = 70.0;
+  camera[2].angle = 180.0;
+  camera[3].angle = 280.0;
+  camera[3].angle = 80.0;
+  for(int i = 0;i<CAMERA_NUM; i++) {
+    camera[i].clockwise = true;
+    Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w, //回転後の座標を計算して検知の一点に格納
+        camera_dst_rects[i].y + camera_dst_rects[i].h /2,
+        camera_dst_rects[i].x + camera_dst_rects[i].w /2,
+        camera_dst_rects[i].y + camera_dst_rects[i].h /2,
+        camera[i].angle,
+        &camera[i].tri[0][0],
+        &camera[i].tri[1][0]);
+    printf("x2 %d\n",camera[i].tri[0][0]);
+    printf("y2 %d\n",camera[i].tri[1][0]);
+    camera[i].theta[0] = 90.0 - camera[i].angle;
+    camera[i].theta[1] = 120.0 - camera[i].angle;
+  }
+}
+
+void DrawMenu() {
+  SDL_RenderCopy(mainrenderer, background[0].image_texture, &background[0].src_rect, &background[0].dst_rect); //背景をレンダーに出力
+  for(int i=0;i<FONT_NUM;i++){
+    boxColor(mainrenderer,font[i].dst_rect.x,font[i].dst_rect.y,font[i].dst_rect.x+font[i].dst_rect.w,font[i].dst_rect.y+font[i].dst_rect.h,0xff000000);
+    SDL_RenderCopy(mainrenderer, font[i].image_texture, &font[i].src_rect, &font[i].dst_rect); //フォントをレンダーに出力
+  }
+  if(key.up == 1) {
+    up = true;
+    down = false;
+  }
+  else if(key.down == 1) {
+    up = false;
+    down = true;
+  }
+  if(up){
+    rectangleColor(mainrenderer,font[0].dst_rect.x,font[0].dst_rect.y,font[0].dst_rect.x+font[0].dst_rect.w,font[0].dst_rect.y+font[0].dst_rect.h,0xff00ff00);
+    if(key.a == 1) status = GAMEMODE;
+  }
+  else if(down){
+    rectangleColor(mainrenderer,font[1].dst_rect.x,font[1].dst_rect.y,font[1].dst_rect.x+font[1].dst_rect.w,font[1].dst_rect.y+font[1].dst_rect.h,0xff00ff00);
+    if(key.a == 1) run = false;
+  }
+  SDL_RenderPresent(mainrenderer); // 描画データを表示
+}
+void Fontload() {
+  SDL_Surface *s; // サーフェイスを一時的に保存する変数
+  SDL_Color black = {0,0,0,255};
+  SDL_Color white = {255,255,255,255};
+  SDL_Color red = {255,0,0,255};
+  //int iw,ih;
+  for(int i = 0; i<FONT_NUM; i++){ //フォントロード 
+    s = TTF_RenderUTF8_Blended(japanesefont,fonts[i],white);
+    font[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
+    //SDL_QueryTexture(font[i].image_texture,NULL,NULL,&iw,&ih); //文字描写したテクスチャのサイズを取得
+
+    font[i].src_rect.x = 0;
+    font[i].src_rect.y = 0;
+    font[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定
+    font[i].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
+    font[i].dst_rect =font_dst_rects[i];
+    font[i].dst_rect.w = s->w;
+    font[i].dst_rect.h = s->h;
+  }
+  printf("フォントロード2終了\n");
+}
+

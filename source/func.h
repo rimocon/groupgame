@@ -2,6 +2,10 @@
 #ifndef _FUNC_H_
 #define _FUNC_H_
 
+/*  変数  */
+TTF_Font *japanesefont; //フォント用
+int position;
+bool up,down;
 /*  define関連  */
 #define WINDOWWIDTH 1280 //ウィンドウの幅
 #define WINDOWHEIGHT 960 //ウィンドウの高さ
@@ -12,10 +16,12 @@
 #define KINKAI_NUM 1
 #define SHELF_NUM 10
 #define ENTRANCE_NUM 1
-#define  KOTEI_OBJECT_NUM 12 // KINKAI_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
+#define KOTEI_OBJECT_NUM 12 // KINKAI_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
 
 #define CAMERA_NUM 5
 
+#define BACKGROUND_NUM 1
+#define FONT_NUM 2
 #define ENEMY_NUM 2
 #define ENEMY_SPEED 1
 
@@ -24,7 +30,10 @@
 #define MAP_HEIGHT 16
 
 /*  関数のプロトタイプ宣言 */
+extern void SetCamera(void); //カメラの値など初期化
+extern void Imageload(void); //画像読み込み関数
 extern float Rotation(int x1, int y1,int a,int b, double theta,int *x2,int *y2); //回転計算
+extern void Fontload(void); //フォント読み込み
 /*  mapデータ */
 static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -53,7 +62,8 @@ typedef enum{
 	TYPE_ENTRANCE = 3,
 	TYPE_ENEMY = 4,
 	TYPE_PLAYER = 5,
-	TYPE_NUM = 6
+  TYPE_BACKGROUND = 6,
+	TYPE_NUM = 7
 }objecttype;
 
 typedef struct {
@@ -112,11 +122,24 @@ typedef struct {
 }enemyinfo; // 敵の構造体
 
 
+typedef struct {
+	objecttype type;
+	SDL_Texture *image_texture;
+	SDL_Rect src_rect;
+	SDL_Rect dst_rect;
+} backgroundinfo;
+
+typedef struct {
+	SDL_Texture *image_texture;
+	SDL_Rect src_rect;
+	SDL_Rect dst_rect;
+} fontinfo;
 /*  構造体の実体化  */
 
 //画像ファイルパス
-static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png"}; // 読み込む画像ファイルを指定
-
+static char *imgfiles[TYPE_NUM] = {"./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png","./images/menu.png"}; // 読み込む画像ファイルを指定
+//フォント
+static char *fonts[FONT_NUM] = {"開始","終了"};
 // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 // 金塊、カメラ、棚、出入り口の数を設定する(あとからテキストファイルにしたりしてステージごとに作ったりできる？)
 // 固定オブジェクト、プレイヤーの初期位置を設定する
@@ -131,7 +154,6 @@ static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
   {100,800,120,100},
   {200,300,120,100}
 };
-
 
 static SDL_Rect shelf_dst_rects[SHELF_NUM] = {
   {400, 100, 46, 108}
@@ -150,6 +172,11 @@ static SDL_Rect enemy_dst_rects[ENEMY_NUM] = {
 static int enemy_lookangles[ENEMY_NUM] = {
   90,270
 };
+static SDL_Rect font_dst_rects[FONT_NUM] = {
+  {540,380,0,0},
+  {540,530,0,0}
+};
+
 
 inputkeys key; //inputkeys構造体をinputという名前で実体化
 playerinfo player[PLAYER_NUM];  // プレイヤーの情報を格納したplayer構造体を実体化
@@ -157,6 +184,6 @@ camerainfo camera[CAMERA_NUM];
 enemyinfo enemy[ENEMY_NUM];
 //const int KOTEI_OBJECT_NUM =  KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUM;
 objectinfo kotei_objects[KOTEI_OBJECT_NUM];
-
-
+backgroundinfo background[BACKGROUND_NUM]; //背景の情報を実体化
+fontinfo font[FONT_NUM]; //フォントの情報を実体化
 #endif
