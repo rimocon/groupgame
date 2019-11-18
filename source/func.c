@@ -411,13 +411,13 @@ int ChangeEnemyMoveAngle(enemyinfo *e,SDL_Rect movefloor, objecttype type){
   adjusted_rect.y = movefloor.y + movefloor.h / 2 - e->dst_rect.h/2;
   e->dst_rect = adjusted_rect;
   switch(type){
-    case TYPE_ENEMY_MOVING_FLOOR_UR:
-      if(e->move_angle == 270) e->move_angle = 0;
-      if(e->move_angle == 180) e->move_angle = 90;
-      break;
     case TYPE_ENEMY_MOVING_FLOOR_UL:
       if(e->move_angle == 90) e->move_angle = 0;
       if(e->move_angle == 180) e->move_angle = 270;
+      break;
+    case TYPE_ENEMY_MOVING_FLOOR_UR:
+      if(e->move_angle == 270) e->move_angle = 0;
+      if(e->move_angle == 180) e->move_angle = 90;
       break;
     case TYPE_ENEMY_MOVING_FLOOR_DL:
       if(e->move_angle == 90) e->move_angle = 180;
@@ -455,7 +455,7 @@ void MakeMap()
         //構造体playerに、プレイヤーの情報を格納
         player_index = InitObjectFromMap(player_index,loadmap_objecttype,dst);
       }
-      else if(loadmap_objecttype == TYPE_KINKAI || loadmap_objecttype == TYPE_SHELF)
+      else if((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_SHELF) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV))
       {
         // 棚、出入り口、金塊の情報をkotei_objectに格納
         index = InitObjectFromMap(index, loadmap_objecttype,dst);
@@ -786,7 +786,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 {
   SDL_Surface *s;
 
-  if(loadmap_objecttype == TYPE_ENEMY){
+  if(loadmap_objecttype == TYPE_ENEMY){ // マップから読み込んだのが敵(NPC)だったとき
     //構造体enemyに、敵の情報を格納
     enemy[index].type = TYPE_ENEMY;
     s = IMG_Load(imgfiles[TYPE_ENEMY]);
@@ -811,7 +811,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].prev_overlap_rect.h = 0;
     index++;
   }
-  else if(loadmap_objecttype == TYPE_PLAYER1 || loadmap_objecttype == TYPE_PLAYER2 || loadmap_objecttype == TYPE_PLAYER3){
+  else if(loadmap_objecttype == TYPE_PLAYER1 || loadmap_objecttype == TYPE_PLAYER2 || loadmap_objecttype == TYPE_PLAYER3){ // マップから読み込んだのがプレイヤーだったとき
     //構造体playerに、敵の情報を格納
     player[index].type = loadmap_objecttype;
     s = IMG_Load(imgfiles[loadmap_objecttype]);
@@ -830,7 +830,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 
     index++;
   }
-  else{
+   else if((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_SHELF) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV)){ // マップから読み込んだのが金塊、棚、出入り口、敵の移動床のとき
     kotei_objects[index].type = loadmap_objecttype;
     s = IMG_Load(imgfiles[loadmap_objecttype]);
     if (s == NULL)

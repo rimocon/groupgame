@@ -14,7 +14,8 @@
 #define CAMERA_NUM 1
 #define SHELF_NUM 10 // 棚の数、マップデータ(map0)の棚の数と合わせる
 #define ENTRANCE_NUM 3
-#define  KOTEI_OBJECT_NUM 16 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
+#define MOVING_FLOOR_NUM 4
+#define  KOTEI_OBJECT_NUM 20 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
 
 #define ENEMY_NUM 2
 #define ENEMY_SPEED 1
@@ -42,7 +43,7 @@ static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 9, 10, 11, 12, 13, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 7, 0, 0, 0, 0, 1, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -74,8 +75,8 @@ typedef enum{
 	TYPE_PLAYER1 = 6, // TYPEを追加する場合はPLAYERとMOVING_FLOORの間にする
 	TYPE_PLAYER2 = 7,
 	TYPE_PLAYER3 = 8,
-	TYPE_ENEMY_MOVING_FLOOR_UR = 9, // TYPE_ENEMY_MOVING_FLOOR_UR >= iって条件にしてるため、これ以降は移動床の宣言
-	TYPE_ENEMY_MOVING_FLOOR_UL = 10,
+	TYPE_ENEMY_MOVING_FLOOR_UL = 9, // TYPE_ENEMY_MOVING_FLOOR_UR >= iって条件にしてるため、これ以降は移動床の宣言
+	TYPE_ENEMY_MOVING_FLOOR_UR = 10,
 	TYPE_ENEMY_MOVING_FLOOR_DL = 11,
 	TYPE_ENEMY_MOVING_FLOOR_DR = 12,
 	TYPE_ENEMY_MOVING_FLOOR_REV = 13,
@@ -139,7 +140,7 @@ typedef struct {
 
 /* グローバル変数 */
 //画像ファイルパス
-static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png", "./images/player2.png", "./images/player3.png" }; // 読み込む画像ファイルを指定
+static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png", "./images/player2.png", "./images/player3.png","./images/floor_ul.png","./images/floor_ur.png","./images/floor_dl.png","./images/floor_dr.png","./images/floor_rev.png"}; // 読み込む画像ファイルを指定
 
 // カメラの初期位置を設定する
 // static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
