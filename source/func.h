@@ -10,23 +10,22 @@
 #define PLAYER_SPEED 1
 
 // 金塊、カメラ、棚、出入り口の数
-#define KINKAI_NUM 2
+// #define KINKAI_NUM 2
 #define CAMERA_NUM 1
-#define SHELF_NUM 18 // 棚の数、マップデータ(map0)の棚の数と合わせる
-#define ENTRANCE_NUM 3
-#define MOVING_FLOOR_NUM 9
-#define  KOTEI_OBJECT_NUM 33 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
+// #define SHELF_NUM 18 // 棚の数、マップデータ(map0)の棚の数と合わせる
+// #define ENTRANCE_NUM 3
+// #define MOVING_FLOOR_NUM 9
+//#define  KOTEI_OBJECT_NUM 33 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
 
 #define ENEMY_NUM 2
 #define ENEMY_SPEED 1
 
 // 各オブジェクトの最大数、実装予定
 // #define SHELF_NUM_MAX 100 //
-// #define  KOTEI_OBJECT_NUM_MAX 125 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
+#define  KOTEI_OBJECT_NUM_MAX 300 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
 
 //敵の最大数と敵のスピード、実装予定
 // #define ENEMY_NUM_MAX 2
-// #define ENEMY_SPEED 1
 
 #define MAP_CHIPSIZE 64 //変数map0の、1マス分のピクセルの大きさ（仮置き）
 #define MAP_WIDTH 20 // 変数map0の横の数、ゲーム画面を横に20等分してる
@@ -47,12 +46,12 @@ static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0},
 	{0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0},
+	{6, 7, 8, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0},
+	{4, 4, 4, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0},
 };
 
 typedef enum{
@@ -148,7 +147,8 @@ camerainfo camera[CAMERA_NUM];
   カメラの張り付く前の座標を保持しておき、張り付いた後に、カメラの座標に代入することにより、カメラを固定する。*/
 camerainfo camera_before[CAMERA_NUM];
 enemyinfo enemy[ENEMY_NUM];
-static objectinfo kotei_objects[KOTEI_OBJECT_NUM]; // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
+static objectinfo kotei_objects[KOTEI_OBJECT_NUM_MAX]; // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
+int kotei_object_num;
 
 /* 関数プロトタイプ宣言 */
 extern int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst); // マップデータを読み込んでその位置にオブジェクトを初期化する関数

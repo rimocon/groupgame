@@ -152,7 +152,7 @@ void Input()
     //金塊を取る
     if (inputevent.jbutton.button == 3)
     {
-      for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
+      for (int i = 0; i < kotei_object_num; i++)
       {
         if (kotei_objects[i].type == TYPE_KINKAI)
         {
@@ -230,7 +230,7 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
 {
   SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
   SDL_RenderClear(mainrenderer);                            // 設定した描画色(白)でレンダラーをクリア
-  for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
+  for (int i = 0; i < kotei_object_num; i++)
   {
     //描画対象が金塊で、金塊が地面に設置されていなければ、描画しない
     if (!(kotei_objects[i].type == TYPE_KINKAI && kinkai_flag == false))
@@ -340,7 +340,7 @@ void MoveChara()
     }
 
     //棚との衝突判定
-    for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
+    for (int i = 0; i < kotei_object_num; i++)
     {
       for (int j = 0; j < PLAYER_NUM; j++)
       {
@@ -373,7 +373,7 @@ void MoveChara()
   //敵キャラの移動
   for (int i = 0; i < ENEMY_NUM; i++)
   {
-    for(int j=0; j < KOTEI_OBJECT_NUM; j++){
+    for(int j=0; j < kotei_object_num; j++){
       SDL_Rect overrap_rect;
       if(SDL_IntersectRect(&(kotei_objects[j].dst_rect), &(enemy[i].dst_rect), &overrap_rect) &&
                         kotei_objects[j].type >= TYPE_ENEMY_MOVING_FLOOR_UL && // 敵が移動床に乗って、かつ
@@ -478,6 +478,7 @@ void MakeMap()
         index = InitObjectFromMap(index, loadmap_objecttype,dst);
       }
     }
+    kotei_object_num = index;
   }
 }
 
@@ -799,6 +800,7 @@ void terminate_client()
   close(sock); ////ソケットを切断
   exit(0);     //正常終了
 }
+
 int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 {
   SDL_Surface *s;
@@ -844,7 +846,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
     player[index].dst_rect.h = s->h;
     player[index].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
-
+    printf("%d\n",index);
     index++;
   }
    else if((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_ENTRANCE) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV)){ // マップから読み込んだのが金塊、棚、出入り口、敵の移動床のとき
