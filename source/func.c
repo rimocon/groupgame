@@ -78,10 +78,10 @@ void Input()
   {
   // ジョイスティックの方向キーまたはアナログキー（スティック)が押された時
   case SDL_JOYAXISMOTION:
-    printf("The axis ID of the operated key is %d.\n", inputevent.jaxis.axis); // 操作された方向キーの方向軸を表示（0：アナログキー，1：アナログキー，2：方向キー左右方向，3：方向キー上下方向）
+    //printf("The axis ID of the operated key is %d.\n", inputevent.jaxis.axis); // 操作された方向キーの方向軸を表示（0：アナログキー，1：アナログキー，2：方向キー左右方向，3：方向キー上下方向）
     if (inputevent.jaxis.axis == 0)
     {
-      printf("--- Analog-Direction Key: 0 Axis\n");
+      //printf("--- Analog-Direction Key: 0 Axis\n");
       if (inputevent.jaxis.value > 0)
       { //右キーが押されたら
         //key.right = 1;
@@ -106,7 +106,14 @@ void Input()
     }
     else if (inputevent.jaxis.axis == 1)
     {
-      printf("--- Analag-Direction Key: 1 Axis\n");
+      printf("P_x = %d, P_y = %d\n", player[myid].dst_rect.x, player[myid].dst_rect.y);
+      for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
+      {
+        if (kotei_objects[i].type == TYPE_KINKAI){
+          printf("Z_x = %d, Z_y = %d\n", kotei_objects[i].src_rect.x, kotei_objects[i].src_rect.y);
+        }
+      }
+      //printf("--- Analag-Direction Key: 1 Axis\n");
       if (inputevent.jaxis.value > 0)
       { //下キーが押されたら
         //key.up = 0;
@@ -152,16 +159,34 @@ void Input()
     //金塊を取る
     if (inputevent.jbutton.button == 3)
     {
-      //if (player[0].dst_rect.x >= 1000 && player[0].dst_rect.x <= 1100)
-      if (player[myid].dst_rect.x >= 300 && player[myid].dst_rect.x <= 400)
+      for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
       {
-        if (player[myid].dst_rect.y >= 100 && player[myid].dst_rect.y <= 200)
+        if (kotei_objects[i].type == TYPE_KINKAI)
         {
-          //kinkai_flag = false;
-          //スティック操作がされた時、金塊情報などのデータ送信される
-          joystick_send(1);
+          if (player[myid].dst_rect.x >= kotei_objects[i].dst_rect.x && player[myid].dst_rect.x <= kotei_objects[i].dst_rect.x + 100)
+          {
+            if (player[myid].dst_rect.y >= kotei_objects[i].dst_rect.y && player[myid].dst_rect.y <= kotei_objects[i].dst_rect.y + 100)
+            {
+              //kinkai_flag = false;
+              //スティック操作がされた時、金塊情報などのデータ送信される
+              joystick_send(1);
+            }
+          }
         }
       }
+
+      /*
+    //if (player[0].dst_rect.x >= 1000 && player[0].dst_rect.x <= 1100)
+    if (player[myid].dst_rect.x >= 300 && player[myid].dst_rect.x <= 400)
+    {
+      if (player[myid].dst_rect.y >= 100 && player[myid].dst_rect.y <= 200)
+      {
+        //kinkai_flag = false;
+        //スティック操作がされた時、金塊情報などのデータ送信される
+        joystick_send(1);
+      }
+    }
+    */
     }
 
     //終了ボタンが押された
@@ -182,13 +207,11 @@ void Input()
     break;
   }
 }
-
 void Destroy()
 {
   SDL_DestroyWindow(mainwindow);
   SDL_DestroyRenderer(mainrenderer);
 }
-
 
 void MoveTriangle()
 {
@@ -206,7 +229,8 @@ void MoveTriangle()
     {
       camera[i].clockwise = true; //時計回り
     }
-    if (camera[i].clockwise) {
+    if (camera[i].clockwise)
+    {
       camera[i].theta[0]--;
       camera[i].theta[1]--;
     }
@@ -369,19 +393,23 @@ void MoveChara()
   //敵キャラの移動
   for (int i = 0; i < ENEMY_NUM; i++)
   {
-    for(int j=0; j < KOTEI_OBJECT_NUM; j++){
-      if(!(kotei_objects[j].type >= TYPE_ENEMY_MOVING_FLOOR_DL)) break;
-      printf("aaa");
+    for (int j = 0; j < KOTEI_OBJECT_NUM; j++)
+    {
+      if (!(kotei_objects[j].type >= TYPE_ENEMY_MOVING_FLOOR_DL))
+        break;
+      //printf("aaa");
       SDL_Rect overrap_rect;
-      if(SDL_IntersectRect(&(kotei_objects[j].dst_rect), &(enemy[i].dst_rect), &overrap_rect)){
-      //&&
-   //                       overrap_rect.w >= enemy[i].dst_rect.w &&
-   //                       overrap_rect.h >= enemy[i].dst_rect.h){
-                            printf("overlap\n");
-                          //&&
-//                          abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w/2) - (kotei_objects[j].dst_rect.x + kotei_objects[j].dst_rect.w)) <= 4){ // 敵の移動床と、敵が完全に重なって、敵の座標が移動床の真ん中に近い（4px以内）のとき
-        if(enemy[i].prev_overlap_rect.w == 0 || (abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.x) > 5 && abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.y)) > 5){
-          ChangeEnemyMoveAngle(&enemy[i],kotei_objects[j].dst_rect,kotei_objects[j].type); // 敵の動く方向をかえる
+      if (SDL_IntersectRect(&(kotei_objects[j].dst_rect), &(enemy[i].dst_rect), &overrap_rect))
+      {
+        //&&
+        //                       overrap_rect.w >= enemy[i].dst_rect.w &&
+        //                       overrap_rect.h >= enemy[i].dst_rect.h){
+        //printf("overlap\n");
+        //&&
+        //                          abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w/2) - (kotei_objects[j].dst_rect.x + kotei_objects[j].dst_rect.w)) <= 4){ // 敵の移動床と、敵が完全に重なって、敵の座標が移動床の真ん中に近い（4px以内）のとき
+        if (enemy[i].prev_overlap_rect.w == 0 || (abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.x) > 5 && abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.y)) > 5)
+        {
+          ChangeEnemyMoveAngle(&enemy[i], kotei_objects[j].dst_rect, kotei_objects[j].type); // 敵の動く方向をかえる
           enemy[i].prev_overlap_rect = overrap_rect;
         }
       }
@@ -389,51 +417,61 @@ void MoveChara()
     //動く方向を格納してる変数（move_angle）に進んでいく
     switch (enemy[i].move_angle)
     {
-      case 0:
-        enemy[i].dst_rect.y -= ENEMY_SPEED;
-        break;
-      case 90:
-        enemy[i].dst_rect.x += ENEMY_SPEED;
-        break;
-      case 180:
-        enemy[i].dst_rect.y += ENEMY_SPEED;
-        break;
-      case 270:
-        enemy[i].dst_rect.x -= ENEMY_SPEED;
-        break;
+    case 0:
+      enemy[i].dst_rect.y -= ENEMY_SPEED;
+      break;
+    case 90:
+      enemy[i].dst_rect.x += ENEMY_SPEED;
+      break;
+    case 180:
+      enemy[i].dst_rect.y += ENEMY_SPEED;
+      break;
+    case 270:
+      enemy[i].dst_rect.x -= ENEMY_SPEED;
+      break;
     }
   }
 }
 
-int ChangeEnemyMoveAngle(enemyinfo *e,SDL_Rect movefloor, objecttype type){
+int ChangeEnemyMoveAngle(enemyinfo *e, SDL_Rect movefloor, objecttype type)
+{
   SDL_Rect adjusted_rect = e->dst_rect;
-  adjusted_rect.x = movefloor.x + movefloor.w / 2 - e->dst_rect.w/2;
-  adjusted_rect.y = movefloor.y + movefloor.h / 2 - e->dst_rect.h/2;
+  adjusted_rect.x = movefloor.x + movefloor.w / 2 - e->dst_rect.w / 2;
+  adjusted_rect.y = movefloor.y + movefloor.h / 2 - e->dst_rect.h / 2;
   e->dst_rect = adjusted_rect;
-  switch(type){
-    case TYPE_ENEMY_MOVING_FLOOR_UR:
-      if(e->move_angle == 270) e->move_angle = 0;
-      if(e->move_angle == 180) e->move_angle = 90;
-      break;
-    case TYPE_ENEMY_MOVING_FLOOR_UL:
-      if(e->move_angle == 90) e->move_angle = 0;
-      if(e->move_angle == 180) e->move_angle = 270;
-      break;
-    case TYPE_ENEMY_MOVING_FLOOR_DL:
-      if(e->move_angle == 90) e->move_angle = 180;
-      if(e->move_angle == 0) e->move_angle = 270;
-      break;
-    case TYPE_ENEMY_MOVING_FLOOR_DR:
-      if(e->move_angle == 270) e->move_angle = 180;
-      if(e->move_angle == 0) e->move_angle = 90;
-      break;
+  switch (type)
+  {
+  case TYPE_ENEMY_MOVING_FLOOR_UR:
+    if (e->move_angle == 270)
+      e->move_angle = 0;
+    if (e->move_angle == 180)
+      e->move_angle = 90;
+    break;
+  case TYPE_ENEMY_MOVING_FLOOR_UL:
+    if (e->move_angle == 90)
+      e->move_angle = 0;
+    if (e->move_angle == 180)
+      e->move_angle = 270;
+    break;
+  case TYPE_ENEMY_MOVING_FLOOR_DL:
+    if (e->move_angle == 90)
+      e->move_angle = 180;
+    if (e->move_angle == 0)
+      e->move_angle = 270;
+    break;
+  case TYPE_ENEMY_MOVING_FLOOR_DR:
+    if (e->move_angle == 270)
+      e->move_angle = 180;
+    if (e->move_angle == 0)
+      e->move_angle = 90;
+    break;
   }
 }
 
 void MakeMap()
 {
   /* マップの読み込みと配置 */
-  int i, j, index=0,enemy_index=0,player_index=0,loadmap_objecttype;
+  int i, j, index = 0, enemy_index = 0, player_index = 0, loadmap_objecttype;
   SDL_Surface *s;
   SDL_Rect src = {0, 0, MAP_CHIPSIZE, MAP_CHIPSIZE};
   SDL_Rect dst = {0};
@@ -445,20 +483,21 @@ void MakeMap()
     for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
     {
       loadmap_objecttype = map0[j][i]; // マップデータを格納する
-      fprintf(stderr,"map0[%d][%d]  = %d\n",j,i,loadmap_objecttype);
+      //fprintf(stderr, "map0[%d][%d]  = %d\n", j, i, loadmap_objecttype);
       if (loadmap_objecttype == TYPE_ENEMY) // 読み込んだマップデータが敵のとき
       {
         //構造体enemyに、敵の情報を格納
-        enemy_index = InitObjectFromMap(enemy_index, loadmap_objecttype,dst);
+        enemy_index = InitObjectFromMap(enemy_index, loadmap_objecttype, dst);
       }
-      else if(loadmap_objecttype == TYPE_PLAYER1 || loadmap_objecttype == TYPE_PLAYER2 || loadmap_objecttype == TYPE_PLAYER3){ // 読み込んだマップデータがプレイヤーのとき
+      else if (loadmap_objecttype == TYPE_PLAYER1 || loadmap_objecttype == TYPE_PLAYER2 || loadmap_objecttype == TYPE_PLAYER3)
+      { // 読み込んだマップデータがプレイヤーのとき
         //構造体playerに、プレイヤーの情報を格納
-        player_index = InitObjectFromMap(player_index,loadmap_objecttype,dst);
+        player_index = InitObjectFromMap(player_index, loadmap_objecttype, dst);
       }
-      else if(loadmap_objecttype == TYPE_KINKAI || loadmap_objecttype == TYPE_SHELF)
+      else if (loadmap_objecttype == TYPE_KINKAI || loadmap_objecttype == TYPE_SHELF)
       {
         // 棚、出入り口、金塊の情報をkotei_objectに格納
-        index = InitObjectFromMap(index, loadmap_objecttype,dst);
+        index = InitObjectFromMap(index, loadmap_objecttype, dst);
       }
     }
   }
@@ -572,8 +611,8 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
     data.zahyo_x = player[myid].dst_rect.x; //プレイヤーのx座標を格納
     data.zahyo_y = player[myid].dst_rect.y; //プレイヤーのy座標を格納
     printf("myid = %d\n", myid);
-    printf("Player 0 : axis x = %d, axis y = %d\n", player[0].dst_rect.x, player[0].dst_rect.y);
-    printf("Player 1 : axis x = %d, axis y = %d\n", player[1].dst_rect.x, player[1].dst_rect.y);
+    printf("Player 0 : axis x = %d, axis y = %d\n", player[myid].dst_rect.x, player[0].dst_rect.y);
+    //printf("Player 1 : axis x = %d, axis y = %d\n", player[1].dst_rect.x, player[1].dst_rect.y);
   }
   else if (num == 1) //金塊の設置の可否を送信
   {
@@ -681,7 +720,7 @@ static int execute_command()
     break;
   case KINKAI_COMMAND: //'K'のとき
     fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
-    //kinkai_flag = false;
+    kinkai_flag = false;
     result = 1;
     break;
   case PLAYER_COMMAND: //'P'のとき
@@ -786,11 +825,13 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 {
   SDL_Surface *s;
 
-  if(loadmap_objecttype == TYPE_ENEMY){
+  if (loadmap_objecttype == TYPE_ENEMY)
+  {
     //構造体enemyに、敵の情報を格納
     enemy[index].type = TYPE_ENEMY;
     s = IMG_Load(imgfiles[TYPE_ENEMY]);
-    if (s == NULL) fprintf(stderr,"Missing Open Surface: maptype %d",loadmap_objecttype);
+    if (s == NULL)
+      fprintf(stderr, "Missing Open Surface: maptype %d", loadmap_objecttype);
     enemy[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     enemy[index].src_rect.x = 0;
     enemy[index].src_rect.y = 0;
@@ -811,11 +852,13 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].prev_overlap_rect.h = 0;
     index++;
   }
-  else if(loadmap_objecttype == TYPE_PLAYER1 || loadmap_objecttype == TYPE_PLAYER2 || loadmap_objecttype == TYPE_PLAYER3){
+  else if (loadmap_objecttype == TYPE_PLAYER1 || loadmap_objecttype == TYPE_PLAYER2 || loadmap_objecttype == TYPE_PLAYER3)
+  {
     //構造体playerに、敵の情報を格納
     player[index].type = loadmap_objecttype;
     s = IMG_Load(imgfiles[loadmap_objecttype]);
-    if (s == NULL) fprintf(stderr,"Missing Open Surface: maptype %d",loadmap_objecttype);
+    if (s == NULL)
+      fprintf(stderr, "Missing Open Surface: maptype %d", loadmap_objecttype);
     player[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     player[index].src_rect.x = 0;
     player[index].src_rect.y = 0;
@@ -830,7 +873,8 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 
     index++;
   }
-  else{
+  else
+  {
     kotei_objects[index].type = loadmap_objecttype;
     s = IMG_Load(imgfiles[loadmap_objecttype]);
     if (s == NULL)

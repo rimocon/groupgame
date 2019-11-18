@@ -42,10 +42,9 @@ int main (int argc, char *argv[]) {
     control_requests();
     SDL_Delay(3);
     RenderWindow();
-    printf("%d\n",camera[0].tri[0][0]);
+    //printf("%d\n",camera[0].tri[0][0]);
     //SDL_RenderPresent(mainrenderer);
   }
   terminate_client(); //ソケットの切断
   return 0;
 }
-
