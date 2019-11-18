@@ -370,21 +370,30 @@ void MoveChara()
   for (int i = 0; i < ENEMY_NUM; i++)
   {
     for(int j=0; j < KOTEI_OBJECT_NUM; j++){
-      if(!(kotei_objects[j].type >= TYPE_ENEMY_MOVING_FLOOR_DL)) break;
-      printf("aaa");
       SDL_Rect overrap_rect;
-      if(SDL_IntersectRect(&(kotei_objects[j].dst_rect), &(enemy[i].dst_rect), &overrap_rect)){
-      //&&
-   //                       overrap_rect.w >= enemy[i].dst_rect.w &&
-   //                       overrap_rect.h >= enemy[i].dst_rect.h){
-                            printf("overlap\n");
-                          //&&
-//                          abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w/2) - (kotei_objects[j].dst_rect.x + kotei_objects[j].dst_rect.w)) <= 4){ // 敵の移動床と、敵が完全に重なって、敵の座標が移動床の真ん中に近い（4px以内）のとき
-        if(enemy[i].prev_overlap_rect.w == 0 || (abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.x) > 5 && abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.y)) > 5){
-          ChangeEnemyMoveAngle(&enemy[i],kotei_objects[j].dst_rect,kotei_objects[j].type); // 敵の動く方向をかえる
-          enemy[i].prev_overlap_rect = overrap_rect;
+      if(SDL_IntersectRect(&(kotei_objects[j].dst_rect), &(enemy[i].dst_rect), &overrap_rect) &&
+                        kotei_objects[j].type >= TYPE_ENEMY_MOVING_FLOOR_UL && // 敵が移動床に乗って、かつ
+                        overrap_rect.w >= enemy[i].dst_rect.w  &&  overrap_rect.h >= enemy[i].dst_rect.h && // 敵と、移動床が完全に重なって、かつ
+                        abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w/2) - (kotei_objects[j].dst_rect.x + kotei_objects[j].dst_rect.w/2)) <= 2 && // 敵のx座標が移動床の真ん中に近くなって、かつ
+                        abs((enemy[i].dst_rect.y + enemy[i].dst_rect.h/2) - (kotei_objects[j].dst_rect.y + kotei_objects[j].dst_rect.h/2)) <= 2) // 敵のy座標が移動床の真ん中に近くなったとき
+      {
+        if((enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.w == 0 ) || abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.x) >= MAP_CHIPSIZE || abs(enemy[i].prev_overlap_rect.y - enemy[i].dst_rect.y) >= MAP_CHIPSIZE){ // 前回移動床に乗った時の座標から、MAP_CHIPSIZE分離れているか、または移動床に乗ったのが最初のとき
+          ChangeEnemyMoveAngle(&enemy[i],kotei_objects[j].dst_rect,kotei_objects[j].type); // 床のタイプによって、敵の動く方向をかえる
+          enemy[i].prev_overlap_rect = overrap_rect; // 前回移動床に乗った時の座標を保存しておく（同じ床で判定して無限ループにならないように）
         }
       }
+    }
+
+    // 敵が1マス分動いてたら、前回移動床に乗った情報をリセット
+    if((enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0 )|| abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.x) >= MAP_CHIPSIZE || abs(enemy[i].prev_overlap_rect.y - enemy[i].dst_rect.y) >= MAP_CHIPSIZE){
+      enemy[i].prev_overlap_rect.w = 0;
+      enemy[i].prev_overlap_rect.h = 0;
+    }
+
+    // 敵が画面外に行こうとしたときに向きを反転する
+    if(enemy[i].dst_rect.x + enemy[i].dst_rect.w >= WINDOWWIDTH || enemy[i].dst_rect.x <= 0 || enemy[i].dst_rect.y + enemy[i].dst_rect.h >= WINDOWHEIGHT || enemy[i].dst_rect.y <= 0 ){
+      enemy[i].move_angle += 180;
+      if(enemy[i].move_angle >= 360) enemy[i].move_angle -= 360;
     }
     //動く方向を格納してる変数（move_angle）に進んでいく
     switch (enemy[i].move_angle)
@@ -427,6 +436,11 @@ int ChangeEnemyMoveAngle(enemyinfo *e,SDL_Rect movefloor, objecttype type){
       if(e->move_angle == 270) e->move_angle = 180;
       if(e->move_angle == 0) e->move_angle = 90;
       break;
+    case TYPE_ENEMY_MOVING_FLOOR_REV:
+      e->move_angle += 180;
+      if(e->move_angle >= 360) e->move_angle -= 360;
+      break;
+
   }
 }
 
@@ -445,7 +459,6 @@ void MakeMap()
     for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
     {
       loadmap_objecttype = map0[j][i]; // マップデータを格納する
-      fprintf(stderr,"map0[%d][%d]  = %d\n",j,i,loadmap_objecttype);
       if (loadmap_objecttype == TYPE_ENEMY) // 読み込んだマップデータが敵のとき
       {
         //構造体enemyに、敵の情報を格納
@@ -455,7 +468,7 @@ void MakeMap()
         //構造体playerに、プレイヤーの情報を格納
         player_index = InitObjectFromMap(player_index,loadmap_objecttype,dst);
       }
-      else if((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_SHELF) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV))
+      else if((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_ENTRANCE) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV))
       {
         // 棚、出入り口、金塊の情報をkotei_objectに格納
         index = InitObjectFromMap(index, loadmap_objecttype,dst);
@@ -786,7 +799,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 {
   SDL_Surface *s;
 
-  if(loadmap_objecttype == TYPE_ENEMY){ // マップから読み込んだのが敵(NPC)だったとき
+  if(loadmap_objecttype == TYPE_ENEMY){ // マップから読み込んだのが敵(敵)だったとき
     //構造体enemyに、敵の情報を格納
     enemy[index].type = TYPE_ENEMY;
     s = IMG_Load(imgfiles[TYPE_ENEMY]);
@@ -830,7 +843,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 
     index++;
   }
-   else if((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_SHELF) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV)){ // マップから読み込んだのが金塊、棚、出入り口、敵の移動床のとき
+   else if((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_ENTRANCE) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV)){ // マップから読み込んだのが金塊、棚、出入り口、敵の移動床のとき
     kotei_objects[index].type = loadmap_objecttype;
     s = IMG_Load(imgfiles[loadmap_objecttype]);
     if (s == NULL)

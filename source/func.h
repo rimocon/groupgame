@@ -14,8 +14,8 @@
 #define CAMERA_NUM 1
 #define SHELF_NUM 10 // 棚の数、マップデータ(map0)の棚の数と合わせる
 #define ENTRANCE_NUM 3
-#define MOVING_FLOOR_NUM 4
-#define  KOTEI_OBJECT_NUM 20 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
+#define MOVING_FLOOR_NUM 9
+#define  KOTEI_OBJECT_NUM 25 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
 
 #define ENEMY_NUM 2
 #define ENEMY_SPEED 1
@@ -41,12 +41,12 @@ static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+	{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 11, 0, 1, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0},
+	{0, 0, 0, 6, 7, 8, 0, 13, 5, 0, 0, 0, 0, 9, 10, 11, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 9, 10, 11, 12, 13, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 7, 0, 0, 0, 0, 1, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -55,16 +55,6 @@ static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 
-/*  構造体宣言  */
-// typedef enum{
-// 	TYPE_KINKAI = 0,
-// 	TYPE_SHELF = 1,
-// 	TYPE_CAMERA = 2,
-// 	TYPE_ENTRANCE = 3,
-// 	TYPE_ENEMY = 4,
-// 	TYPE_PLAYER = 5,
-// 	TYPE_NUM = 6
-// }objecttype;
 typedef enum{
 	TYPE_NONE = 0,
 	TYPE_KINKAI = 1,
@@ -75,11 +65,11 @@ typedef enum{
 	TYPE_PLAYER1 = 6, // TYPEを追加する場合はPLAYERとMOVING_FLOORの間にする
 	TYPE_PLAYER2 = 7,
 	TYPE_PLAYER3 = 8,
-	TYPE_ENEMY_MOVING_FLOOR_UL = 9, // TYPE_ENEMY_MOVING_FLOOR_UR >= iって条件にしてるため、これ以降は移動床の宣言
-	TYPE_ENEMY_MOVING_FLOOR_UR = 10,
-	TYPE_ENEMY_MOVING_FLOOR_DL = 11,
-	TYPE_ENEMY_MOVING_FLOOR_DR = 12,
-	TYPE_ENEMY_MOVING_FLOOR_REV = 13,
+	TYPE_ENEMY_MOVING_FLOOR_UL = 9, // UL = UpLeftの略 TYPE_ENEMY_MOVING_FLOOR_UR >= iって条件にしてるため、これ以降は移動床の宣言
+	TYPE_ENEMY_MOVING_FLOOR_UR = 10, // UR = UpRightの略
+	TYPE_ENEMY_MOVING_FLOOR_DL = 11, // DL = DownLeftの略
+	TYPE_ENEMY_MOVING_FLOOR_DR = 12, // DR = DownRightの略
+	TYPE_ENEMY_MOVING_FLOOR_REV = 13, // REV = Reverseの略です
 	TYPE_NUM = 14
 }objecttype;
 
@@ -118,10 +108,6 @@ typedef struct {
 	float theta[2];
 	bool clockwise;
 }camerainfo;
-
-
-
-
 
 typedef struct {
 	int rotate_range; // 敵の回転速度

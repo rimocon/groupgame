@@ -19,7 +19,7 @@ int main (int argc, char *argv[]) {
     break;//変数は更新されず，初期化の値がそのまま使われる
   case 2: //コマンドライン引数の数が2つの場合
     sprintf(server_name, "%s", argv[1]); //名前を格納
-    break; 
+    break;
   case 3://コマンドライン引数の数が3つの場合
     sprintf(server_name, "%s", argv[1]); //名前を格納
     port = (u_short)atoi(argv[2]); //ポート番号の更新
@@ -42,7 +42,6 @@ int main (int argc, char *argv[]) {
     control_requests();
     SDL_Delay(3);
     RenderWindow();
-    printf("%d\n",camera[0].tri[0][0]);
     //SDL_RenderPresent(mainrenderer);
   }
   terminate_client(); //ソケットの切断
