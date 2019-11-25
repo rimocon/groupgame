@@ -120,7 +120,7 @@ typedef struct {
 	SDL_Rect dst_rect;
 	bool flag_kinkai;
   int tri[2][3];
-  float theta[2];
+  float theta[3];
   bool clockwise;
   double angle;
 }camerainfo;

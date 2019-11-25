@@ -198,25 +198,33 @@ void MoveTriangle()
 {
 
   for (int i = 0; i<CAMERA_NUM;i++) {  //カメラの数だけ繰り返す
-    if ( camera[i].theta[0] < 105 - camera[i].angle -90 || camera[i].theta[1] < 105 - camera[i].angle - 90) {
+    if ( camera[i].theta[2] < 120 - camera[i].angle -90) {
       camera[i].clockwise = false; //反時計回り
     }
-    else if(camera[i].theta[0] > 255 - camera[i].angle - 90 || camera[i].theta[1] > 255 - camera[i].angle - 90) {
+    else if(camera[i].theta[2] > 240 - camera[i].angle - 90) {
       camera[i].clockwise = true; //時計回り
     }
     if (camera[i].clockwise) {
-      camera[i].theta[0]--;
-      camera[i].theta[1]--;
+      camera[i].theta[2]--; //三角形の頂点の座標の角度を変える
     }
     else
     {
-      camera[i].theta[0]++;
-      camera[i].theta[1]++;
+      camera[i].theta[2]++;
     }
-    camera[i].tri[0][1] = camera[i].tri[0][0] + sin(camera[i].theta[0]*M_PI / 180.0)*180; //x2の計算
-    camera[i].tri[1][1] = camera[i].tri[1][0] + cos(camera[i].theta[0]*M_PI / 180.0)*180; //y2の計算
-    camera[i].tri[0][2] = camera[i].tri[0][0] + sin(camera[i].theta[1]*M_PI / 180.0)*180; //x3の計算
-    camera[i].tri[1][2] = camera[i].tri[1][0] + cos(camera[i].theta[1]*M_PI / 180.0)*180; //x3の計算
+    camera[i].theta[0] = camera[i].theta[2] + 15; //三角形の残り2点の角度を変える
+    camera[i].theta[1] = camera[i].theta[2] - 15;
+    Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w - camera_dst_rects[i].w/4,
+             camera_dst_rects[i].y + camera_dst_rects[i].h /2,
+             camera_dst_rects[i].x + camera_dst_rects[i].w /2,
+             camera_dst_rects[i].y + camera_dst_rects[i].h /2,
+             90 - camera[i].theta[2],
+             &camera[i].tri[0][0],
+             &camera[i].tri[1][0]); //右端縦真ん中の座標を中心座標から三角形の頂点の座標角度分回転(回転座標系のとり方が違うので90から引いて正規化)
+    //三角形の残り2点の位置計算
+    camera[i].tri[0][1] = camera[i].tri[0][0] + sin(camera[i].theta[0]*M_PI / 180.0)*250; //x2の計算
+    camera[i].tri[1][1] = camera[i].tri[1][0] + cos(camera[i].theta[0]*M_PI / 180.0)*250; //y2の計算
+    camera[i].tri[0][2] = camera[i].tri[0][0] + sin(camera[i].theta[1]*M_PI / 180.0)*250; //x3の計算
+    camera[i].tri[1][2] = camera[i].tri[1][0] + cos(camera[i].theta[1]*M_PI / 180.0)*250; //x3の計算
   }
 
 
@@ -250,7 +258,8 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
 
   for(int i = 0;  i<CAMERA_NUM; i++){
     filledTrigonColor(mainrenderer,camera[i].tri[0][0],camera[i].tri[1][0],camera[i].tri[0][1],camera[i].tri[1][1],camera[i].tri[0][2],camera[i].tri[1][2],0xff0000ff);
-    SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,camera[i].angle,NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    //SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,camera[i].angle,NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,90 - camera[i].theta[2],NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     //printf("%d,%d \n",i,camera[i].dst_rect.x);
   }
   SDL_RenderPresent(mainrenderer); // 描画データを表示
@@ -427,14 +436,14 @@ float Rotation(int x1,int y1,int a,int b,double theta,int *x2,int *y2){
 }
 
 void SetCamera() { //カメラの初期値セット
-  camera[0].angle = 30.0;
+  camera[0].angle = 30.0; //初期の回転位置
   camera[1].angle = 70.0;
   camera[2].angle = 180.0;
   camera[3].angle = 280.0;
   camera[4].angle = 80.0;
   for(int i = 0;i<CAMERA_NUM; i++) {
     camera[i].clockwise = true;
-    Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w, //回転後の座標を計算して検知の一点に格納
+    Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w, //回転後の座標を計算して返す
         camera_dst_rects[i].y + camera_dst_rects[i].h /2,
         camera_dst_rects[i].x + camera_dst_rects[i].w /2,
         camera_dst_rects[i].y + camera_dst_rects[i].h /2,
@@ -443,8 +452,11 @@ void SetCamera() { //カメラの初期値セット
         &camera[i].tri[1][0]);
     printf("x2 %d\n",camera[i].tri[0][0]);
     printf("y2 %d\n",camera[i].tri[1][0]);
+    /*
     camera[i].theta[0] = 90.0 - camera[i].angle;
     camera[i].theta[1] = 120.0 - camera[i].angle;
+    */
+    camera[i].theta[2] = 105 - camera[i].angle;
   }
 }
 
