@@ -9,17 +9,12 @@
 #define PLAYER_NUM 3 // オブジェクトの数などはテキストファイルで読み込めるようにしたほうがいろんなマップに対応できるから後から修正したい
 #define PLAYER_SPEED 1
 
-// 金塊、カメラ、棚、出入り口の数
-// #define KINKAI_NUM 2
+// カメラと敵の数、敵のスピードを最初に設定
 #define CAMERA_NUM 1
-
 #define ENEMY_NUM 2
 #define ENEMY_SPEED 1
 
-#define  KOTEI_OBJECT_NUM_MAX 300 // オブジェクト
-
-//敵の最大数と敵のスピード、実装予定
-// #define ENEMY_NUM_MAX 2
+#define  KOTEI_OBJECT_NUM_MAX 300 // 固定オブジェクトの最大の数
 
 #define MAP_CHIPSIZE 64 //変数map0の、1マス分のピクセルの大きさ（仮置き）
 #define MAP_WIDTH 20 // 変数map0の横の数、ゲーム画面を横に20等分してる
@@ -102,6 +97,12 @@ typedef struct {
 	bool clockwise;
 }camerainfo;
 
+typedef enum{
+	MT_NONE = 0,
+	MT_MOVING_FLOOR = 1, // 移動床に沿って移動する
+	MT_RIGHT_METHOD = 2 // 右手法で動く
+}enemymovetype; // 敵の動きのタイプをこの中から選ぶ
+
 typedef struct {
 	int rotate_range; // 敵の回転速度
 	objecttype type; // タイプ
@@ -114,6 +115,7 @@ typedef struct {
 	int look_angle; // 敵が向いている方向(0度〜360度)、視野の描画する方法によるので仮
 	int move_angle; // 敵が動く方向
 	bool isgodest; // 目的地まで行ってるかどうか
+	enemymovetype movetype; // 敵の動きのタイプ
 }enemyinfo; // 敵の構造体
 
 
@@ -132,6 +134,10 @@ static int enemy_lookangles[ENEMY_NUM] = {
 };
 static int enemy_moveangles[ENEMY_NUM] = {
 	90,270
+};
+static enemymovetype enemy_movetypes[ENEMY_NUM] = {
+	MT_MOVING_FLOOR,
+	MT_MOVING_FLOOR
 };
 
 //inputkeys key; //inputkeys構造体をinputという名前で実体化
