@@ -93,6 +93,8 @@ typedef struct {
 	SDL_Texture * image_texture;
 	SDL_Rect src_rect;
 	SDL_Rect dst_rect;
+	float back_zahyo_x;
+    float back_zahyo_y;
 	bool flag_kinkai;
 	int speed;
     inputkeys key; //inputkeys構造体をinputという名前で実体化
