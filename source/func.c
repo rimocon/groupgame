@@ -380,6 +380,8 @@ void MoveChara()
         if(enemy[i].move_angle >= 360) enemy[i].move_angle -= 360;
       }
       SDL_Rect overrap_rect;
+      SDL_Rect shelf_overrap_rect;
+      int k,l,map_x,map_y = 0;
       switch(enemy[i].movetype){
       case MT_MOVING_FLOOR:
         // 敵が移動床に乗った時の処理
@@ -395,7 +397,34 @@ void MoveChara()
         }
         // 敵が移動床に乗った時の処理ここまで
         break;
-      }
+      case MT_RIGHT_METHOD:
+        shelf_overrap_rect = enemy[i].dst_rect; // 右に壁があるかどうか見る当たり判定の矩形
+        switch (enemy[i].move_angle) // 右の壁の判定になるように、当たり判定をMAP_CHIPSIZE分移動させる
+        {
+        case 0:
+          shelf_overrap_rect.x += MAP_CHIPSIZE;
+          break;
+        case 90:
+          shelf_overrap_rect.y += MAP_CHIPSIZE;
+          break;
+        case 180:
+          shelf_overrap_rect.x -= MAP_CHIPSIZE;
+          break;
+        case 270:
+          shelf_overrap_rect.y -= MAP_CHIPSIZE;
+          break;
+        }
+        // マップデータをfor文で1マスずつ読み込んでいく
+        for (k = 0; k < MAP_HEIGHT; k++, map_y += MAP_CHIPSIZE) {
+          map_x = 0;
+          for (l = 0; l < MAP_WIDTH; l++, map_x += MAP_CHIPSIZE){
+            if(abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2) - (map_x + MAP_CHIPSIZE / 2)) <= 2 && abs((enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2) - (map_y + MAP_CHIPSIZE)) <= 2) { // 敵のx,y座標がmap_chipsizeの真ん中に近くなったとき
+              printf("真ん中\n"); // ここでマップのchipsizeの真ん中で判定されるようにしてほしい！！
+            }
+          }
+        }
+        break;
+     }
     }
 
     // 敵が1マス分動いてたら、前回の何かの床に乗った情報をリセット
