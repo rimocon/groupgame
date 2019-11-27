@@ -70,6 +70,7 @@ void Startup()
   player_flag[2] = true;                                //プレイヤー3 は最初は、生存
   mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0); //メインウィンドウに対するレンダラー生成
   MakeMap();
+
 }
 
 void Input()
@@ -300,44 +301,86 @@ void Collision()
 
 void MoveChara()
 {
-  int move_distance = PLAYER_SPEED * 2;
+  int move_distance = PLAYER_SPEED * 1;
+  //static back_diff_x = 0;
+  //static back_diff_y = 0;
+  float move; //移動係数
+
   for (int i = 0; i < 3; i++)
   {
-    if (player[i].key.left)
-    {
-      //player[myid].dst_rect.x -= move_distance;
-      //if(player[myid].dst_rect.x <0) player[myid].dst_rect.x = 0;
+    if (player[i].key.left == 1 || player[i].key.right == 1){
+      if (player[i].key.up == 1 || player[i].key.down == 1){
+        move=0.71f; //移動係数を0.71に設定
+      }  
+      else{
+        move=1.0f; ////斜めじゃなければ1.0に設定
+      }
+    }
+    else if(player[i].key.up == 1 || player[i].key.down == 1){
+      move=1.0f;
+    }
+
+    if(player[i].key.left == 1){
+      player[i].back_zahyo_x -= (int)1 * move; //プレイヤーの座標をfloat型で保持
+      if (player[i].back_zahyo_x < 0){
+        player[i].back_zahyo_x = 0;
+      }
+      player[i].dst_rect.x = player[i].back_zahyo_x;
+    }
+    if(player[i].key.right == 1){
+      player[i].back_zahyo_x += (int)1 * move;
+     if (player[i].back_zahyo_x > WINDOWWIDTH - player[0].dst_rect.w){
+        player[i].back_zahyo_x = WINDOWWIDTH - player[0].dst_rect.w;
+     }
+      player[i].dst_rect.x = player[i].back_zahyo_x;
+    }
+    if(player[i].key.up == 1){
+      player[i].back_zahyo_y -= (int)1 * move;
+      if (player[i].back_zahyo_y < 0){
+        player[i].back_zahyo_y = 0;
+      }
+      player[i].dst_rect.y = player[i].back_zahyo_y;
+    }
+    if(player[i].key.down == 1){
+      player[i].back_zahyo_y += (int)1 * move;
+      if (player[i].back_zahyo_y > WINDOWHEIGHT - player[0].dst_rect.h){
+        player[i].back_zahyo_y = WINDOWHEIGHT - player[0].dst_rect.h;
+      }
+      player[i].dst_rect.y = player[i].back_zahyo_y;
+    }
+
+
+    /*
+    if (player[i].key.left) //左
+    { 
       player[i].dst_rect.x -= move_distance;
       if (player[i].dst_rect.x < 0)
         player[i].dst_rect.x = 0;
-      //joystick_send(0); //座標などのデータ送信される
     }
-    else if (player[i].key.right)
-    {
-      //player[myid].dst_rect.x += move_distance;
-      //if(player[myid].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w) player[myid].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w;
+    else if (player[i].key.right) //右
+    { 
       player[i].dst_rect.x += move_distance;
       if (player[i].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w)
         player[i].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w;
-      //joystick_send(0); //座標などのデータ送信される
+      
     }
-    //else if (player[i].key.up)
-    if (player[i].key.up)
+    if (player[i].key.up ) //上
     {
-      //player[myid].dst_rect.y -= move_distance;
+      player[myid].dst_rect.y -= move_distance;
       //if(player[myid].dst_rect.y < 0) player[myid].dst_rect.y = 0;
-      player[i].dst_rect.y -= move_distance;
+      
       if (player[i].dst_rect.y < 0)
         player[i].dst_rect.y = 0;
-      //joystick_send(0); //座標などのデータ送信される
+      
     }
-    else if (player[i].key.down)
-    {
+    else if (player[i].key.down) //下
+    { 
       player[i].dst_rect.y += move_distance;
       if (player[i].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h)
         player[i].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h;
-      //joystick_send(0); //座標などのデータ送信される
+      
     }
+    */
 
     //棚との衝突判定
     for (int i = 0; i < kotei_object_num; i++)
@@ -351,19 +394,23 @@ void MoveChara()
           // ぶつかったぶんの距離プレイヤーの位置を戻す
           if (player[j].key.left)
           {
-            player[j].dst_rect.x += move_distance;
+            player[j].back_zahyo_x += move;
+            player[j].dst_rect.x = player[j].back_zahyo_x;
           }
           if (player[j].key.right)
           {
-            player[j].dst_rect.x -= move_distance;
+            player[j].back_zahyo_x -= move;
+            player[j].dst_rect.x = player[j].back_zahyo_x;
           }
           if (player[j].key.up)
           {
-            player[j].dst_rect.y += move_distance;
+            player[j].back_zahyo_y += move;
+            player[j].dst_rect.y = player[j].back_zahyo_y;
           }
           if (player[j].key.down)
           {
-            player[j].dst_rect.y -= move_distance;
+            player[j].back_zahyo_y -= move;
+            player[j].dst_rect.y = player[j].back_zahyo_y;
           }
         }
       }
@@ -884,6 +931,8 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 
     player[index].dst_rect.x = dst.x + ((MAP_CHIPSIZE - s->w) / 2); // マップで指定された場所 + MAP_CHIPSIZEの中心になるように足し算
     player[index].dst_rect.y = dst.y + ((MAP_CHIPSIZE - s->h) / 2);
+    player[index].back_zahyo_x = player[index].dst_rect.x; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
+    player[index].back_zahyo_y = player[index].dst_rect.y; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
     player[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
     player[index].dst_rect.h = s->h;
     player[index].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
