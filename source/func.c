@@ -64,7 +64,9 @@ void Startup()
     camera[i].theta[0] = 90.0;
     camera[i].theta[1] = 120.0;
   }
+  elapsed_time = 0; //経過時間の初期化
   kinkai_flag = true;                                   //金塊は最初は、配置されている
+  kinkai_keep_flag = false;                             //最初は、プレイヤーは金塊を保持していない 
   player_flag[0] = true;                                //プレイヤー1 は最初は、生存
   player_flag[1] = true;                                //プレイヤー2 は最初は、生存
   player_flag[2] = true;                                //プレイヤー3 は最初は、生存
@@ -77,8 +79,10 @@ void Input()
 {
   switch (inputevent.type)
   {
+  
   // ジョイスティックの方向キーまたはアナログキー（スティック)が押された時
   case SDL_JOYAXISMOTION:
+    printf("kinkai_keep_flag = %d\n",kinkai_keep_flag);  
     printf("The axis ID of the operated key is %d.\n", inputevent.jaxis.axis); // 操作された方向キーの方向軸を表示（0：アナログキー，1：アナログキー，2：方向キー左右方向，3：方向キー上下方向）
     if (inputevent.jaxis.axis == 0)
     {
@@ -746,6 +750,9 @@ static int execute_command()
   case KINKAI_COMMAND: //'K'のとき
     fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
     kinkai_flag = false;
+    if(data.cid == myid){ //金塊を取った、クライアントのIDが自分のIDと同じであれば
+      kinkai_keep_flag = true; 
+    } 
     result = 1;
     break;
   case PLAYER_COMMAND: //'P'のとき

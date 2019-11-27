@@ -34,6 +34,7 @@
 
 /*  変数  */
 bool kinkai_flag; //金塊を描画するかしないか
+bool kinkai_keep_flag; //プレイヤーが金塊を持っているかどうか
 bool player_flag[3]; //プレイヤーを描画するか、しないか
 
 /*  mapデータ */
