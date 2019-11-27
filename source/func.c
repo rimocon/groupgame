@@ -311,7 +311,7 @@ void MoveChara()
     if (player[i].key.left == 1 || player[i].key.right == 1){
       if (player[i].key.up == 1 || player[i].key.down == 1){
         move=0.71f; //移動係数を0.71に設定
-      }  
+      }
       else{
         move=1.0f; ////斜めじゃなければ1.0に設定
       }
@@ -352,33 +352,33 @@ void MoveChara()
 
     /*
     if (player[i].key.left) //左
-    { 
+    {
       player[i].dst_rect.x -= move_distance;
       if (player[i].dst_rect.x < 0)
         player[i].dst_rect.x = 0;
     }
     else if (player[i].key.right) //右
-    { 
+    {
       player[i].dst_rect.x += move_distance;
       if (player[i].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w)
         player[i].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w;
-      
+
     }
     if (player[i].key.up ) //上
     {
       player[myid].dst_rect.y -= move_distance;
       //if(player[myid].dst_rect.y < 0) player[myid].dst_rect.y = 0;
-      
+
       if (player[i].dst_rect.y < 0)
         player[i].dst_rect.y = 0;
-      
+
     }
     else if (player[i].key.down) //下
-    { 
+    {
       player[i].dst_rect.y += move_distance;
       if (player[i].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h)
         player[i].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h;
-      
+
     }
     */
 
@@ -427,8 +427,10 @@ void MoveChara()
         if(enemy[i].move_angle >= 360) enemy[i].move_angle -= 360;
       }
       SDL_Rect overrap_rect;
-      SDL_Rect shelf_overrap_rect;
-      int k,l,map_x,map_y = 0;
+      //SDL_Rect shelf_overrap_rect;
+      // int k,l,map_x,map_y = 0;
+      srand((unsigned int)time(NULL)); // MT_RANDOM用に現在時刻の情報で初期化
+      int random = rand() % 100;
       switch(enemy[i].movetype){
       case MT_MOVING_FLOOR:
         // 敵が移動床に乗った時の処理
@@ -437,41 +439,70 @@ void MoveChara()
                         overrap_rect.w >= enemy[i].dst_rect.w  &&  overrap_rect.h >= enemy[i].dst_rect.h && // 敵と、移動床が完全に重なって、かつ
                         abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w/2) - (kotei_objects[j].dst_rect.x + kotei_objects[j].dst_rect.w/2)) <= 2 && // 敵のx座標が移動床の真ん中に近くなって、かつ
                         abs((enemy[i].dst_rect.y + enemy[i].dst_rect.h/2) - (kotei_objects[j].dst_rect.y + kotei_objects[j].dst_rect.h/2)) <= 2){ // 敵のy座標が移動床の真ん中に近くなったとき
-          if(enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.w == 0 ){ // 前回移動床に乗った時の座標から、MAP_CHIPSIZE分離れているか、または移動床に乗ったのが最初のとき
+          if(enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0 ){ // 前回移動床に乗った時の座標から、MAP_CHIPSIZE分離れているか、または移動床に乗ったのが最初のとき
             ChangeEnemyMoveAngle(&enemy[i],kotei_objects[j].dst_rect,kotei_objects[j].type); // 床のタイプによって、敵の動く方向をかえる
             enemy[i].prev_overlap_rect = overrap_rect; // 前回移動床に乗った時の座標を保存しておく（同じ床で判定して無限ループにならないように）
           }
         }
         // 敵が移動床に乗った時の処理ここまで
         break;
-      case MT_RIGHT_METHOD:
-        shelf_overrap_rect = enemy[i].dst_rect; // 右に壁があるかどうか見る当たり判定の矩形
-        switch (enemy[i].move_angle) // 右の壁の判定になるように、当たり判定をMAP_CHIPSIZE分移動させる
-        {
-        case 0:
-          shelf_overrap_rect.x += MAP_CHIPSIZE;
-          break;
-        case 90:
-          shelf_overrap_rect.y += MAP_CHIPSIZE;
-          break;
-        case 180:
-          shelf_overrap_rect.x -= MAP_CHIPSIZE;
-          break;
-        case 270:
-          shelf_overrap_rect.y -= MAP_CHIPSIZE;
-          break;
-        }
-        // マップデータをfor文で1マスずつ読み込んでいく
-        for (k = 0; k < MAP_HEIGHT; k++, map_y += MAP_CHIPSIZE) {
-          map_x = 0;
-          for (l = 0; l < MAP_WIDTH; l++, map_x += MAP_CHIPSIZE){
-            if(abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2) - (map_x + MAP_CHIPSIZE / 2)) <= 2 && abs((enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2) - (map_y + MAP_CHIPSIZE)) <= 2) { // 敵のx,y座標がmap_chipsizeの真ん中に近くなったとき
-              printf("真ん中\n"); // ここでマップのchipsizeの真ん中で判定されるようにしてほしい！！
+      // case MT_RIGHT_METHOD:
+      //   shelf_overrap_rect = enemy[i].dst_rect; // 右に壁があるかどうか見る当たり判定の矩形
+      //   switch (enemy[i].move_angle) // 右の壁の判定になるように、当たり判定をMAP_CHIPSIZE分移動させる
+      //   {
+      //   case 0:
+      //     shelf_overrap_rect.x += MAP_CHIPSIZE;
+      //     break;
+      //   case 90:
+      //     shelf_overrap_rect.y += MAP_CHIPSIZE;
+      //     break;
+      //   case 180:
+      //     shelf_overrap_rect.x -= MAP_CHIPSIZE;
+      //     break;
+      //   case 270:
+      //     shelf_overrap_rect.y -= MAP_CHIPSIZE;
+      //     break;
+      //   }
+      // // マップデータをfor文で1マスずつ読み込んでいく
+      // for (k = 0; k < MAP_HEIGHT; k++, map_y += MAP_CHIPSIZE) {
+      //   map_x = 0;
+      //   for (l = 0; l < MAP_WIDTH; l++, map_x += MAP_CHIPSIZE){
+      //     if(abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2) - (map_x + MAP_CHIPSIZE / 2)) <= 2 && abs((enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2) - (map_y + MAP_CHIPSIZE)) <= 2) { // 敵のx,y座標がmap_chipsizeの真ん中に近くなったとき
+      //       printf("真ん中\n"); // ここでマップのchipsizeの真ん中で判定されるようにしてほしい！！
+      //     }
+      //   }
+      // }
+      //break;
+      case MT_RANDOM:
+        if (((enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2 + MAP_CHIPSIZE / 2) % MAP_CHIPSIZE <= 2) && ((enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2 + MAP_CHIPSIZE / 2) % MAP_CHIPSIZE <= 2))
+        { // 敵がMAP_CHIPSIZE*MAP_CHIPSIZEマスの真ん中に来た時
+          if (enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0)
+          { // 前回真ん中に来た時の座標から、MAP_CHIPSIZE分離れているか、または移動床に乗ったのが最初のとき
+            //ランダムにする処理
+            if (random >= 0 && random <= 40)
+            {
+              enemy[i].move_angle = 0;
             }
+            else if (random > 40 && random <= 50)
+            {
+              enemy[i].move_angle = 90;
+            }
+            else if (random > 50 && random <= 70)
+            {
+              enemy[i].move_angle = 180;
+            }
+            else if(random > 70 && random <= 100)
+            {
+              enemy[i].move_angle = 270;
+            }
+            else {
+              printf("random 値エラー\n");
+            }
+            enemy[i].prev_overlap_rect = enemy[i].dst_rect; // 前回移動床に乗った時の座標を保存しておく（同じ床で判定して無限ループにならないように）
           }
         }
         break;
-     }
+      }
     }
 
     // 敵が1マス分動いてたら、前回の何かの床に乗った情報をリセット
