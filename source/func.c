@@ -424,6 +424,7 @@ void MoveChara()
   //敵キャラの移動
   for (int i = 0; i < ENEMY_NUM; i++)
   {
+    /*
     for(int j=0; j < KOTEI_OBJECT_NUM; j++){
       SDL_Rect overrap_rect;
       if(SDL_IntersectRect(&(kotei_objects[j].dst_rect), &(enemy[i].dst_rect), &overrap_rect) &&
@@ -444,7 +445,25 @@ void MoveChara()
       enemy[i].prev_overlap_rect.w = 0;
       enemy[i].prev_overlap_rect.h = 0;
     }
-
+    */
+ 
+   /*追跡してくるNPC
+   　現在は、x,y座標に対して、プレイヤー側に寄ってくるようにしているが、
+   　x座標または、y座標のどちらか片方のみに設定すると、道の追跡ではなく、
+   　道の”とうせんぼ”ができる！
+   */ 
+   if(enemy[i].dst_rect.x > player[0].dst_rect.x){
+     enemy[i].move_angle = 270;
+   }
+   if(enemy[i].dst_rect.x < player[0].dst_rect.x){
+     enemy[i].move_angle = 90;
+   }
+   if(enemy[i].dst_rect.y > player[0].dst_rect.y){
+     enemy[i].move_angle = 0;
+   }
+   if(enemy[i].dst_rect.y < player[0].dst_rect.y){
+     enemy[i].move_angle = 180;
+   }
     // 敵が画面外に行こうとしたときに向きを反転する
     if(enemy[i].dst_rect.x + enemy[i].dst_rect.w >= WINDOWWIDTH || enemy[i].dst_rect.x <= 0 || enemy[i].dst_rect.y + enemy[i].dst_rect.h >= WINDOWHEIGHT || enemy[i].dst_rect.y <= 0 ){
       enemy[i].move_angle += 180;
