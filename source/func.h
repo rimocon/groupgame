@@ -18,7 +18,7 @@
 #define  KOTEI_OBJECT_NUM 33 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
 
 #define ENEMY_NUM 2
-#define ENEMY_SPEED 1
+//#define ENEMY_SPEED 1
 
 // 各オブジェクトの最大数、実装予定
 // #define SHELF_NUM_MAX 100 //
@@ -36,6 +36,7 @@
 bool kinkai_flag; //金塊を描画するかしないか
 bool kinkai_keep_flag; //プレイヤーが金塊を持っているかどうか
 bool player_flag[3]; //プレイヤーを描画するか、しないか
+static int enemy_speed = 1;
 
 /*  mapデータ */
 static int map0[MAP_HEIGHT][MAP_WIDTH] = {

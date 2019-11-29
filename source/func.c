@@ -434,29 +434,6 @@ void MoveChara()
   //敵キャラの移動
   for (int i = 0; i < ENEMY_NUM; i++)
   {
-
-    
-      /*
-      if(SDL_IntersectRect(&(kotei_objects[j].dst_rect), &(enemy[i].dst_rect), &overrap_rect) &&
-                        kotei_objects[j].type >= TYPE_ENEMY_MOVING_FLOOR_UL && // 敵が移動床に乗って、かつ
-                        overrap_rect.w >= enemy[i].dst_rect.w  &&  overrap_rect.h >= enemy[i].dst_rect.h && // 敵と、移動床が完全に重なって、かつ
-                        abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w/2) - (kotei_objects[j].dst_rect.x + kotei_objects[j].dst_rect.w/2)) <= 2 && // 敵のx座標が移動床の真ん中に近くなって、かつ
-                        abs((enemy[i].dst_rect.y + enemy[i].dst_rect.h/2) - (kotei_objects[j].dst_rect.y + kotei_objects[j].dst_rect.h/2)) <= 2) // 敵のy座標が移動床の真ん中に近くなったとき
-      {
-        if((enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.w == 0 ) || abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.x) >= MAP_CHIPSIZE || abs(enemy[i].prev_overlap_rect.y - enemy[i].dst_rect.y) >= MAP_CHIPSIZE){ // 前回移動床に乗った時の座標から、MAP_CHIPSIZE分離れているか、または移動床に乗ったのが最初のとき
-          ChangeEnemyMoveAngle(&enemy[i],kotei_objects[j].dst_rect,kotei_objects[j].type); // 床のタイプによって、敵の動く方向をかえる
-          enemy[i].prev_overlap_rect = overrap_rect; // 前回移動床に乗った時の座標を保存しておく（同じ床で判定して無限ループにならないように）
-        }
-      }
-    }
-
-    // 敵が1マス分動いてたら、前回移動床に乗った情報をリセット
-    if((enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0 )|| abs(enemy[i].prev_overlap_rect.x - enemy[i].dst_rect.x) >= MAP_CHIPSIZE || abs(enemy[i].prev_overlap_rect.y - enemy[i].dst_rect.y) >= MAP_CHIPSIZE){
-      enemy[i].prev_overlap_rect.w = 0;
-      enemy[i].prev_overlap_rect.h = 0;
-    */
-    //}
-
     /*追跡してくるNPC
    　現在は、x,y座標に対して、プレイヤー側に寄ってくるようにしているが、
    　x座標または、y座標のどちらか片方のみに設定すると、道の追跡ではなく、
@@ -484,9 +461,31 @@ void MoveChara()
     {
       enemy[i].move_angle += 180;
       if (enemy[i].move_angle >= 360)
+      {
         enemy[i].move_angle -= 360;
+      }
     }
-    
+
+    //動く方向を格納してる変数（move_angle）に進んでいく
+    switch (enemy[i].move_angle)
+    {
+    case 0:
+      //enemy[i].dst_rect.y -= ENEMY_SPEED;
+      enemy[i].dst_rect.y -= enemy[i].speed;
+      break;
+    case 90:
+      //enemy[i].dst_rect.x += ENEMY_SPEED;
+      enemy[i].dst_rect.x += enemy[i].speed;
+      break;
+    case 180:
+      //enemy[i].dst_rect.y += ENEMY_SPEED;
+      enemy[i].dst_rect.y += enemy[i].speed;
+      break;
+    case 270:
+      //enemy[i].dst_rect.x -= ENEMY_SPEED;
+      enemy[i].dst_rect.x -= enemy[i].speed;
+      break;
+    }
     for (int j = 0; j < KOTEI_OBJECT_NUM; j++)
     {
       SDL_Rect overrap_rect;
@@ -494,27 +493,27 @@ void MoveChara()
       // 敵が棚に当たった時、反転する
       if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF)
       {
-        //enemy[i].move_angle += 180;
-        enemy[i].move_angle += 90;
-        if (enemy[i].move_angle >= 360)
-          enemy[i].move_angle -= 360;
+        //動く方向を格納してる変数（move_angle）に進んでいく
+        switch (enemy[i].move_angle)
+        {
+        case 0:
+          //enemy[i].dst_rect.y -= ENEMY_SPEED;
+          enemy[i].dst_rect.y += enemy[i].speed;
+          break;
+        case 90:
+          //enemy[i].dst_rect.x += ENEMY_SPEED;
+          enemy[i].dst_rect.x -= enemy[i].speed;
+          break;
+        case 180:
+          //enemy[i].dst_rect.y += ENEMY_SPEED;
+          enemy[i].dst_rect.y -= enemy[i].speed;
+          break;
+        case 270:
+          //enemy[i].dst_rect.x -= ENEMY_SPEED;
+          enemy[i].dst_rect.x += enemy[i].speed;
+          break;
+        }
       }
-    }
-    //動く方向を格納してる変数（move_angle）に進んでいく
-    switch (enemy[i].move_angle)
-    {
-    case 0:
-      enemy[i].dst_rect.y -= ENEMY_SPEED;
-      break;
-    case 90:
-      enemy[i].dst_rect.x += ENEMY_SPEED;
-      break;
-    case 180:
-      enemy[i].dst_rect.y += ENEMY_SPEED;
-      break;
-    case 270:
-      enemy[i].dst_rect.x -= ENEMY_SPEED;
-      break;
     }
   }
 }
@@ -936,7 +935,8 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].dst_rect.y = dst.y + ((MAP_CHIPSIZE - s->h) / 2);
     enemy[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
     enemy[index].dst_rect.h = s->h;
-    enemy[index].speed = ENEMY_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+    //enemy[index].speed = ENEMY_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+    enemy[index].speed = enemy_speed; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
     enemy[index].isgodest = false;
     enemy[index].look_angle = enemy_lookangles[index];
     enemy[index].move_angle = enemy_moveangles[index];
