@@ -38,7 +38,7 @@
 
 \subsection{概略}
 ゲームの設定は，「犯罪組織に盗まれた金塊を組織に潜入して，複数のプレイヤーと協力して，組織的に取り返す」といった設定である．
-本ゲームは，同一のサーバに接続した複数のプレイヤーが協力する脱出ゲームである．プレイヤーは出入り口からスタートし，敵キャラ(NPC)，監視カメラに見つからないように，ステージ上に設置された金塊をゲットし再び敵，監視カメラに見つからないように出入り口に帰ってくるゲームである．
+本ゲームは，同一のサーバに接続した複数のプレイヤーが協力する脱出ゲームである．プレイヤーは出入り口からスタートし，敵キャラ(敵)，監視カメラに見つからないように，ステージ上に設置された金塊をゲットし再び敵，監視カメラに見つからないように出入り口に帰ってくるゲームである．
 ステージは複数用意されており，ステージが上がるごとに敵や監視カメラを増やすことで難易度を向上させる．
 
 プレイヤーは敵キャラや監視カメラに対して妨害を行うことで，他プレイヤーが金塊を取るためのアシストを行うことができる．
@@ -72,7 +72,7 @@
 \end{center}
 \end{figure}
 
-赤で示しているのがプレイヤー，青で示しているのが敵キャラ(NPC)，右下隅の物体が監視カメラである．
+赤で示しているのがプレイヤー，青で示しているのが敵キャラ(敵)，右下隅の物体が監視カメラである．
 敵キャラ，監視カメラの扇形の物体は視界を表しており，この中にプレイヤーがいるとプレイヤーが「見つかった」判定となる．
 
 \subsection{勝敗，クリア，終了条件}
@@ -142,7 +142,7 @@ int		&	speed	& 監視カメラの首振りのスピード\\ \hline
 \multicolumn{2}{|l|}{void StartUp(void)}       \\ \hline
 関数名           & StartUp \\ \hline
 機能     & SDLなどの初期化処理を行う関数  \\
-引数 	 	 & なし \\ 
+引数 	 	 & なし \\
 返り値	 & なし \\ \hline
 \end{tabular}
 \end{table}
@@ -154,7 +154,7 @@ int		&	speed	& 監視カメラの首振りのスピード\\ \hline
 \multicolumn{2}{|l|}{void Destroy(void)}       \\ \hline
 関数名           & Destroy \\ \hline
 機能     & SDLなどの終了処理を行う関数  \\
-引数 	 	 & なし \\ 
+引数 	 	 & なし \\
 返り値	 & なし \\ \hline
 \end{tabular}
 \end{table}
@@ -166,7 +166,7 @@ int		&	speed	& 監視カメラの首振りのスピード\\ \hline
 \multicolumn{2}{|l|}{void PlayerSystem(void)}       \\ \hline
 関数名           & PlayerSystem\\ \hline
 機能     &  プレイヤーの移動などの処理を行う  \\
-引数 	 	 & なし \\ 
+引数 	 	 & なし \\
 返り値	 & なし \\ \hline
 \end{tabular}
 \end{table}
@@ -178,7 +178,7 @@ int		&	speed	& 監視カメラの首振りのスピード\\ \hline
 \multicolumn{2}{|l|}{void EnemySystem(void)}       \\ \hline
 関数名           &  EnemySystem \\ \hline
 機能     & 敵キャラの移動などの処理を行う  \\
-引数 	 	 & なし \\ 
+引数 	 	 & なし \\
 返り値	 & なし \\ \hline
 \end{tabular}
 \end{table}
@@ -190,7 +190,7 @@ int		&	speed	& 監視カメラの首振りのスピード\\ \hline
 \multicolumn{2}{|l|}{void CameraSystem(void)}       \\ \hline
 関数名           & CameraSystem  \\ \hline
 機能     & カメラの座標などの変更を行う  \\
-引数 	 	 & なし \\ 
+引数 	 	 & なし \\
 返り値	 & なし \\ \hline
 \end{tabular}
 \end{table}
@@ -201,7 +201,7 @@ int		&	speed	& 監視カメラの首振りのスピード\\ \hline
 \multicolumn{2}{|l|}{void Collision(void)}       \\ \hline
 関数名           & Collision  \\ \hline
 機能     & 衝突判定を行う関数  \\
-引数 	 	 & なし \\ 
+引数 	 	 & なし \\
 返り値	 & なし \\ \hline
 \end{tabular}
 \end{table}
@@ -212,7 +212,7 @@ int		&	speed	& 監視カメラの首振りのスピード\\ \hline
 \multicolumn{2}{|l|}{void RenderWindow(void)}       \\ \hline
 関数名           & RenderWindow  \\ \hline
 機能     & 画面の描画を行う関数  \\
-引数 	 	 & なし \\ 
+引数 	 	 & なし \\
 返り値	 & なし \\ \hline
 \end{tabular}
 \end{table}

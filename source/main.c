@@ -1,7 +1,15 @@
 #include "../common.h"
 #include "../constants.h"
+static Uint32 AniTimer(Uint32 interval, void *param);
 
-int main (int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
+
+/*  フレームレート用の変数  */
+  const int fps = 60.0; //1秒に何回描画するか
+  const int framedelay = 1000.0 / fps; //1秒 = 1000msなので1回の描画にかけるべき時間
+  Uint32 framestart; //処理の始まりの時間を格納する変数
+  int frametime; //1回の処理にかかった時間を格納する変数
 
   u_short port = DEFAULT_PORT;
   char server_name[MAX_LEN_NAME];
@@ -24,20 +32,14 @@ int main (int argc, char *argv[]) {
   }
 
   setup_client(server_name, port); //クライアントのセットアップを行う関数
-
   Startup(); //初期設定
 
-  /*  フレームレート用の変数  */
-  const int fps = 60.0; //1秒に何回描画するか
-  const int framedelay = 1000.0 / fps; //1秒 = 1000msなので1回の描画にかけるべき時間
-  Uint32 framestart; //処理の始まりの時間を格納する変数
-  int frametime; //1回の処理にかかった時間を格納する変数
-  while (run) {
+    while (run) {
     framestart = SDL_GetTicks();
-
     if((SDL_PollEvent(&inputevent)))
     {
       Input(); 
+      printf("input\n");
     }
     control_requests();
     switch(status){
@@ -47,9 +49,8 @@ int main (int argc, char *argv[]) {
       case GAMEMODE:
         MoveChara(); //$B%-%c%i0\F0(B
         MoveTriangle(); //$B;03Q7A0\F0(B
-        RenderWindow(); //$BIA2h(B
         Collision(); //$BEv$?$jH=Dj(B
-        MoveChara();
+        RenderWindow(); //$BIA2h(B
         //Destroy(); //$BGK4~4XO"(B
         //SDL_Delay(3);
         break;
@@ -67,4 +68,3 @@ int main (int argc, char *argv[]) {
   terminate_client(); //ソケットの切断
   return 0;
 }
-

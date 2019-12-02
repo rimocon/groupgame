@@ -52,6 +52,7 @@ extern void joystick_send(int);
 /*  グローバル変数  */
 int status; //ゲームの現在の状態
 bool run; //プログラムが動いてるかどうか
+int elapsed_time; //ゲーム開始時からの経過時間
 SDL_Window *mainwindow; //メイン画面用
 SDL_Renderer *mainrenderer; //メイン画面用レンダラー
 SDL_Joystick *joystick; //ジョイスティックを特定,利用するための構造体
