@@ -5,6 +5,7 @@
 /*  変数  */
 TTF_Font *japanesefont; //フォント用
 int position;
+Uint time; //時間
 bool up,down;
 /*  define関連  */
 #define WINDOWWIDTH 1280 //ウィンドウの幅
@@ -101,6 +102,7 @@ typedef struct { //キー入力用の構造体を型宣言
 		up, //上矢印
 		down, //下矢印
 		a;  //4ボタン(決定ボタン)
+		b; //3ボタン(ハック用)
 }inputkeys;
 
 typedef struct {
@@ -119,6 +121,7 @@ typedef struct {
 	SDL_Rect src_rect;
 	SDL_Rect dst_rect;
 	bool flag_kinkai;
+	bool flag_hack;
   int tri[2][3];
   float theta[3];
   bool clockwise;

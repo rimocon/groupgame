@@ -204,13 +204,22 @@ void MoveTriangle()
     else if(camera[i].theta[2] > 240 - camera[i].angle - 90) {
       camera[i].clockwise = true; //時計回り
     }
-    if (camera[i].clockwise) {
-      camera[i].theta[2]--; //三角形の頂点の座標の角度を変える
-    }
-    else
-    {
+		if (!camera[i].flag_hack){ //ハッキングされていないとき
+    	if (camera[i].clockwise) {
+     	 camera[i].theta[2]--; //三角形の頂点の座標の角度を変える
+    	}
+    	else
+    	{
       camera[i].theta[2]++;
-    }
+    	}
+		}
+		else{
+			//ハッキングボタン3秒長押しでフラグあげて,止める.その後3秒たったらまた動き出す
+			//ハッキングしたあとは敵キャラのスピードあげる(警戒を強める)などの要素もあれば楽しいかも
+			if(SDL_GetTicks() - time > 3000){ //3秒経過したらフラグを下げる
+				camera[i].flag_hack = false;
+			}
+		}
     camera[i].theta[0] = camera[i].theta[2] + 15; //三角形の残り2点の角度を変える
     camera[i].theta[1] = camera[i].theta[2] - 15;
     Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w - camera_dst_rects[i].w/4,
@@ -254,13 +263,10 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   {
     SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); //敵をレンダーに出力
   }
-  //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
 
   for(int i = 0;  i<CAMERA_NUM; i++){
     filledTrigonColor(mainrenderer,camera[i].tri[0][0],camera[i].tri[1][0],camera[i].tri[0][1],camera[i].tri[1][1],camera[i].tri[0][2],camera[i].tri[1][2],0xff0000ff);
-    //SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,camera[i].angle,NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,90 - camera[i].theta[2],NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-    //printf("%d,%d \n",i,camera[i].dst_rect.x);
   }
   SDL_RenderPresent(mainrenderer); // 描画データを表示
 }
