@@ -1,7 +1,9 @@
 #include "../common.h"
 #include "../constants.h"
+static Uint32 AniTimer(Uint32 interval, void *param);
 
-int main (int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 
   u_short port = DEFAULT_PORT;
   char server_name[MAX_LEN_NAME];
@@ -47,9 +49,8 @@ int main (int argc, char *argv[]) {
       case GAMEMODE:
         MoveChara(); //$B%-%c%i0\F0(B
         MoveTriangle(); //$B;03Q7A0\F0(B
-        RenderWindow(); //$BIA2h(B
         Collision(); //$BEv$?$jH=Dj(B
-        MoveChara();
+        RenderWindow(); //$BIA2h(B
         //Destroy(); //$BGK4~4XO"(B
         //SDL_Delay(3);
         break;
@@ -63,8 +64,8 @@ int main (int argc, char *argv[]) {
     {
       SDL_Delay(framedelay - frametime); //余った時間分おやすみ
     }
+
   }
   terminate_client(); //ソケットの切断
   return 0;
 }
-
