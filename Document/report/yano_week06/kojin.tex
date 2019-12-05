@@ -1,0 +1,63 @@
+\documentclass{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings,jlisting,url,here}
+
+\lstset{%
+  language={C},
+  basicstyle={\small},%
+  identifierstyle={\small},%
+  commentstyle={\small\itshape},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small},%
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  numbers=left,%
+  xrightmargin=0zw,%
+  xleftmargin=3zw,%
+  numberstyle={\scriptsize},% stepnumber=1,
+  numbersep=1zw,%
+  lineskip=-0.5ex%
+}
+
+% xなんちゃらが変数，進捗書く
+\newcommand{\xe}{敵のランダムな動きを実装}
+\newcommand{\xf}{敵の動きのタイプの情報を保存する変数を構造体に追加}
+% []内の数が引数，#数字で引数読む
+\newcommand{\pitem}[2]{
+\item #1
+\item #2
+}
+
+\title{個人レポート}
+\author{6119019207 矢野大暉}
+\date{2019/11/29 提出}
+
+\begin{document}
+\maketitle
+
+\section{開発期間11/25～12/2の進捗状況} 
+\subsection{進展事項}
+今回の開発期間では，ゲームの設計として主に
+\begin{itemize}
+\pitem{\xe}{\xf}
+\end{itemize}
+を行った．以下にその詳細を示す．
+
+\subsection{\xe}
+敵が設定された確率に従って，ランダムに上下左右方向へ移動する動きを実装した．
+
+\subsection{\xf}
+敵の動くタイプが，3種類できたので整理するために構造体に新しく敵の動きのタイプを保存する変数を追加した．
+現在敵ができる動きのタイプは，「移動床に沿って動く」「ランダムに動く」，「プレイヤーを追跡する」の3つになる．
+
+\section{次回開発期間での予定}
+\begin{itemize}
+\item 敵の視界の実装
+\end{itemize}
+
+今回の開発期間では，前回予定していた「敵の移動パターンを増やす」ことができた．
+
+次回は，前回の目標であった「敵の視界の実装」を実装したい．
+\end{document}

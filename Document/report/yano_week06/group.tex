@@ -1,0 +1,71 @@
+\documentclass{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings,jlisting,url,here}
+
+\lstset{%
+  language={C},
+  basicstyle={\small},%
+  identifierstyle={\small},%
+  commentstyle={\small\itshape},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small},%
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  numbers=left,%
+  xrightmargin=0zw,%
+  xleftmargin=3zw,%
+  numberstyle={\scriptsize},% stepnumber=1,
+  numbersep=1zw,%
+  lineskip=-0.5ex%
+}
+% xなんちゃらが変数，進捗書く
+\newcommand{\xa}{プレイヤーの斜め移動の実装}
+\newcommand{\xb}{フレームレートの実装}
+\newcommand{\xc}{カメラの視点と，カメラ本体の回転の同期の実装}
+\newcommand{\xd}{プレイヤーを追跡する敵の動きの実装}
+\newcommand{\xe}{敵のランダムな動きを実装}
+% []内の数が引数，#数字で引数読む
+\newcommand{\pitem}[5]{
+\item #1
+\item #2
+\item #3
+\item #4
+\item #5
+}
+
+\title{グループレポート}
+\author{6119019092 織田武瑠 6119019207 矢野大暉 6119019056 山口力也}
+\date{2019/11/29 提出}
+
+\begin{document}
+\maketitle
+
+\section{開発期間11/25～12/2の進捗状況} 
+
+\subsection{進展事項}
+今回の開発期間では，ゲームの設計として主に
+\begin{itemize}
+\pitem{\xa}{\xb}{\xc}{\xd}{\xe}
+\end{itemize}
+を行った．以下にその詳細を示す．
+
+\subsection{\xa}
+プレイヤーが斜めに移動した際に，移動係数として0.71をかけることと，プレイヤーの座標を実数で持つことで，速度が速くならずに斜め移動が可能になった．また，最初に実装していた時に発生していた棚との当たり判定と，ゲーム画面の外に移動するバグを修正した．
+
+\subsection{\xb}
+フレームレートを実装し，クライアントが設定されたFPSでゲーム画面が描画されるようになった．
+最初に設定したFPS値から計算して，1回のループ処理にかけるべき時間を計算し，その時間になるようにループ処理内で待機処理を行うことでフレームレートを実装した．
+
+\subsection{\xc}
+前回までで，カメラの視点の回転のみ実装していたため，その回転に同期するようにカメラ本体の回転がされるように実装した．
+
+\subsection{\xd}
+プレイヤーの現在位置に追跡してくる敵の動きを実装した．
+また，その際に発生していた棚との当たり判定が無くなる挙動などを修正した．
+
+\subsection{\xe}
+敵が設定された確率に従って，ランダムに上下左右方向へ移動する動きを実装した．
+
+\end{document}
