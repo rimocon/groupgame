@@ -364,38 +364,6 @@ void MoveChara()
       player[i].dst_rect.y = player[i].back_zahyo_y;
     }
 
-    /*
-    if (player[i].key.left) //左
-    { 
-      player[i].dst_rect.x -= move_distance;
-      if (player[i].dst_rect.x < 0)
-        player[i].dst_rect.x = 0;
-    }
-    else if (player[i].key.right) //右
-    { 
-      player[i].dst_rect.x += move_distance;
-      if (player[i].dst_rect.x > WINDOWWIDTH - player[0].dst_rect.w)
-        player[i].dst_rect.x = WINDOWWIDTH - player[0].dst_rect.w;
-      
-    }
-    if (player[i].key.up ) //上
-    {
-      player[myid].dst_rect.y -= move_distance;
-      //if(player[myid].dst_rect.y < 0) player[myid].dst_rect.y = 0;
-      
-      if (player[i].dst_rect.y < 0)
-        player[i].dst_rect.y = 0;
-      
-    }
-    else if (player[i].key.down) //下
-    { 
-      player[i].dst_rect.y += move_distance;
-      if (player[i].dst_rect.y > WINDOWHEIGHT - player[0].dst_rect.h)
-        player[i].dst_rect.y = WINDOWHEIGHT - player[0].dst_rect.h;
-      
-    }
-    */
-
     //棚との衝突判定
     for (int i = 0; i < KOTEI_OBJECT_NUM; i++)
     {
@@ -434,27 +402,31 @@ void MoveChara()
   //敵キャラの移動
   for (int i = 0; i < ENEMY_NUM; i++)
   {
+    srand((unsigned int)time(NULL)); // 現在時刻の情報で初期化
     /*追跡してくるNPC
    　現在は、x,y座標に対して、プレイヤー側に寄ってくるようにしているが、
    　x座標または、y座標のどちらか片方のみに設定すると、道の追跡ではなく、
    　道の”とうせんぼ”ができる！
    */
-
-    if (enemy[i].dst_rect.x > player[0].dst_rect.x)
+    if (enemy[i].dst_rect.y > player[0].dst_rect.y && rand() % 10 + 1 >= 6) //プレイヤーが上方向にいる
     {
-      enemy[i].move_angle = 270;
-    }
-    if (enemy[i].dst_rect.x < player[0].dst_rect.x)
-    {
-      enemy[i].move_angle = 90;
-    }
-    if (enemy[i].dst_rect.y > player[0].dst_rect.y)
-    {
+      //if (rand() % 10 + 1 >= 3)
       enemy[i].move_angle = 0;
     }
-    if (enemy[i].dst_rect.y < player[0].dst_rect.y)
+    if (enemy[i].dst_rect.y < player[0].dst_rect.y && rand() % 10 + 1 >= 6) //プレイヤーが下方向にいる
     {
+      //if (rand() % 10 + 1 >= 3)
       enemy[i].move_angle = 180;
+    }
+    if (enemy[i].dst_rect.x > player[0].dst_rect.x && rand() % 10 + 1 < 6) //プレイヤーが左方向にいる
+    {
+      //if (rand() % 10 + 1 >= 3)
+      enemy[i].move_angle = 270;
+    }
+    if (enemy[i].dst_rect.x < player[0].dst_rect.x && rand() % 10 + 1 < 6) //プレイヤーが右方向にいる
+    {
+      //if (rand() % 10 + 1 >= 3)
+      enemy[i].move_angle = 90;
     }
     // 敵が画面外に行こうとしたときに向きを反転する
     if (enemy[i].dst_rect.x + enemy[i].dst_rect.w >= WINDOWWIDTH || enemy[i].dst_rect.x <= 0 || enemy[i].dst_rect.y + enemy[i].dst_rect.h >= WINDOWHEIGHT || enemy[i].dst_rect.y <= 0)
@@ -469,20 +441,16 @@ void MoveChara()
     //動く方向を格納してる変数（move_angle）に進んでいく
     switch (enemy[i].move_angle)
     {
-    case 0:
-      //enemy[i].dst_rect.y -= ENEMY_SPEED;
+    case 0: //プレイヤーが上方向にいる
       enemy[i].dst_rect.y -= enemy[i].speed;
       break;
-    case 90:
-      //enemy[i].dst_rect.x += ENEMY_SPEED;
+    case 90: //プレイヤーが右方向にいる
       enemy[i].dst_rect.x += enemy[i].speed;
       break;
-    case 180:
-      //enemy[i].dst_rect.y += ENEMY_SPEED;
+    case 180: //プレイヤーが下方向にいる
       enemy[i].dst_rect.y += enemy[i].speed;
       break;
-    case 270:
-      //enemy[i].dst_rect.x -= ENEMY_SPEED;
+    case 270: //プレイヤーが左方向にいる
       enemy[i].dst_rect.x -= enemy[i].speed;
       break;
     }
@@ -490,27 +458,109 @@ void MoveChara()
     {
       SDL_Rect overrap_rect;
 
-      // 敵が棚に当たった時、反転する
+      // 敵が棚に当たった時
       if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF)
       {
         //動く方向を格納してる変数（move_angle）に進んでいく
         switch (enemy[i].move_angle)
         {
-        case 0:
-          //enemy[i].dst_rect.y -= ENEMY_SPEED;
+        case 0: //プレイヤーが上方向にいる　かつ　上方向に棚がある
           enemy[i].dst_rect.y += enemy[i].speed;
+          //敵が棚で止まるのを防止
+          if (rand() % 10 + 1 < 7)
+          {
+            if (enemy[i].dst_rect.x > player[0].dst_rect.x)
+            { //プレイヤーが左方向にいる時
+              enemy[i].dst_rect.x -= enemy[i].speed;
+            }
+            else if (enemy[i].dst_rect.x < player[0].dst_rect.x)
+            { //プレイヤーが右方向にいる時
+              enemy[i].dst_rect.x += enemy[i].speed;
+            }
+          }
+          else
+          {
+            if (rand() % 10 + 1 < 6){
+              enemy[i].dst_rect.x += enemy[i].speed;
+            }
+            else{
+              enemy[i].dst_rect.x -= enemy[i].speed;
+            }
+          }
           break;
-        case 90:
-          //enemy[i].dst_rect.x += ENEMY_SPEED;
+        case 90: //プレイヤーが右方向にいる　かつ　右方向に棚がある
           enemy[i].dst_rect.x -= enemy[i].speed;
+          //敵が棚で止まるのを防止
+          if (rand() % 10 + 1 < 7)
+          {
+            if (enemy[i].dst_rect.y > player[0].dst_rect.y)
+            { //プレイヤーが上方向にいる時
+              enemy[i].dst_rect.y -= enemy[i].speed;
+            }
+            else if (enemy[i].dst_rect.y < player[0].dst_rect.y)
+            { //プレイヤーが下方向にいる時
+              enemy[i].dst_rect.y += enemy[i].speed;
+            }
+          }
+          else
+          {
+            if (rand() % 10 + 1 < 6){
+              enemy[i].dst_rect.y += enemy[i].speed;
+            }
+            else {
+              enemy[i].dst_rect.y -= enemy[i].speed;
+            }
+          }
           break;
-        case 180:
+        case 180: //プレイヤーが下方向にいる　かつ　下方向に棚がある
           //enemy[i].dst_rect.y += ENEMY_SPEED;
           enemy[i].dst_rect.y -= enemy[i].speed;
+          //敵が棚で止まるのを防止
+          if (rand() % 10 + 1 < 7)
+          {
+            if (enemy[i].dst_rect.x > player[0].dst_rect.x)
+            {
+              enemy[i].dst_rect.x -= enemy[i].speed;
+            }
+            else if (enemy[i].dst_rect.x < player[0].dst_rect.x)
+            {
+              enemy[i].dst_rect.x += enemy[i].speed;
+            }
+          }
+          else
+          {
+            if (rand() % 10 + 1 < 6){
+              enemy[i].dst_rect.x += enemy[i].speed;
+            }
+            else{
+              enemy[i].dst_rect.x -= enemy[i].speed;
+            }
+          }
           break;
-        case 270:
+        case 270: //プレイヤーが左方向にいる　かつ　左方向に棚がある
           //enemy[i].dst_rect.x -= ENEMY_SPEED;
           enemy[i].dst_rect.x += enemy[i].speed;
+          //敵が棚で止まるのを防止
+          if (rand() % 10 + 1 < 7)
+          {
+            if (enemy[i].dst_rect.y > player[0].dst_rect.y)
+            {                                        //NPCが下、プレイヤーが上のとき
+              enemy[i].dst_rect.y -= enemy[i].speed; //NPCを上に移動
+            }
+            else if (enemy[i].dst_rect.y < player[0].dst_rect.y)
+            {                                        //NPCが上、プレイヤーが下のとき
+              enemy[i].dst_rect.y += enemy[i].speed; //NPCを下に移動
+            }
+          }
+          else
+          {
+             if (rand() % 10 + 1 < 6){
+              enemy[i].dst_rect.y += enemy[i].speed;
+            }
+            else {
+              enemy[i].dst_rect.y -= enemy[i].speed;
+            }
+          }
           break;
         }
       }
