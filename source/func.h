@@ -11,14 +11,9 @@ bool up,down;
 #define WINDOWHEIGHT 960 //ウィンドウの高さ
 
 #define PLAYER_NUM 3 // オブジェクトの数などはテキストファイルで読み込めるようにしたほうがいろんなマップに対応できるから後から修正したい
-#define PLAYER_SPEED 1
+#define PLAYER_SPEED 4
 
 // 金塊、カメラ、棚、出入り口の数
-#define KINKAI_NUM 2
-#define SHELF_NUM 10 // 棚の数、マップデータ(map0)の棚の数と合わせる
-#define ENTRANCE_NUM 3
-#define  KOTEI_OBJECT_NUM 16 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
-
 #define CAMERA_NUM 5
 #define BACKGROUND_NUM 1
 #define FONT_NUM 2

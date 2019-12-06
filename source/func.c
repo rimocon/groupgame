@@ -333,20 +333,18 @@ void Collision()
 }
 void MoveChara()
 {
-
-  int move_distance = PLAYER_SPEED * 1;
   //static back_diff_x = 0;
   //static back_diff_y = 0;
   float move; //移動係数
 
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < PLAYER_NUM; i++)
   {
     if (player[i].key.left == 1 || player[i].key.right == 1){
       if (player[i].key.up == 1 || player[i].key.down == 1){
-        move=0.71f; //移動係数を0.71に設定
+        move = 0.71f; //移動係数を0.71に設定
       }
       else{
-        move=1.0f; ////斜めじゃなければ1.0に設定
+        move = 1.0f; ////斜めじゃなければ1.0に設定
       }
     }
     else if (player[i].key.up == 1 || player[i].key.down == 1)
@@ -356,7 +354,7 @@ void MoveChara()
 
     if (player[i].key.left == 1)
     {
-      player[i].back_zahyo_x -= (int)1 * move; //プレイヤーの座標をfloat型で保持
+      player[i].back_zahyo_x -= player[i].speed * move; //プレイヤーの座標をfloat型で保持
       if (player[i].back_zahyo_x < 0)
       {
         player[i].back_zahyo_x = 0;
@@ -365,7 +363,7 @@ void MoveChara()
     }
     if (player[i].key.right == 1)
     {
-      player[i].back_zahyo_x += (int)1 * move;
+      player[i].back_zahyo_x += player[i].speed * move;
       if (player[i].back_zahyo_x > WINDOWWIDTH - player[0].dst_rect.w)
       {
         player[i].back_zahyo_x = WINDOWWIDTH - player[0].dst_rect.w;
@@ -374,7 +372,7 @@ void MoveChara()
     }
     if (player[i].key.up == 1)
     {
-      player[i].back_zahyo_y -= (int)1 * move;
+      player[i].back_zahyo_y -= player[i].speed * move;
       if (player[i].back_zahyo_y < 0)
       {
         player[i].back_zahyo_y = 0;
@@ -383,43 +381,43 @@ void MoveChara()
     }
     if (player[i].key.down == 1)
     {
-      player[i].back_zahyo_y += (int)1 * move;
+      player[i].back_zahyo_y += player[i].speed * move;
       if (player[i].back_zahyo_y > WINDOWHEIGHT - player[0].dst_rect.h)
       {
         player[i].back_zahyo_y = WINDOWHEIGHT - player[0].dst_rect.h;
       }
       player[i].dst_rect.y = player[i].back_zahyo_y;
     }
+    printf("back %lf %lf", player[i].back_zahyo_x, player[i].back_zahyo_y);
+    printf("dst %d %d", player[i].dst_rect.x, player[i].dst_rect.y);
+
     //棚との衝突判定
-    for (int i = 0; i < kotei_object_num; i++)
+    for (int j = 0; j < kotei_object_num; j++)
     {
-      for (int j = 0; j < PLAYER_NUM; j++)
+      if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &player[i].dst_rect)) // プレイヤーと固定オブジェクトが重なった時
       {
-        if (SDL_HasIntersection(&kotei_objects[i].dst_rect, &player[j].dst_rect)) // プレイヤーと固定オブジェクトが重なった時
+        if (kotei_objects[j].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
+          break;
+        // ぶつかったぶんの距離プレイヤーの位置を戻す
+        if (player[i].key.left)
         {
-          if (kotei_objects[i].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
-            break;
-          // ぶつかったぶんの距離プレイヤーの位置を戻す
-          if (player[j].key.left)
-          {
-            player[j].back_zahyo_x += move;
-            player[j].dst_rect.x = player[j].back_zahyo_x;
-          }
-          if (player[j].key.right)
-          {
-            player[j].back_zahyo_x -= move;
-            player[j].dst_rect.x = player[j].back_zahyo_x;
-          }
-          if (player[j].key.up)
-          {
-            player[j].back_zahyo_y += move;
-            player[j].dst_rect.y = player[j].back_zahyo_y;
-          }
-          if (player[j].key.down)
-          {
-            player[j].back_zahyo_y -= move;
-            player[j].dst_rect.y = player[j].back_zahyo_y;
-          }
+          player[i].back_zahyo_x += player[i].speed * move;
+          player[i].dst_rect.x = player[i].back_zahyo_x;
+        }
+        if (player[i].key.right)
+        {
+          player[i].back_zahyo_x -= player[i].speed * move;
+          player[i].dst_rect.x = player[i].back_zahyo_x;
+        }
+        if (player[i].key.up)
+        {
+          player[i].back_zahyo_y += player[i].speed * move;
+          player[i].dst_rect.y = player[i].back_zahyo_y;
+        }
+        if (player[i].key.down)
+        {
+          player[i].back_zahyo_y -= player[i].speed * move;
+          player[i].dst_rect.y = player[i].back_zahyo_y;
         }
       }
     }
@@ -680,7 +678,7 @@ void Fontload() {
   SDL_Color white = {255,255,255,255};
   SDL_Color red = {255,0,0,255};
   //int iw,ih;
-  for(int i = 0; i<FONT_NUM; i++){ //フォントロード 
+  for(int i = 0; i<FONT_NUM; i++){ //フォントロード
     s = TTF_RenderUTF8_Blended(japanesefont,fonts[i],white);
     font[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer,s);
 
@@ -826,7 +824,7 @@ int control_requests()
   }
 
   return result;
-  // マップはテクスチャに 
+  // マップはテクスチャに
   // if (NULL == (gGame.map = SDL_CreateTextureFromSurface(gGame.render, map)))
   // {
   //   ret = PrintError(SDL_GetError());
