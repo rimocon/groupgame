@@ -1,0 +1,59 @@
+\documentclass{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings,jlisting,url,here}
+
+\lstset{%
+  language={C},
+  basicstyle={\small},%
+  identifierstyle={\small},%
+  commentstyle={\small\itshape},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small},%
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  numbers=left,%
+  xrightmargin=0zw,%
+  xleftmargin=3zw,%
+  numberstyle={\scriptsize},% stepnumber=1,
+  numbersep=1zw,%
+  lineskip=-0.5ex%
+}
+% xなんちゃらが変数，進捗書く
+\newcommand{\xa}{プレイヤーを追いかける敵の動きの改良}
+\newcommand{\xb}{カメラの動くプログラムと，敵の動きのプログラムの統合}
+\newcommand{\xc}{プレイヤーによる，敵への妨害行為の実装の検討}
+% []内の数が引数，#数字で引数読む
+\newcommand{\pitem}[3]{
+\item #1
+\item #2
+\item #3
+}
+
+\title{グループレポート}
+\author{6119019092 織田武瑠 6119019207 矢野大暉 6119019056 山口力也}
+\date{2019/12/6 提出}
+
+\begin{document}
+\maketitle
+
+\section{開発期間12/2～12/9の進捗状況} 
+
+\subsection{進展事項}
+今回の開発期間では，ゲームの設計として主に
+\begin{itemize}
+\pitem{\xa}{\xb}{\xc}
+\end{itemize}
+を行った．以下にその詳細を示す．
+
+\subsection{\xa}
+プレイヤーを追いかける敵の動きにおいて，プレイヤーと敵との間に壁があったときに正しく迂回することができていなかったので，改良を行った．
+
+\subsection{\xb}
+前回作成した「監視カメラと，監視カメラの視点を動かすプログラム」と「敵がランダムに動く，敵がプレイヤーを追いかけるプログラム」の統合を行った．
+
+\subsection{\xc}
+ゲームの最低限の機能は実装できたため，次に実装予定であるプレイヤーが「催涙スプレーをかける」行動や「監視カメラをハッキングする」などの敵に行う妨害行動の実装方法の検討をした．
+
+\end{document}

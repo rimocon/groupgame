@@ -1,0 +1,55 @@
+\documentclass{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings,jlisting,url,here}
+
+\lstset{%
+  language={C},
+  basicstyle={\small},%
+  identifierstyle={\small},%
+  commentstyle={\small\itshape},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small},%
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  numbers=left,%
+  xrightmargin=0zw,%
+  xleftmargin=3zw,%
+  numberstyle={\scriptsize},% stepnumber=1,
+  numbersep=1zw,%
+  lineskip=-0.5ex%
+}
+
+% xなんちゃらが変数，進捗書く
+\newcommand{\xe}{プレイヤーによる，敵への妨害行為の実装の検討}
+% []内の数が引数，#数字で引数読む
+\newcommand{\pitem}[1]{
+\item #1
+}
+
+\title{個人レポート}
+\author{6119019207 矢野大暉}
+\date{2019/12/6 提出}
+
+\begin{document}
+\maketitle
+
+\section{開発期間12/2～12/9の進捗状況} 
+\subsection{進展事項}
+今回の開発期間では，ゲームの設計として主に
+\begin{itemize}
+\pitem{\xe}
+\end{itemize}
+を行った．以下にその詳細を示す．
+
+\subsection{\xe}
+ゲームの最低限の機能は実装できたため，次に実装予定であるプレイヤーが「催涙スプレーをかける」という、敵に対して行う妨害行動の実装方法の検討をした．現在はプレイヤーの移動方向を取得できるように実装を行っている途中である．
+
+\section{次回開発期間での予定}
+\begin{itemize}
+\item プレイヤーが敵に対して妨害をする処理の実装
+\end{itemize}
+
+次回は，前回の目標であった「敵の視界の実装」を実装したい．
+\end{document}
