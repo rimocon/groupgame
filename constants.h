@@ -18,6 +18,7 @@
 #define CENTER_COMMAND 'C' //真ん中(左右)へのスティック操作が行われたことを示す
 #define AENTER_COMMAND 'A' //真ん中(上下)へのスティック操作が行われたことを示す
 #define QUIT_COMMAND 'Q' //チャットシステムの終了
+#define START_COMMAND 'S' //メニュー画面で、スタートボタンを押したことを表す
 
 /*  関数のプロトタイプ宣言 */
 //またあとで

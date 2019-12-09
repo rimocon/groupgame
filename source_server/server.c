@@ -15,6 +15,8 @@ static int num_clients;
 static int num_socks;
 static fd_set mask; //FD集合を表す構造体
 static CONTAINER data;
+static int start_count = 0;
+static int start_count_flag[3] = {};
 
 void setup_server(int, u_short);
 int control_requests();
@@ -221,6 +223,18 @@ int control_requests()
       case MESSAGE_COMMAND: //'M'のとき
         fprintf(stderr, "client[%d] %s: message = %s\n", clients[i].cid, clients[i].name, data.message);
         send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case START_COMMAND: //'S'のとき
+        fprintf(stderr, "client[%d] %s: message = %s\n", clients[i].cid, clients[i].name, data.message);
+        if(start_count_flag[clients[i].cid] == 0){
+          start_count++;
+          start_count_flag[clients[i].cid] = 1;
+        }
+        printf("%d\n",start_count);
+        if(start_count == num_clients){ //接続しているクライアント全員が、スタートボタンを押したことが確認できた時
+          send_data(BROADCAST, &data, sizeof(data));
+        }
         result = 1;
         break;
       case QUIT_COMMAND: //'Q'のとき
