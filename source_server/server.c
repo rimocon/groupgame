@@ -190,6 +190,11 @@ int control_requests()
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;
         break;
+      case HACK_COMMAND: //'H'のとき
+        fprintf(stderr, "client[%d], name : %s, hacking !!!!! \n", clients[i].cid, clients[i].name);
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
       case PLAYER_COMMAND: //'P'のとき
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;

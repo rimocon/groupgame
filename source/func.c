@@ -43,6 +43,7 @@ void Startup() {
   player_flag[0] = true;                                //プレイヤー1 は最初は、生存
   player_flag[1] = true;                                //プレイヤー2 は最初は、生存
   player_flag[2] = true;                                //プレイヤー3 は最初は、生存
+  hacking_flag = false; //最初ハッキングはされていない
   mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0); //メインウィンドウに対するレンダラー生成
   TTF_Init(); //ttfを初期化
   japanesefont = TTF_OpenFont("fonts-japanese-gothic.ttf",80);  //フォント読み込み
@@ -56,7 +57,7 @@ void Startup() {
     printf("camera %d.h = %d\n",i,camera[i].dst_rect.h);
   }
   MakeMap();
-  status = MENUMODE; //メニューモードに状態を設定
+  status = GAMEMODE; //メニューモードに状態を設定
   run = true; //動かす
   up = false;
   down = false;
@@ -147,8 +148,10 @@ void Input()
       {
         run = false;
       }
-      if (inputevent.jbutton.button == 5)
+      if (inputevent.jbutton.button == 1) //ハッキングボタン
       {
+        player[myid].inputtime = SDL_GetTicks();
+        player[myid].flag_hack_start = true;
       }
 
       //金塊を取る
@@ -182,9 +185,14 @@ void Input()
     case SDL_JOYBUTTONUP:
       //	printf("The ID of the released button is %d.\n",inputevent.jbutton.button); // 離されたボタンのIDを表示（0から）
       // ボタンIDに応じた処理
-      if (inputevent.jbutton.button == 0)
+      if (inputevent.jbutton.button == 1) //ハッキングボタン
       {
-        //		printf("--- You released a button on the joystick.\n");
+        if(SDL_GetTicks() - player[myid].inputtime > 3000){
+          player[myid].flag_hack_end = true;
+          joystick_send(9);
+          printf("hack\n");
+          player[myid].flag_hack_start = false;
+          }
       }
       break;
   }
@@ -226,7 +234,7 @@ void Imageload(){
 
 void MoveTriangle()
 {
-
+  
   for (int i = 0; i<CAMERA_NUM;i++) {  //カメラの数だけ繰り返す
     if ( camera[i].theta[2] < 120 - camera[i].angle -90) {
       camera[i].clockwise = false; //反時計回り
@@ -234,13 +242,17 @@ void MoveTriangle()
     else if(camera[i].theta[2] > 240 - camera[i].angle - 90) {
       camera[i].clockwise = true; //時計回り
     }
-    if (camera[i].clockwise) {
-      camera[i].theta[2]--; //三角形の頂点の座標の角度を変える
+    //ハッキング処理があった場合ここで処理を止める.
+    if (!hacking_flag){
+      if (camera[i].clockwise) {
+        camera[i].theta[2]--; //三角形の頂点の座標の角度を変える
+      }
+      else
+      {
+        camera[i].theta[2]++;
+      }
     }
-    else
-    {
-      camera[i].theta[2]++;
-    }
+    printf("%d\n",hacking_flag);
     camera[i].theta[0] = camera[i].theta[2] + 15; //三角形の残り2点の角度を変える
     camera[i].theta[1] = camera[i].theta[2] - 15;
     Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w - camera_dst_rects[i].w/4,
@@ -896,6 +908,11 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
     //コマンドとして、プレイヤーの'A'を代入
     data.command = AENTER_COMMAND; //コマンドを格納
     data.cid = myid;               //クライアントIDを格納
+  }
+  else if (num == 9) //ハッキングフラグ
+  {
+    data.command = HACK_COMMAND;
+    data.cid = myid;
   }
   send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
 }

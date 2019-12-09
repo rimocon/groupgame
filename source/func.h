@@ -1,4 +1,4 @@
-/*  二重インクルード防止  */
+ /*  二重インクルード防止  */
 #ifndef _FUNC_H_
 #define _FUNC_H_
 
@@ -33,6 +33,7 @@ bool up,down;
 
 /*  変数  */
 bool kinkai_flag; //金塊を描画するかしないか
+bool hacking_flag; //金塊を描画するかしないか
 bool kinkai_keep_flag; //プレイヤーが金塊を持っているかどうか
 bool player_flag[3]; //プレイヤーを描画するか、しないか
 /*  mapデータ */
@@ -114,9 +115,12 @@ typedef struct {
 	SDL_Rect src_rect;
 	SDL_Rect dst_rect;
 	float back_zahyo_x;
-    float back_zahyo_y;
+  float back_zahyo_y;
 	bool flag_kinkai;
+  bool flag_hack_start;
+  bool flag_hack_end;
 	int speed;
+  int inputtime;
   inputkeys key; //inputkeys構造体をinputという名前で実体化
 }playerinfo;
 
