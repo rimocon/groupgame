@@ -85,7 +85,8 @@ typedef enum{
 	TYPE_ENEMY_MOVING_FLOOR_DR = 12, // DR = DownRightの略
 	TYPE_ENEMY_MOVING_FLOOR_REV = 13, // REV = Reverseの略です
   TYPE_BACKGROUND = 14,
-	TYPE_NUM = 15
+  TYPE_SPRAY = 15,
+	TYPE_NUM = 16
 }objecttype;
 
 typedef struct {
@@ -100,19 +101,26 @@ typedef struct { //キー入力用の構造体を型宣言
 		right, //右矢印
 		up, //上矢印
 		down, //下矢印
-		a;  //4ボタン(決定ボタン)
+		a,  //4ボタン(決定ボタン)
+		x;  //2ボタン(催涙スプレー)
 }inputkeys;
 
 typedef struct {
 	objecttype type;
 	SDL_Texture * image_texture;
+	SDL_Texture *spray_texture;
 	SDL_Rect src_rect;
 	SDL_Rect dst_rect;
 	float back_zahyo_x;
     float back_zahyo_y;
 	bool flag_kinkai;
 	int speed;
-  inputkeys key; //inputkeys構造体をinputという名前で実体化
+ 	inputkeys key; //inputkeys構造体をinputという名前で実体化
+  	int look_angle;
+	int spray_flag;
+	SDL_Rect spray_src_rect;
+	SDL_Rect spray_dst_rect;
+	SDL_Point spray_origin;
 }playerinfo;
 
 
@@ -146,7 +154,7 @@ typedef struct {
 	int speed; //敵の移動速度
 	int look_angle; // 敵が向いている方向(0度〜360度)、視野の描画する方法によるので仮
 	int move_angle; // 敵が動く方向
-	bool isgodest; // 目的地まで行ってるかどうか
+	bool isfreeze; // 止まってるかどうか
 	enemymovetype movetype; // 敵の動きのタイプ
 }enemyinfo; // 敵の構造体
 
@@ -173,7 +181,7 @@ static int num_sock;
 static fd_set mask; //FD集合を表す構造体
 
 //画像ファイルパス
-static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png", "./images/player2.png", "./images/player3.png","./images/floor_ul.png","./images/floor_ur.png","./images/floor_dl.png","./images/floor_dr.png","./images/floor_rev.png","./images/menu.png"}; // 読み込む画像ファイルを指定
+static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png", "./images/player2.png", "./images/player3.png","./images/floor_ul.png","./images/floor_ur.png","./images/floor_dl.png","./images/floor_dr.png","./images/floor_rev.png","./images/menu.png","./images/spray.png"}; // 読み込む画像ファイルを指定
 //フォント
 static char *fonts[FONT_NUM] = {"開始","終了"};
 

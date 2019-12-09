@@ -139,6 +139,7 @@ void Input()
       {
         //	printf("--- Four-Direction Key: Vertical Axis\n");
       }
+      break;
       // ジョイスティックのボタンが押された時
     case SDL_JOYBUTTONDOWN:
       //	printf("The ID of the pressed button is %d.\n", inputevent.jbutton.button); // 押されたボタンのIDを表示（0から）
@@ -176,12 +177,21 @@ void Input()
       {
         run = false;
       }
+      //2ボタンが押された時(jbuttonだと1)
+      if (inputevent.jbutton.button == 1)
+      {
+        joystick_send(9);
+      }
       break;
-
       // ボタンが離された時
     case SDL_JOYBUTTONUP:
       //	printf("The ID of the released button is %d.\n",inputevent.jbutton.button); // 離されたボタンのIDを表示（0から）
       // ボタンIDに応じた処理
+      // 2ボタンが離された
+      if (inputevent.jbutton.button == 1)
+      {
+        joystick_send(10);
+      }
       if (inputevent.jbutton.button == 0)
       {
         //		printf("--- You released a button on the joystick.\n");
@@ -278,6 +288,9 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
     if (player_flag[i] == true)
     {
       SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
+      if(player[i].spray_flag == 1){
+        SDL_RenderCopyEx(mainrenderer,player[i].spray_texture,&player[i].spray_src_rect,&player[i].spray_dst_rect,player[i].look_angle-90,&player[i].spray_origin,SDL_FLIP_NONE);
+      }
     }
   }
   for (int i = 0; i < ENEMY_NUM; i++)
@@ -289,7 +302,7 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   for(int i = 0;  i<CAMERA_NUM; i++){
     filledTrigonColor(mainrenderer,camera[i].tri[0][0],camera[i].tri[1][0],camera[i].tri[0][1],camera[i].tri[1][1],camera[i].tri[0][2],camera[i].tri[1][2],0xff0000ff);
     //SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,camera[i].angle,NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-    SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,90 - camera[i].theta[2],NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,90 - camera[i].theta[2],&player[i].spray_origin,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     //printf("%d,%d \n",i,camera[i].dst_rect.x);
   }
   SDL_RenderPresent(mainrenderer); // 描画データを表示
@@ -330,27 +343,50 @@ void Collision()
     }
   }
   //ここまでカメラの判定
+
 }
 void MoveChara()
 {
   //static back_diff_x = 0;
   //static back_diff_y = 0;
   float move; //移動係数
-
+  // プレイヤーの移動
   for (int i = 0; i < PLAYER_NUM; i++)
   {
     if (player[i].key.left == 1 || player[i].key.right == 1){
       if (player[i].key.up == 1 || player[i].key.down == 1){
         move = 0.71f; //移動係数を0.71に設定
+        // 向いている方向をlook_angleに保存
+        if     (player[i].key.right && player[i].key.up) player[i].look_angle = 45;
+        else if(player[i].key.right && player[i].key.down) player[i].look_angle = 135;
+        else if(player[i].key.left && player[i].key.down) player[i].look_angle = 225;
+        else if(player[i].key.left && player[i].key.up) player[i].look_angle = 315;
       }
       else{
         move = 1.0f; ////斜めじゃなければ1.0に設定
+        if(player[i].key.left) player[i].look_angle = 270;
+        else if(player[i].key.right) player[i].look_angle = 90;
       }
     }
     else if (player[i].key.up == 1 || player[i].key.down == 1)
     {
       move = 1.0f;
+
+      if (player[i].key.right == 1 || player[i].key.left == 1){
+        move = 0.71f; //移動係数を0.71に設定
+        if     (player[i].key.right && player[i].key.up) player[i].look_angle = 45;
+        else if(player[i].key.right && player[i].key.down) player[i].look_angle = 135;
+        else if(player[i].key.left && player[i].key.down) player[i].look_angle = 225;
+        else if(player[i].key.left && player[i].key.up) player[i].look_angle = 315;
+      }
+      else{
+        move = 1.0f; ////斜めじゃなければ1.0に設定
+        if(player[i].key.up) player[i].look_angle = 0;
+        else if(player[i].key.down) player[i].look_angle = 180;
+      }
     }
+
+    //printf("left %d, right %d, up %d, down %d",player[0].key.left,player[0].key.right,player[0].key.up,player[0].key.down);
 
     if (player[i].key.left == 1)
     {
@@ -388,8 +424,6 @@ void MoveChara()
       }
       player[i].dst_rect.y = player[i].back_zahyo_y;
     }
-    printf("back %lf %lf", player[i].back_zahyo_x, player[i].back_zahyo_y);
-    printf("dst %d %d", player[i].dst_rect.x, player[i].dst_rect.y);
 
     //棚との衝突判定
     for (int j = 0; j < kotei_object_num; j++)
@@ -421,7 +455,9 @@ void MoveChara()
         }
       }
     }
+    printf("player[%d] : %d\n",i,player[i].key.x);
   }
+
   //敵キャラの移動
   for (int i = 0; i < ENEMY_NUM; i++)
   {
@@ -430,7 +466,7 @@ void MoveChara()
 
       srand((unsigned int)time(NULL)); // MT_RANDOM用に現在時刻の情報で初期化
       int random = rand() % 100;
-      //敵の動くタイプによって処理変える
+      //func.hのenemy_movetypes配列で設定した、敵の動くタイプによって処理変える
       switch(enemy[i].movetype){
         // 敵が移動床に乗った時の処理
         case MT_MOVING_FLOOR:
@@ -518,7 +554,7 @@ void MoveChara()
         enemy[i].move_angle -= 360;
     }
 
-
+  
 
     //動く方向を格納してる変数（move_angle）にしたがって進んでいく
     switch (enemy[i].move_angle)
@@ -536,7 +572,7 @@ void MoveChara()
         enemy[i].dst_rect.x -= enemy[i].speed;
         break;
     }
-    // 棚との衝突判定、敵のmovetypeによって処理を分ける
+    // 敵と棚との衝突判定、敵のmovetypeによって処理を分ける
     for (int j = 0; j < kotei_object_num; j++)
     {
       SDL_Rect overrap_rect;
@@ -575,6 +611,7 @@ void MoveChara()
   }
 }
 
+//敵が移動床に乗った時に、移動する方向を変える関数
 int ChangeEnemyMoveAngle(enemyinfo *e, SDL_Rect movefloor, objecttype type)
 {
   SDL_Rect adjusted_rect = e->dst_rect;
@@ -895,6 +932,19 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
     data.command = AENTER_COMMAND; //コマンドを格納
     data.cid = myid;               //クライアントIDを格納
   }
+  else if (num == 9)
+  { //3ボタンを押した時
+    //コマンドとして、2ボタンをスーファミに見立てたときの'X'を代入
+    data.command = X_ON_COMMAND; //コマンドを格納
+    data.cid = myid;               //クライアントIDを格納
+  }
+  else if (num == 10)
+  { //3ボタンを離した時
+    //コマンドとして、2ボタンをスーファミに見立てたときの'X'を代入
+    data.command = X_OFF_COMMAND; //コマンドを格納
+    data.cid = myid;               //クライアントIDを格納
+  }
+
   send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
 }
 
@@ -1008,6 +1058,14 @@ static int execute_command()
       fprintf(stderr, "client[%d] %s sent quit command.\n", data.cid, clients[data.cid].name);
       result = 0;
       break;
+    case X_ON_COMMAND: //'X'のとき
+      player[data.cid].key.x = 1; //2ボタンが入力されていることを維持
+      result = 1;
+      break;
+    case X_OFF_COMMAND://'Y'のとき
+      player[data.cid].key.x = 0; //2ボタンが離されていることを維持
+      result = 1;
+      break;
     default: //その他の文字が入力された場合
       //fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
       //exit(1); //異常終了
@@ -1082,7 +1140,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
     enemy[index].dst_rect.h = s->h;
     enemy[index].speed = ENEMY_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
-    enemy[index].isgodest = false;
+    enemy[index].isfreeze = false;
     enemy[index].look_angle = enemy_lookangles[index];
     enemy[index].move_angle = enemy_moveangles[index];
     enemy[index].prev_overlap_rect.x = 0;
@@ -1107,11 +1165,25 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].src_rect.h = s->h; // 読み込んだ画像ファイルの高さを元画像の領域として設定
     player[index].dst_rect.x = dst.x + ((MAP_CHIPSIZE - s->w) / 2); // マップで指定された場所 + MAP_CHIPSIZEの中心になるように足し算
     player[index].dst_rect.y = dst.y + ((MAP_CHIPSIZE - s->h) / 2);
+    player[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
+    player[index].dst_rect.h = s->h;
+    s=IMG_Load(imgfiles[TYPE_SPRAY]);
+    if (s == NULL)
+      fprintf(stderr, "Missing Open Surface: %s",imgfiles[TYPE_SPRAY]);
+    player[index].spray_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
+    player[index].spray_src_rect.x = 0;
+    player[index].spray_src_rect.y = 0;
+    player[index].spray_src_rect.w = s->w;
+    player[index].spray_src_rect.h = s->h;
+    player[index].spray_dst_rect.w = 80;
+    player[index].spray_dst_rect.h = 50;
+    player[index].spray_origin.x = 0;
+    player[index].spray_origin.y = player[index].spray_dst_rect.h/2;
     player[index].back_zahyo_x = player[index].dst_rect.x; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
     player[index].back_zahyo_y = player[index].dst_rect.y; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
-    player[index].dst_rect.w = s->w;                       // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
-    player[index].dst_rect.h = s->h;
     player[index].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+    player[index].look_angle = 0; // プレイヤーの最初の見てる角度、0度に設定
+    player[index].spray_flag = 0;
     index++;
   }
   else if ((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_ENTRANCE) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV))
@@ -1133,4 +1205,52 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     index++;
   }
   return index;
+}
+
+void PlayerAction(){
+  // 催涙スプレーを出す動作
+  int origin_x, origin_y;
+  for (int i = 0; i < PLAYER_NUM; i++){
+    if (player[i].key.x){
+      origin_x = player[i].dst_rect.x;
+      origin_y = player[i].dst_rect.y;
+      switch (player[i].look_angle){
+      case 0:
+        origin_x += player[i].src_rect.w / 2;
+        origin_y -= player[i].spray_dst_rect.h/2;
+        break;
+      case 45:
+        origin_x += player[i].src_rect.w;
+        origin_y -= player[i].spray_dst_rect.h/2;
+        break;
+      case 90:
+        origin_x += player[i].src_rect.w;
+        origin_y += player[i].src_rect.h / 2-player[i].spray_dst_rect.h/2;
+        break;
+      case 135:
+        origin_x += player[i].src_rect.w;
+        origin_y += player[i].src_rect.h-player[i].spray_dst_rect.h/2;
+        break;
+      case 180:
+        origin_x += player[i].src_rect.w / 2;
+        origin_y += player[i].src_rect.h-player[i].spray_dst_rect.h/2;
+        break;
+      case 225:
+        origin_y += player[i].src_rect.h-player[i].spray_dst_rect.h/2;
+        break;
+      case 270:
+        origin_y += player[i].src_rect.h / 2-player[i].spray_dst_rect.h/2;
+        break;
+      case 315:
+        origin_y -=player[i].spray_dst_rect.h/2;
+        break;
+      }
+      //催涙スプレーの座標を調節する
+      player[i].spray_dst_rect.x = origin_x;
+      player[i].spray_dst_rect.y = origin_y;
+      //催涙スプレーフラグを立てる
+      player[i].spray_flag = 1;
+    }
+    else if(!player[i].key.x) player[i].spray_flag = 0;
+  }
 }
