@@ -651,6 +651,7 @@ void SetCamera() { //カメラの初期値セット
 void DrawMenu() {
   CONTAINER data;
   memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
+  
 
   SDL_RenderCopy(mainrenderer, background[0].image_texture, &background[0].src_rect, &background[0].dst_rect); //背景をレンダーに出力
   for(int i=0;i<FONT_NUM;i++){
@@ -671,6 +672,7 @@ void DrawMenu() {
       data.command = START_COMMAND;           //コマンドを格納
       data.cid = myid;                        //クライアントIDを格納
       send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
+      player[myid].key.a = 0;
     }
   }
   else if(down){
