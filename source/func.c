@@ -649,6 +649,9 @@ void SetCamera() { //カメラの初期値セット
 }
 
 void DrawMenu() {
+  CONTAINER data;
+  memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
+
   SDL_RenderCopy(mainrenderer, background[0].image_texture, &background[0].src_rect, &background[0].dst_rect); //背景をレンダーに出力
   for(int i=0;i<FONT_NUM;i++){
     boxColor(mainrenderer,font[i].dst_rect.x,font[i].dst_rect.y,font[i].dst_rect.x+font[i].dst_rect.w,font[i].dst_rect.y+font[i].dst_rect.h,0xff000000);
@@ -664,7 +667,12 @@ void DrawMenu() {
   }
   if(up){
     rectangleColor(mainrenderer,font[0].dst_rect.x,font[0].dst_rect.y,font[0].dst_rect.x+font[0].dst_rect.w,font[0].dst_rect.y+font[0].dst_rect.h,0xff00ff00);
-    if(player[myid].key.a == 1) status = GAMEMODE;
+    if(player[myid].key.a == 1) { //スタートボタンが押された時
+      data.command = START_COMMAND;           //コマンドを格納
+      data.cid = myid;                        //クライアントIDを格納
+      send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
+      //status = GAMEMODE;
+    }
   }
   else if(down){
     rectangleColor(mainrenderer,font[1].dst_rect.x,font[1].dst_rect.y,font[1].dst_rect.x+font[1].dst_rect.w,font[1].dst_rect.y+font[1].dst_rect.h,0xff00ff00);
