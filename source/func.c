@@ -671,7 +671,6 @@ void DrawMenu() {
       data.command = START_COMMAND;           //コマンドを格納
       data.cid = myid;                        //クライアントIDを格納
       send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
-      //status = GAMEMODE;
     }
   }
   else if(down){
@@ -1014,6 +1013,10 @@ static int execute_command()
       fprintf(stderr, "client[%d] %s: %s\n", data.cid, clients[data.cid].name, data.message);
       result = 1;
       break;
+    case START_COMMAND: //'S'のとき
+      fprintf(stderr, "client[%d] %s: %s\n", data.cid, clients[data.cid].name, data.message);
+      status = GAMEMODE;
+      result = 1;
     case QUIT_COMMAND: //'Q'のとき
       fprintf(stderr, "client[%d] %s sent quit command.\n", data.cid, clients[data.cid].name);
       result = 0;
