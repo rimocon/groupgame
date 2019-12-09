@@ -31,11 +31,15 @@ bool up,down;
 #define MAP_WIDTH 20 // 変数map0の横の数、ゲーム画面を横に20等分してる
 #define MAP_HEIGHT 15 // 変数map0の縦の数、ゲーム画面を縦に16等分してる
 
+#define HACKTIME 2000 //ハッキングに要する時間
+#define STOPTIME 2000 //ハッキング中にカメラを止める時間
 /*  変数  */
 bool kinkai_flag; //金塊を描画するかしないか
 bool hacking_flag; //金塊を描画するかしないか
 bool kinkai_keep_flag; //プレイヤーが金塊を持っているかどうか
 bool player_flag[3]; //プレイヤーを描画するか、しないか
+
+int time_now,time_left;
 /*  mapデータ */
 // static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 // 	{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
@@ -106,7 +110,8 @@ typedef struct { //キー入力用の構造体を型宣言
 		right, //右矢印
 		up, //上矢印
 		down, //下矢印
-		a;  //4ボタン(決定ボタン)
+		a,  //4ボタン(決定ボタン)
+    x; //2ボタン(ハッキングボタン)
 }inputkeys;
 
 typedef struct {
