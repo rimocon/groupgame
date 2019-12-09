@@ -295,13 +295,10 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   {
     SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); //敵をレンダーに出力
   }
-  //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
 
   for(int i = 0;  i<CAMERA_NUM; i++){
     filledTrigonColor(mainrenderer,camera[i].tri[0][0],camera[i].tri[1][0],camera[i].tri[0][1],camera[i].tri[1][1],camera[i].tri[0][2],camera[i].tri[1][2],0xff0000ff);
-    //SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,camera[i].angle,NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,90 - camera[i].theta[2],NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-    //printf("%d,%d \n",i,camera[i].dst_rect.x);
   }
   SDL_RenderPresent(mainrenderer); // 描画データを表示
 }

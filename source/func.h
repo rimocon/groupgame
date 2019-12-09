@@ -135,6 +135,7 @@ typedef struct {
 	SDL_Rect src_rect;
 	SDL_Rect dst_rect;
 	bool flag_kinkai;
+	bool flag_hack;
   int tri[2][3];
   float theta[3];
   bool clockwise;
