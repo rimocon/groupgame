@@ -554,7 +554,20 @@ void MoveChara()
         enemy[i].move_angle -= 360;
     }
 
-  
+
+    int startTime, temp;
+    // 催涙スプレーと、敵の判定
+    for(int j=0; j<PLAYER_NUM; j++){
+      if(SDL_HasIntersection(&enemy[i].dst_rect, &player[j].spray_dst_rect) && enemy[i].flag_sairui == false){
+        enemy[i].savetime = SDL_GetTicks();
+        enemy[j].speed = 0;
+        enemy[i].flag_sairui = true;
+      }
+    }
+    if(SDL_GetTicks() - enemy[i].savetime > 3000 && enemy[i].flag_sairui == true){
+      enemy[i].speed = ENEMY_SPEED;
+      enemy[i].flag_sairui = false;
+    }
 
     //動く方向を格納してる変数（move_angle）にしたがって進んでいく
     switch (enemy[i].move_angle)
@@ -946,6 +959,7 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
   }
 
   send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
+  fprintf(stderr, "send_data %d\n",num);
 }
 
 static int input_command()
@@ -1140,7 +1154,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
     enemy[index].dst_rect.h = s->h;
     enemy[index].speed = ENEMY_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
-    enemy[index].isfreeze = false;
+    enemy[index].flag_sairui = false;
     enemy[index].look_angle = enemy_lookangles[index];
     enemy[index].move_angle = enemy_moveangles[index];
     enemy[index].prev_overlap_rect.x = 0;
@@ -1251,6 +1265,6 @@ void PlayerAction(){
       //催涙スプレーフラグを立てる
       player[i].spray_flag = 1;
     }
-    else if(!player[i].key.x) player[i].spray_flag = 0;
+    else if(player[i].key.x == 0) player[i].spray_flag = 0;
   }
 }

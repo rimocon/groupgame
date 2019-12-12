@@ -154,8 +154,9 @@ typedef struct {
 	int speed; //敵の移動速度
 	int look_angle; // 敵が向いている方向(0度〜360度)、視野の描画する方法によるので仮
 	int move_angle; // 敵が動く方向
-	bool isfreeze; // 止まってるかどうか
+	bool flag_sairui; // 止まってるかどうか
 	enemymovetype movetype; // 敵の動きのタイプ
+	int savetime; // 時間を保存する
 }enemyinfo; // 敵の構造体
 
 typedef struct {
