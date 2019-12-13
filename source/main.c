@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     if((SDL_PollEvent(&inputevent)))
     {
       Input();
-      printf("input\n");
+      //printf("input\n");
     }
     control_requests();
     switch(status){
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
         break;
     }
     frametime = SDL_GetTicks() - framestart; //処理が終わった時間-処理が始まった時間=1回のループ処理にかかった時間
-    printf("一回の処理時間　%d\n",frametime);
+    //printf("一回の処理時間　%d\n",frametime);
     if(framedelay > frametime) //一回の処理にかける時間より1回のループ処理にかかった時間が小さかったら
     {
       SDL_Delay(framedelay - frametime); //余った時間分おやすみ

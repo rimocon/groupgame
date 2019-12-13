@@ -282,15 +282,15 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
       SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
     }
   }
+  // 催涙スプレーの描画
   for (int i = 0; i < PLAYER_NUM; i++)
   {
-    //描画対象がプレイヤーで、プレイヤーが消えていれば(カメラにバレるなどして)、描画しない
     if (player_flag[i] == true)
     {
       SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
       if(player[i].spray_flag == 1){
         SDL_RenderCopyEx(mainrenderer,player[i].spray_texture,&player[i].spray_src_rect,&player[i].spray_dst_rect,player[i].look_angle-90,&player[i].spray_origin,SDL_FLIP_NONE);
-      }
+        }
     }
   }
   for (int i = 0; i < ENEMY_NUM; i++)
@@ -302,8 +302,9 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   for(int i = 0;  i<CAMERA_NUM; i++){
     filledTrigonColor(mainrenderer,camera[i].tri[0][0],camera[i].tri[1][0],camera[i].tri[0][1],camera[i].tri[1][1],camera[i].tri[0][2],camera[i].tri[1][2],0xff0000ff);
     //SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,camera[i].angle,NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-    SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,90 - camera[i].theta[2],&player[i].spray_origin,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+    SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,90 - camera[i].theta[2],NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     //printf("%d,%d \n",i,camera[i].dst_rect.x);
+    printf("%d %d %d %d \n",player[0].spray_hitlines[0][0],player[0].spray_hitlines[1][0],player[0].spray_hitlines[0][1],player[0].spray_hitlines[1][1]);
   }
   SDL_RenderPresent(mainrenderer); // 描画データを表示
 }
@@ -455,7 +456,6 @@ void MoveChara()
         }
       }
     }
-    printf("player[%d] : %d\n",i,player[i].key.x);
   }
 
   //敵キャラの移動
@@ -558,15 +558,18 @@ void MoveChara()
     int startTime, temp;
     // 催涙スプレーと、敵の判定
     for(int j=0; j<PLAYER_NUM; j++){
-      if(SDL_HasIntersection(&enemy[i].dst_rect, &player[j].spray_dst_rect) && enemy[i].flag_sairui == false){
+      //if(SDL_HasIntersection(&enemy[i].dst_rect, &player[j].spray_dst_rect) && enemy[i].flag_sairui == false){
+      if(SDL_IntersectRectAndLine(&enemy[i].dst_rect,&player[j].spray_hitlines[0][0],&player[j].spray_hitlines[1][0],&player[j].spray_hitlines[0][1],&player[j].spray_hitlines[0][1])){
         enemy[i].savetime = SDL_GetTicks();
-        enemy[j].speed = 0;
+        enemy[i].speed = 0;
         enemy[i].flag_sairui = true;
+        printf("enemy[%d] savetime, speed, flag_sairui %d , %d ,%d",i,enemy[i].savetime,enemy[i].speed,enemy[i].flag_sairui);
       }
     }
     if(SDL_GetTicks() - enemy[i].savetime > 3000 && enemy[i].flag_sairui == true){
       enemy[i].speed = ENEMY_SPEED;
       enemy[i].flag_sairui = false;
+      printf("enemy[%d] savetime, speed, flag_sairui %d , %d ,%d\n",i,enemy[i].savetime,enemy[i].speed,enemy[i].flag_sairui);
     }
 
     //動く方向を格納してる変数（move_angle）にしたがって進んでいく
@@ -1189,10 +1192,15 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].spray_src_rect.y = 0;
     player[index].spray_src_rect.w = s->w;
     player[index].spray_src_rect.h = s->h;
-    player[index].spray_dst_rect.w = 80;
-    player[index].spray_dst_rect.h = 50;
+    player[index].spray_dst_rect.w = SPRAY_WIDTH;
+    player[index].spray_dst_rect.h = SPRAY_HEIGHT;
+    for(int i=0; i<2; i++){
+      for(int j=0; j<4; j++){
+        player[index].spray_hitlines[i][j] = 0;
+      }
+    }
     player[index].spray_origin.x = 0;
-    player[index].spray_origin.y = player[index].spray_dst_rect.h/2;
+    player[index].spray_origin.y = SPRAY_HEIGHT/2;
     player[index].back_zahyo_x = player[index].dst_rect.x; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
     player[index].back_zahyo_y = player[index].dst_rect.y; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
     player[index].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
@@ -1231,40 +1239,51 @@ void PlayerAction(){
       switch (player[i].look_angle){
       case 0:
         origin_x += player[i].src_rect.w / 2;
-        origin_y -= player[i].spray_dst_rect.h/2;
+        origin_y -= SPRAY_HEIGHT/2;
         break;
       case 45:
         origin_x += player[i].src_rect.w;
-        origin_y -= player[i].spray_dst_rect.h/2;
+        origin_y -= SPRAY_HEIGHT/2;
         break;
       case 90:
         origin_x += player[i].src_rect.w;
-        origin_y += player[i].src_rect.h / 2-player[i].spray_dst_rect.h/2;
+        origin_y += player[i].src_rect.h / 2 - SPRAY_HEIGHT/2;
         break;
       case 135:
         origin_x += player[i].src_rect.w;
-        origin_y += player[i].src_rect.h-player[i].spray_dst_rect.h/2;
+        origin_y += player[i].src_rect.h-SPRAY_HEIGHT/2;
         break;
       case 180:
         origin_x += player[i].src_rect.w / 2;
-        origin_y += player[i].src_rect.h-player[i].spray_dst_rect.h/2;
+        origin_y += player[i].src_rect.h-SPRAY_HEIGHT/2;
         break;
       case 225:
-        origin_y += player[i].src_rect.h-player[i].spray_dst_rect.h/2;
+        origin_y += player[i].src_rect.h-SPRAY_HEIGHT/2;
         break;
       case 270:
-        origin_y += player[i].src_rect.h / 2-player[i].spray_dst_rect.h/2;
+        origin_y += player[i].src_rect.h / 2-SPRAY_HEIGHT/2;
         break;
       case 315:
-        origin_y -=player[i].spray_dst_rect.h/2;
+        origin_y -=SPRAY_HEIGHT/2;
         break;
       }
       //催涙スプレーの座標を調節する
       player[i].spray_dst_rect.x = origin_x;
       player[i].spray_dst_rect.y = origin_y;
+      player[i].spray_dst_rect.w = SPRAY_WIDTH;
+      player[i].spray_dst_rect.h = SPRAY_HEIGHT;
+      player[i].spray_hitlines[0][0] = origin_x;// - SPRAY_WIDTH/2 * sin(player[i].look_angle)
+      player[i].spray_hitlines[1][0] = origin_y + player[i].dst_rect.h ; //- SPRAY_WIDTH/2 * cos(player[i].look_angle)
+      player[i].spray_hitlines[0][1] = origin_x + SPRAY_WIDTH * sin(player[i].look_angle);
+      player[i].spray_hitlines[1][1] = origin_y + player[i].dst_rect.h + SPRAY_WIDTH * cos(player[i].look_angle);
+
       //催涙スプレーフラグを立てる
       player[i].spray_flag = 1;
     }
-    else if(player[i].key.x == 0) player[i].spray_flag = 0;
+    else if(player[i].key.x == 0){
+      player[i].spray_flag = 0;
+      player[i].spray_dst_rect.w = 0;
+      player[i].spray_dst_rect.h = 0;
+    }
   }
 }
