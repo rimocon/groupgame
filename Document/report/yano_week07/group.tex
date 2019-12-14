@@ -1,0 +1,60 @@
+\documentclass{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings,jlisting,url,here}
+
+\lstset{%
+  language={C},
+  basicstyle={\small},%
+  identifierstyle={\small},%
+  commentstyle={\small\itshape},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small},%
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  numbers=left,%
+  xrightmargin=0zw,%
+  xleftmargin=3zw,%
+  numberstyle={\scriptsize},% stepnumber=1,
+  numbersep=1zw,%
+  lineskip=-0.5ex%
+}
+% xなんちゃらが変数，進捗書く
+\newcommand{\xa}{監視カメラのハッキング処理}
+\newcommand{\xb}{ゲーム開始時間の同期処理}
+\newcommand{\xc}{催涙スプレーの描画}
+% []内の数が引数，#数字で引数読む
+\newcommand{\pitem}[3]{
+\item #1
+\item #2
+\item #3
+}
+
+\title{グループレポート}
+\author{6119019092 織田武瑠 6119019207 矢野大暉 6119019056 山口力也}
+\date{\number\year/\number\month/\number\day 提出}
+
+\begin{document}
+\maketitle
+
+\section{開発期間12/9～12/15の進捗状況} 
+
+\subsection{進展事項}
+今回の開発期間では，ゲームの設計として主に
+\begin{itemize}
+\pitem{\xa}{\xb}{\xc}
+\end{itemize}
+を行った．以下にその詳細を示す．
+
+\subsection{\xa}
+ハッキングボタンを一定時間以上長押しすると、監視カメラの回転が一定時間停止するハッキングイベントを作成した．
+実際のゲームの中では、1人のプレイヤーが今回実装したハッキングを使って、監視カメラの動きを止め他のプレイヤーを助ける．
+
+\subsection{\xb}
+ゲームの開始時間をすべてのプレイヤーで統一することで、画面の描画のタイミングを同期するようにした．
+
+\subsection{\xc}
+催涙スプレーボタンを押すと、敵の動きを一定時間止める催涙スプレーの描画のみを実装した．
+
+\end{document}
