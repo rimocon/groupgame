@@ -52,7 +52,6 @@ int main(int argc, char *argv[])
         RenderWindow(); //描画
         Events();
         //Destroy(); //破棄関連
-        //SDL_Delay(3);
         break;
       case RESULTMODE:
         //DrawResult();

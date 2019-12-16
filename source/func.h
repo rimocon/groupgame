@@ -40,6 +40,7 @@ bool kinkai_keep_flag; //プレイヤーが金塊を持っているかどうか
 bool player_flag[3]; //プレイヤーを描画するか、しないか
 
 int time_now,time_left;
+float gauge;
 /*  mapデータ */
 // static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 // 	{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},

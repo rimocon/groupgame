@@ -70,7 +70,6 @@ void Input()
 {
   switch (inputevent.type)
   {
-
     // ジョイスティックの方向キーまたはアナログキー（スティック)が押された時
     case SDL_JOYAXISMOTION:
       printf("kinkai_keep_flag = %d\n", kinkai_keep_flag);
@@ -146,11 +145,7 @@ void Input()
       }
       if (inputevent.jbutton.button == 1) //ハッキングボタン
       {
-        player[myid].inputtime = SDL_GetTicks();
-        player[myid].flag_hack_start = true;
-        player[myid].key.x= 1;
-        player[myid].speed= 0;
-
+        joystick_send(10);
       }
 
       //金塊を取る
@@ -187,14 +182,13 @@ void Input()
       {
         if(SDL_GetTicks() - player[myid].inputtime > HACKTIME){
           joystick_send(9);
-          printf("hack\n");
         }
-        player[myid].flag_hack_start = false;
-        player[myid].key.x = 0;
-        player[myid].speed = PLAYER_SPEED;
+        else{
+          gauge = 0;
+
       }
       break;
-      }
+  }
 }
 
 void Destroy()
@@ -266,13 +260,10 @@ void MoveTriangle()
     camera[i].tri[0][2] = camera[i].tri[0][0] + sin(camera[i].theta[1]*M_PI / 180.0)*250; //x3の計算
     camera[i].tri[1][2] = camera[i].tri[1][0] + cos(camera[i].theta[1]*M_PI / 180.0)*250; //x3の計算
   }
-
-
 }
 
 void RenderWindow(void) //画面の描画(イベントが無い時)
 {
-
   SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
   SDL_RenderClear(mainrenderer);                            // 設定した描画色(白)でレンダラーをクリア
   for (int i = 0; i < kotei_object_num; i++)
@@ -300,8 +291,22 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
     filledTrigonColor(mainrenderer,camera[i].tri[0][0],camera[i].tri[1][0],camera[i].tri[0][1],camera[i].tri[1][1],camera[i].tri[0][2],camera[i].tri[1][2],0xff0000ff);
     SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,90 - camera[i].theta[2],NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
   }
+  for(int i=0; i< PLAYER_NUM; i++){
+    if(player[i].flag_hack_start){ //ゲージ描画
+      gauge += 0.53;
+      if(gauge > 64) {
+        gauge = 64;
+        boxColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x -20 + gauge,player[i].dst_rect.y,0xffff0000);
+      }
+      else{
+        rectangleColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x+player[i].dst_rect.w + 22,player[i].dst_rect.y,0xff0000ff);
+        boxColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x -20 + gauge,player[i].dst_rect.y,0xff0000ff);
+      }
+    }
+  }
   SDL_RenderPresent(mainrenderer); // 描画データを表示
 }
+
 void Collision()
 {
   //00,10,01,11->00,10,02,12->01,11,01,11->01,11,02,12で判定
@@ -349,7 +354,7 @@ void MoveChara()
 
   for (int i = 0; i < 3; i++)
   {
-    
+
     if (player[i].key.left == 1 || player[i].key.right == 1){
       if (player[i].key.up == 1 || player[i].key.down == 1){
         move=0.71f; //移動係数を0.71に設定
@@ -400,31 +405,31 @@ void MoveChara()
       player[i].dst_rect.y = player[i].back_zahyo_y;
     }
     /*
-    if(player[i].flag_hack_start)
+       if(player[i].flag_hack_start)
+       {
+    // ぶつかったぶんの距離プレイヤーの位置を戻す
+    if (player[i].key.left)
     {
-        // ぶつかったぶんの距離プレイヤーの位置を戻す
-        if (player[i].key.left)
-        {
-          player[i].back_zahyo_x += move;
-          player[i].dst_rect.x = player[i].back_zahyo_x;
-        }
-        if (player[i].key.right)
-        {
-          player[i].back_zahyo_x -= move;
-          player[i].dst_rect.x = player[i].back_zahyo_x;
-        }
-        if (player[i].key.up)
-        {
-          player[i].back_zahyo_y += move;
-          player[i].dst_rect.y = player[i].back_zahyo_y;
-        }
-        if (player[i].key.down)
-        {
-          player[i].back_zahyo_y -= move;
-          player[i].dst_rect.y = player[i].back_zahyo_y;
-        }
+    player[i].back_zahyo_x += move;
+    player[i].dst_rect.x = player[i].back_zahyo_x;
     }
-    */
+    if (player[i].key.right)
+    {
+    player[i].back_zahyo_x -= move;
+    player[i].dst_rect.x = player[i].back_zahyo_x;
+    }
+    if (player[i].key.up)
+    {
+    player[i].back_zahyo_y += move;
+    player[i].dst_rect.y = player[i].back_zahyo_y;
+    }
+    if (player[i].key.down)
+    {
+    player[i].back_zahyo_y -= move;
+    player[i].dst_rect.y = player[i].back_zahyo_y;
+    }
+    }
+     */
     //棚との衝突判定
     for (int i = 0; i < kotei_object_num; i++)
     {
@@ -932,12 +937,19 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
     data.command = AENTER_COMMAND; //コマンドを格納
     data.cid = myid;               //クライアントIDを格納
   }
-  else if (num == 9) //ハッキングフラグ
+  else if (num == 9) //ハッキング
   {
     printf("joystickhack\n");
     data.command = HACK_COMMAND;
     data.cid = myid;
   }
+  else if (num == 10) //ハッキングチャージ
+  {
+    printf("hackstart\n");
+    data.command = HACK_START_COMMAND;
+    data.cid = myid;
+  }
+
   send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
 }
 
@@ -1008,6 +1020,18 @@ static int execute_command()
       printf("executehack\n");
       time_now = SDL_GetTicks();
       hacking_flag = true;
+      player[data.cid].flag_hack_start = false;
+      player[data.cid].key.x= 0;
+      player[data.cid].speed= PLAYER_SPEED;
+      result = 1;
+      break;
+    case HACK_START_COMMAND: //'S'のとき
+      player[data.cid].inputtime = SDL_GetTicks();
+      player[data.cid].flag_hack_start = true;
+      player[data.cid].key.x= 1;
+      player[data.cid].speed= 0;
+      gauge = 0;
+      printf("executestarthack\n");
       result = 1;
       break;
     case PLAYER_COMMAND: //'P'のとき
@@ -1178,16 +1202,16 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 
     kotei_objects[index].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
     kotei_objects[index].dst_rect.y = dst.y;
-    kotei_objects[index].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
+    kotei_objects[index].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする   
     kotei_objects[index].dst_rect.h = MAP_CHIPSIZE;
     index++;
   }
   return index;
 }
+
 void Events() {
   //ハッキング関連
   if(hacking_flag){
     if(SDL_GetTicks() - time_now > STOPTIME) hacking_flag = false;
   }
 }
-

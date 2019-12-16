@@ -11,6 +11,7 @@
 #define ZAHYO_COMMAND 'Z' //座標の送信
 #define KINKAI_COMMAND 'K' //金塊の状態
 #define HACK_COMMAND 'H' //ハッキング状態
+#define HACK_START_COMMAND 'S' //ハッキング状態
 #define PLAYER_COMMAND 'P' //プレイヤーが死んだことを示す
 #define UP_COMMAND 'U' //上へのスティック操作が行われたことを示す
 #define DOWN_COMMAND 'D' //下へのスティック操作が行われたことを示す
