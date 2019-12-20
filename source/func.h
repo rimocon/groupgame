@@ -14,11 +14,12 @@ bool up,down;
 #define PLAYER_SPEED 4
 
 // 金塊、カメラ、棚、出入り口の数
-#define CAMERA_NUM 5
+//#define CAMERA_NUM 5
+#define CAMERA_NUM 0
 #define BACKGROUND_NUM 1
 #define FONT_NUM 2
 #define ENEMY_NUM 1
-#define ENEMY_SPEED 1
+#define ENEMY_SPEED 3
 
 #define  KOTEI_OBJECT_NUM_MAX 300 // 固定オブジェクトの最大の数
 
@@ -26,9 +27,11 @@ bool up,down;
 #define MAP_WIDTH 20 // 変数map0の横の数、ゲーム画面を横に20等分してる
 #define MAP_HEIGHT 15 // 変数map0の縦の数、ゲーム画面を縦に16等分してる
 
-//催涙スプレーの幅と高さを設定する
+//催涙スプレーの幅と高さと敵が固まる時間を設定する
 #define SPRAY_WIDTH 80
 #define SPRAY_HEIGHT 50
+#define SAIRUI_TIME 3000
+#define SPRAY_TIME 300 // スプレーが使える時間
 
 /*  変数  */
 bool kinkai_flag; //金塊を描画するかしないか
@@ -64,11 +67,11 @@ static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{2, 0, 0, 2, 2, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 6, 7, 8, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{2, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
 };
 
@@ -126,6 +129,7 @@ typedef struct {
 	SDL_Rect spray_dst_rect;
 	int spray_hitlines[2][4];
 	SDL_Point spray_origin;
+	int spraytime;
 }playerinfo;
 
 
@@ -162,6 +166,8 @@ typedef struct {
 	bool flag_sairui; // 止まってるかどうか
 	enemymovetype movetype; // 敵の動きのタイプ
 	unsigned int savetime; // 時間を保存する
+	int tri[2][3]; // 視界の三角形
+	int prev_angle;
 }enemyinfo; // 敵の構造体
 
 typedef struct {
@@ -192,11 +198,11 @@ static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png"
 static char *fonts[FONT_NUM] = {"開始","終了"};
 
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
-  {700,200,120,100},
-  {600,400,120,100},
-  {800,100,120,100},
-  {500,800,120,100},
-  {600,300,120,100}
+//   {700,200,120,100},
+//   {600,400,120,100},
+//   {800,100,120,100},
+//   {500,800,120,100},
+//   {600,300,120,100}
 };
 
 // 敵が最初に向いている方向,敵の動きのタイプを指定する
@@ -204,7 +210,7 @@ static int enemy_lookangles[ENEMY_NUM] = {
 	180
 };
 static int enemy_moveangles[ENEMY_NUM] = {
-	180
+	0
 };
 static enemymovetype enemy_movetypes[ENEMY_NUM] = {
 	MT_MOVING_FLOOR,

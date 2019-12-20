@@ -266,8 +266,26 @@ void MoveTriangle()
     camera[i].tri[0][2] = camera[i].tri[0][0] + sin(camera[i].theta[1]*M_PI / 180.0)*250; //x3の計算
     camera[i].tri[1][2] = camera[i].tri[1][0] + cos(camera[i].theta[1]*M_PI / 180.0)*250; //x3の計算
   }
-
-
+  int origin_x,origin_y;
+  for (int i = 0; i < ENEMY_NUM; i++){
+    origin_x = enemy[i].dst_rect.x + enemy[i].dst_rect.w/2;
+    origin_y = enemy[i].dst_rect.y + enemy[i].dst_rect.h/2;
+    origin_x += 13 *  sin(enemy[i].prev_angle * M_PI/180);
+    origin_y += 13 * -cos(enemy[i].prev_angle * M_PI/180);
+    enemy[i].tri[0][0] = origin_x;
+    enemy[i].tri[1][0] = origin_y;
+    // 20度回転させた敵の視界の当たり判定を作る
+    int vision[2] = {enemy[i].prev_angle - 20, enemy[i].prev_angle + 20};
+    for (int j = 0; j < 2; j++) {
+      if (vision[j] < 0)
+        vision[j] += 360;
+      else if (vision[j] >= 360)
+        vision[j] -= 360;
+      // 200が視界の範囲
+      enemy[i].tri[0][j + 1] = origin_x + 200 * sin(vision[j] * M_PI / 180);
+      enemy[i].tri[1][j + 1] = origin_y + 200 * -cos((vision[j]) * M_PI / 180);
+    }
+  }
 }
 
 void RenderWindow(void) //画面の描画(イベントが無い時)
@@ -290,12 +308,20 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
       SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
       if(player[i].spray_flag == 1){
         SDL_RenderCopyEx(mainrenderer,player[i].spray_texture,&player[i].spray_src_rect,&player[i].spray_dst_rect,player[i].look_angle-90,&player[i].spray_origin,SDL_FLIP_NONE);
+        // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][1],player[i].spray_hitlines[1][1], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
+        // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][2],player[i].spray_hitlines[1][2], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
+        // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][3],player[i].spray_hitlines[1][3], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
         }
     }
   }
+  // 敵の描画
   for (int i = 0; i < ENEMY_NUM; i++)
   {
     SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); //敵をレンダーに出力
+    //lineColor(mainrenderer,enemy[i].tri[0][0],enemy[i].tri[1][0],enemy[i].tri[0][1],enemy[i].tri[1][1], 0xff00ff00); // 当たり判定、デバッグ用
+    //lineColor(mainrenderer,enemy[i].tri[0][0],enemy[i].tri[1][0],enemy[i].tri[0][2],enemy[i].tri[1][2], 0xff00ff00); // 当たり判定、デバッグ用
+    //lineColor(mainrenderer,enemy[i].tri[0][1],enemy[i].tri[1][1],enemy[i].tri[0][2],enemy[i].tri[1][2], 0xff00ff00); // 当たり判定、デバッグ用
+    if(enemy[i].flag_sairui == false) filledTrigonColor(mainrenderer,enemy[i].tri[0][0],enemy[i].tri[1][0],enemy[i].tri[0][1],enemy[i].tri[1][1],enemy[i].tri[0][2],enemy[i].tri[1][2],0xff0000ff);
   }
   //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
 
@@ -304,7 +330,6 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
     //SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,camera[i].angle,NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,90 - camera[i].theta[2],NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     //printf("%d,%d \n",i,camera[i].dst_rect.x);
-    printf("%d %d %d %d \n",player[0].spray_hitlines[0][0],player[0].spray_hitlines[1][0],player[0].spray_hitlines[0][1],player[0].spray_hitlines[1][1]);
   }
   SDL_RenderPresent(mainrenderer); // 描画データを表示
 }
@@ -344,6 +369,37 @@ void Collision()
     }
   }
   //ここまでカメラの判定
+
+  //敵の判定
+  int tri_before[2][3];
+  for (int i = 0; i < PLAYER_NUM; i++){
+    for (int j = 0; j < ENEMY_NUM; j++){
+        tri_before[0][0] = enemy[j].tri[0][0];
+        tri_before[1][0] = enemy[j].tri[1][0];
+        tri_before[0][1] = enemy[j].tri[0][1];
+        tri_before[1][1] = enemy[j].tri[1][1];
+        tri_before[0][2] = enemy[j].tri[0][2];
+        tri_before[1][2] = enemy[j].tri[1][2];
+
+      if ((SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][0], &enemy[j].tri[1][0], &enemy[j].tri[0][1], &enemy[j].tri[1][1]) ||
+          SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][0], &enemy[j].tri[1][0], &enemy[j].tri[0][2], &enemy[j].tri[1][2]) ||
+          SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][1], &enemy[j].tri[1][1], &enemy[j].tri[0][2], &enemy[j].tri[1][2])) && enemy[j].flag_sairui == false){
+        player_flag[myid] = false; // 他のプレイヤーも消える？
+        joystick_send(2); //プレイヤーが消えたことが他のクライアントに通知される。
+        player[myid].dst_rect.x = 0;
+        player[myid].dst_rect.y = 0;
+        player[myid].dst_rect.w = 0;
+        player[myid].dst_rect.h = 0;
+        enemy[j].tri[0][0] = tri_before[0][0];
+        enemy[j].tri[1][0] = tri_before[1][0];
+        enemy[j].tri[0][1] = tri_before[0][1];
+        enemy[j].tri[1][1] = tri_before[1][1];
+        enemy[j].tri[0][2] = tri_before[0][2];
+        enemy[j].tri[1][2] = tri_before[1][2];
+      }
+    }
+  }
+  //ここまで敵の判定
 
 }
 void MoveChara()
@@ -558,18 +614,19 @@ void MoveChara()
     int startTime, temp;
     // 催涙スプレーと、敵の判定
     for(int j=0; j<PLAYER_NUM; j++){
-      //if(SDL_HasIntersection(&enemy[i].dst_rect, &player[j].spray_dst_rect) && enemy[i].flag_sairui == false){
-      if(SDL_IntersectRectAndLine(&enemy[i].dst_rect,&player[j].spray_hitlines[0][0],&player[j].spray_hitlines[1][0],&player[j].spray_hitlines[0][1],&player[j].spray_hitlines[0][1])){
-        enemy[i].savetime = SDL_GetTicks();
-        enemy[i].speed = 0;
-        enemy[i].flag_sairui = true;
-        printf("enemy[%d] savetime, speed, flag_sairui %d , %d ,%d",i,enemy[i].savetime,enemy[i].speed,enemy[i].flag_sairui);
+      // 催涙スプレーの当たり判定
+      if(SDL_IntersectRectAndLine(&enemy[i].dst_rect,&player[j].spray_hitlines[0][0],&player[j].spray_hitlines[1][0],&player[j].spray_hitlines[0][1],&player[j].spray_hitlines[1][1]) ||
+         SDL_IntersectRectAndLine(&enemy[i].dst_rect,&player[j].spray_hitlines[0][0],&player[j].spray_hitlines[1][0],&player[j].spray_hitlines[0][2],&player[j].spray_hitlines[1][2]) ||
+         SDL_IntersectRectAndLine(&enemy[i].dst_rect,&player[j].spray_hitlines[0][0],&player[j].spray_hitlines[1][0],&player[j].spray_hitlines[0][3],&player[j].spray_hitlines[1][3])){
+        enemy[i].savetime = SDL_GetTicks(); // 催涙スプレーを当てた時間を保存
+        enemy[i].speed = 0; // 敵のスピードを0にする
+        enemy[i].flag_sairui = true; // 催涙スプレーフラグを立てる
       }
     }
-    if(SDL_GetTicks() - enemy[i].savetime > 3000 && enemy[i].flag_sairui == true){
-      enemy[i].speed = ENEMY_SPEED;
-      enemy[i].flag_sairui = false;
-      printf("enemy[%d] savetime, speed, flag_sairui %d , %d ,%d\n",i,enemy[i].savetime,enemy[i].speed,enemy[i].flag_sairui);
+    // 催涙スプレーを当てた時間からSAIRUI_TIME立ったら元に戻る
+    if(SDL_GetTicks() - enemy[i].savetime > SAIRUI_TIME && enemy[i].flag_sairui == true){
+      enemy[i].speed = ENEMY_SPEED; // 敵のスピードをもとに戻す
+      enemy[i].flag_sairui = false; // 催涙スプレーフラグを下ろす
     }
 
     //動く方向を格納してる変数（move_angle）にしたがって進んでいく
@@ -587,6 +644,8 @@ void MoveChara()
       case 270:
         enemy[i].dst_rect.x -= enemy[i].speed;
         break;
+      default:
+        break; // その場で待機
     }
     // 敵と棚との衝突判定、敵のmovetypeによって処理を分ける
     for (int j = 0; j < kotei_object_num; j++)
@@ -623,6 +682,23 @@ void MoveChara()
             enemy[i].move_angle -= 360;
         }
       }
+    }
+
+    // ゆっくり振り向く,最短で90度振り向いてほしいけど270度回ってしまう
+    if(enemy[i].prev_angle != enemy[i].move_angle) {
+        enemy[i].prev_angle += 3;
+        if(enemy[i].prev_angle >= 360) enemy[i].prev_angle -= 360;
+
+      // int diff = enemy[i].move_angle - enemy[i].prev_angle;
+      // if(abs(diff) > 180){ diff -= 180; diff *= -1;}
+      // if(diff < 0) {
+      //   enemy[i].prev_angle += 10;
+      // }
+      // else if(diff > 0) {
+      //   enemy[i].prev_angle -= 10;
+      // }
+      // if(enemy[i].prev_angle >= 360) enemy[i].prev_angle -= 360;
+      // else if(enemy[i].prev_angle < 0) enemy[i].prev_angle += 360;
     }
   }
 }
@@ -1165,6 +1241,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].prev_overlap_rect.w = 0;
     enemy[index].prev_overlap_rect.h = 0;
     enemy[index].movetype = enemy_movetypes[index];
+    enemy[index].prev_angle = enemy_moveangles[index];
     index++;
   }
   else if (loadmap_objecttype == TYPE_PLAYER1 || loadmap_objecttype == TYPE_PLAYER2 || loadmap_objecttype == TYPE_PLAYER3)
@@ -1206,6 +1283,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
     player[index].look_angle = 0; // プレイヤーの最初の見てる角度、0度に設定
     player[index].spray_flag = 0;
+    player[index].spraytime = SPRAY_TIME;
     index++;
   }
   else if ((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_ENTRANCE) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV))
@@ -1233,6 +1311,12 @@ void PlayerAction(){
   // 催涙スプレーを出す動作
   int origin_x, origin_y;
   for (int i = 0; i < PLAYER_NUM; i++){
+    if(player_flag[myid] == false) break; // プレイヤーがいないとき、催涙スプレーを出さない
+    // スプレーが切れたとき、出さない
+    if(player[i].spraytime < 0){
+      player[i].spray_flag = false;
+      break;
+    }
     if (player[i].key.x){
       origin_x = player[i].dst_rect.x;
       origin_y = player[i].dst_rect.y;
@@ -1267,23 +1351,35 @@ void PlayerAction(){
         origin_y -=SPRAY_HEIGHT/2;
         break;
       }
-      //催涙スプレーの座標を調節する
+      //催涙スプレーの当たり判定(線)を作る, 当たり判定の範囲はSPRAY_WIDTH,HEIGHTの定数で調節(現在は画像の幅と一緒に)
       player[i].spray_dst_rect.x = origin_x;
       player[i].spray_dst_rect.y = origin_y;
       player[i].spray_dst_rect.w = SPRAY_WIDTH;
       player[i].spray_dst_rect.h = SPRAY_HEIGHT;
-      player[i].spray_hitlines[0][0] = origin_x;// - SPRAY_WIDTH/2 * sin(player[i].look_angle)
-      player[i].spray_hitlines[1][0] = origin_y + player[i].dst_rect.h ; //- SPRAY_WIDTH/2 * cos(player[i].look_angle)
-      player[i].spray_hitlines[0][1] = origin_x + SPRAY_WIDTH * sin(player[i].look_angle);
-      player[i].spray_hitlines[1][1] = origin_y + player[i].dst_rect.h + SPRAY_WIDTH * cos(player[i].look_angle);
-
+      player[i].spray_hitlines[0][0] = origin_x;
+      player[i].spray_hitlines[1][0] = origin_y + player[i].dst_rect.h;
+      player[i].spray_hitlines[0][1] = origin_x + SPRAY_WIDTH * sin(player[i].look_angle*M_PI/180);
+      player[i].spray_hitlines[1][1] = origin_y + player[i].dst_rect.h + SPRAY_WIDTH * -cos((player[i].look_angle)*M_PI/180);
+      // 15度回転させた催涙スプレーの当たり判定を作る
+      int look_angle_vision[2] = {player[i].look_angle-15,player[i].look_angle+15};
+      for(int j=0; j<2; j++){
+        if(look_angle_vision[j] < 0) look_angle_vision[j] += 360;
+        else if(look_angle_vision[j] >= 360) look_angle_vision [j] -= 360;
+        player[i].spray_hitlines[0][j+2] = origin_x + SPRAY_WIDTH * sin(look_angle_vision[j]*M_PI/180);
+        player[i].spray_hitlines[1][j+2] = origin_y + player[i].dst_rect.h + SPRAY_WIDTH * -cos((look_angle_vision[j])*M_PI/180);
+      }
+      player[i].spraytime--;
       //催涙スプレーフラグを立てる
+      printf("spraytime = %d\n",player[i].spraytime);
       player[i].spray_flag = 1;
     }
+    // キー押されてないとき、催涙スプレーの当たり判定をリセットする
     else if(player[i].key.x == 0){
       player[i].spray_flag = 0;
-      player[i].spray_dst_rect.w = 0;
-      player[i].spray_dst_rect.h = 0;
+      for(int j=0; j<4; j++){
+        player[i].spray_hitlines[0][j] = 0;
+        player[i].spray_hitlines[1][j] = 0;
+      }
     }
   }
 }
