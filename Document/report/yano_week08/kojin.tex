@@ -1,0 +1,58 @@
+\documentclass{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings,jlisting,url,here}
+
+\lstset{%
+  language={C},
+  basicstyle={\small},%
+  identifierstyle={\small},%
+  commentstyle={\small\itshape},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small},%
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  numbers=left,%
+  xrightmargin=0zw,%
+  xleftmargin=3zw,%
+  numberstyle={\scriptsize},% stepnumber=1,
+  numbersep=1zw,%
+  lineskip=-0.5ex%
+}
+% xなんちゃらが変数，進捗書く
+\newcommand{\xb}{敵の視界実装}
+\newcommand{\xc}{催涙スプレーの実装}
+% []内の数が引数，#数字で引数読む
+\newcommand{\pitem}[2]{
+\item #1
+\item #2
+}
+
+\title{個人レポート}
+\author{6119019207 矢野大暉}
+\date{\number\year/\number\month/\number\day 提出}
+
+\begin{document}
+\maketitle
+
+\section{開発期間12/16～12/22の進捗状況} 
+
+\subsection{進展事項}
+今回の開発期間では，ゲームの設計として主に
+\begin{itemize}
+\pitem{\xb}{\xc}
+\end{itemize}
+を行った．以下にその詳細を示す．
+
+\subsection{\xb}
+敵の視界を実装した．本ゲーム内では、この視界内に金塊を持ったプレイヤーが入ると、ゲームオーバーになる．
+現状の問題点は、目的の角度になるまで最短で視界を回転させたいが、回転が一方向なので無駄な距離回転しているためこれを改善したい．
+
+\subsection{\xc}
+催涙スプレーを実装した．敵にこの催涙スプレーが当たると、敵の動きが一定時間止まり、視界がなくなる．一定時間を過ぎると復活する．
+当たり判定は、催涙スプレーの画像に当たり判定用の線を3本重ねて、この線と敵の画像が重なったときに判定を行う．
+
+\section{次回開発期間での予定}
+次回は、全員のプログラムを統合して、不具合がないかを確認したい．
+\end{document}
