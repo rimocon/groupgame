@@ -66,7 +66,7 @@ void Startup()
   random_start_flag = 0;
   stay_time = 0;
   random_start = 0;
-  random_time= 0;
+  random_time = 0;
 }
 
 void Input()
@@ -351,6 +351,11 @@ void MoveChara()
   //static back_diff_y = 0;
   float move; //移動係数
   double distance;
+  int min_distance;
+  int min_x;
+  int min_y;
+  static int min_k = 0; //距離が最小のi
+  int k;
 
   /*
   if (same_place_flag == 1)
@@ -395,9 +400,9 @@ void MoveChara()
     if (player[i].key.right == 1)
     {
       player[i].back_zahyo_x += (int)1 * move;
-      if (player[i].back_zahyo_x > WINDOWWIDTH - player[0].dst_rect.w)
+      if (player[i].back_zahyo_x > WINDOWWIDTH - player[i].dst_rect.w)
       {
-        player[i].back_zahyo_x = WINDOWWIDTH - player[0].dst_rect.w;
+        player[i].back_zahyo_x = WINDOWWIDTH - player[i].dst_rect.w;
       }
       player[i].dst_rect.x = player[i].back_zahyo_x;
     }
@@ -413,9 +418,9 @@ void MoveChara()
     if (player[i].key.down == 1)
     {
       player[i].back_zahyo_y += (int)1 * move;
-      if (player[i].back_zahyo_y > WINDOWHEIGHT - player[0].dst_rect.h)
+      if (player[i].back_zahyo_y > WINDOWHEIGHT - player[i].dst_rect.h)
       {
-        player[i].back_zahyo_y = WINDOWHEIGHT - player[0].dst_rect.h;
+        player[i].back_zahyo_y = WINDOWHEIGHT - player[i].dst_rect.h;
       }
       player[i].dst_rect.y = player[i].back_zahyo_y;
     }
@@ -513,53 +518,91 @@ void MoveChara()
           }
         }
         break;
+      /*
       case MT_TRACKING:
-        /*追跡してくるNPC
-            　現在は、x,y座標に対して、プレイヤー側に寄ってくるようにしているが、
-            x座標または、y座標のどちらか片方のみに設定すると、道の追跡ではなく、
-            　道の”とうせんぼ”ができる！
-           */
+            //追跡してくるNPC
+            //現在は、x,y座標に対して、プレイヤー側に寄ってくるようにしているが、
+            //x座標または、y座標のどちらか片方のみに設定すると、道の追跡ではなく、
+            //道の”とうせんぼ”ができる！
+           
 
-        if (enemy[i].dst_rect.x > player[0].dst_rect.x) 
+        if (enemy[i].dst_rect.x > player[i].dst_rect.x) 
         {
           enemy[i].move_angle = 270;
         }
-        if (enemy[i].dst_rect.x < player[0].dst_rect.x) 
+        if (enemy[i].dst_rect.x < player[i].dst_rect.x) 
         {
           enemy[i].move_angle = 90;
         }
-        if (enemy[i].dst_rect.y > player[0].dst_rect.y)
+        if (enemy[i].dst_rect.y > player[i].dst_rect.y)
         {
           enemy[i].move_angle = 0;
         }
-        if (enemy[i].dst_rect.y < player[0].dst_rect.y)
+        if (enemy[i].dst_rect.y < player[i].dst_rect.y)
         {
           enemy[i].move_angle = 180;
         }
         break;
+      */
       case MT_RANDOM_AND_TRACKING:
         //プレイヤーとNPCとの距離が一定の距離より近い　かつ　same_place_flag == 0の時(追跡する)
-        if (sqrt(pow(enemy[i].dst_rect.x - player[i].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[i].dst_rect.y, 2)) < 200 && same_place_flag == 0)
+        printf("%d\n",enemy[i].move_angle);
+        //プレイヤー3人の中で一番NPCとの距離が近いプレイヤーを求める
+        min_distance = sqrt(pow(enemy[i].dst_rect.x - player[0].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[0].dst_rect.y, 2));
+        min_x = player[0].dst_rect.x;
+        min_y = player[0].dst_rect.y;
+        min_k = 0;
+        if (min_distance > sqrt(pow(enemy[i].dst_rect.x - player[1].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[1].dst_rect.y, 2)))
         {
-          if (enemy[i].dst_rect.x > player[0].dst_rect.x) //プレイヤーが左方向にいる時
+          min_distance = sqrt(pow(enemy[i].dst_rect.x - player[1].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[1].dst_rect.y, 2));
+          min_x = player[1].dst_rect.x;
+          min_y = player[1].dst_rect.y;
+          min_k = 1;
+        }
+        if (min_distance > sqrt(pow(enemy[i].dst_rect.x - player[2].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[2].dst_rect.y, 2)))
+        {
+          min_distance = sqrt(pow(enemy[i].dst_rect.x - player[2].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[2].dst_rect.y, 2));
+          min_x = player[2].dst_rect.x;
+          min_y = player[2].dst_rect.y;
+          min_k = 2;
+        }
+
+        //if (sqrt(pow(enemy[i].dst_rect.x - player[min_k].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[min_k].dst_rect.y, 2)) < 200 && same_place_flag == 0)
+        if (min_distance < 200 && same_place_flag == 0)
+        {
+          printf("%d\n", min_distance);
+          if (enemy[i].dst_rect.x > player[min_k].dst_rect.x) //プレイヤーが左方向にいる時
           {
             enemy[i].move_angle = 270;
           }
-          if (enemy[i].dst_rect.x < player[0].dst_rect.x) //プレイヤーが右方向にいる時
+          if (enemy[i].dst_rect.x < player[min_k].dst_rect.x) //プレイヤーが右方向にいる時
           {
             enemy[i].move_angle = 90;
           }
-          if (enemy[i].dst_rect.y > player[0].dst_rect.y) //プレイヤーが上方向にいる時
+          if (enemy[i].dst_rect.y > player[min_k].dst_rect.y) //プレイヤーが上方向にいる時
           {
             enemy[i].move_angle = 0;
           }
-          if (enemy[i].dst_rect.y < player[0].dst_rect.y) //プレイヤーが下方向にいる時
+          if (enemy[i].dst_rect.y < player[min_k].dst_rect.y) //プレイヤーが下方向にいる時
           {
             enemy[i].move_angle = 180;
           }
-          if(enemy[i].dst_rect.x == player[0].dst_rect.x && enemy[i].dst_rect.y == player[0].dst_rect.y){
-            enemy[i].move_angle = 360; //プレイヤーとx,y座標が等しい時、動かない
+          
+          if(enemy[i].dst_rect.x == player[min_k].dst_rect.x && enemy[i].dst_rect.y == player[min_k].dst_rect.y)
+          {
+            enemy[i].move_angle = 360;
           }
+          /*
+            if (enemy[i].dst_rect.x == min_x && enemy[i].dst_rect.y == min_y)
+            {
+              enemy[i].move_angle = 360; //プレイヤーとx,y座標が等しい時、動かない
+            }
+
+            if (k != min_k)
+            {
+              enemy[i].move_angle = 360; //プレイヤーとx,y座標が等しい時、動かない
+            }
+            */
         }
         //プレイヤーとNPCとの距離が一定の距離より遠い時(ランダムウォークする)
         else
@@ -645,48 +688,80 @@ void MoveChara()
         {
           switch (enemy[i].move_angle)
           {
-          case 0: //プレイヤーが上方向にいる　かつ　上方向に棚がある
+          case 0:                                  //プレイヤーが上方向にいる　かつ　上方向に棚がある
             enemy[i].dst_rect.y += enemy[i].speed; //めり込みを戻す
-            if (enemy[i].dst_rect.x > player[0].dst_rect.x)
+            if (enemy[i].dst_rect.x > player[min_k].dst_rect.x)
             { //プレイヤーが左方向にいる時
-              enemy[i].dst_rect.x -= enemy[i].speed;
+               enemy[i].dst_rect.x -= enemy[i].speed;
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                enemy[i].dst_rect.x += enemy[i].speed;
+              }
+              //enemy[i].move_angle = 270;
             }
-            else if (enemy[i].dst_rect.x < player[0].dst_rect.x)
+            else if (enemy[i].dst_rect.x < player[min_k].dst_rect.x)
             { //プレイヤーが右方向にいる時
               enemy[i].dst_rect.x += enemy[i].speed;
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                enemy[i].dst_rect.x -= enemy[i].speed;
+              }
+              //enemy[i].move_angle = 90;
             }
             break;
-          case 90: //プレイヤーが右方向にいる　かつ　右方向に棚がある
+          case 90:                                 //プレイヤーが右方向にいる　かつ　右方向に棚がある
             enemy[i].dst_rect.x -= enemy[i].speed; //めり込みを戻す
-            if (enemy[i].dst_rect.y > player[0].dst_rect.y)
+            if (enemy[i].dst_rect.y > player[min_k].dst_rect.y)
             { //プレイヤーが上方向にいる時
               enemy[i].dst_rect.y -= enemy[i].speed;
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                enemy[i].dst_rect.y += enemy[i].speed;
+              }
+              //enemy[i].move_angle = 180;
             }
-            else if (enemy[i].dst_rect.y < player[0].dst_rect.y)
+            else if (enemy[i].dst_rect.y < player[min_k].dst_rect.y)
             { //プレイヤーが下方向にいる時
               enemy[i].dst_rect.y += enemy[i].speed;
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                enemy[i].dst_rect.y -= enemy[i].speed;
+              }
+              //enemy[i].move_angle = 0;
             }
             break;
           case 180:
             enemy[i].dst_rect.y -= enemy[i].speed; //めり込みを戻す
-            if (enemy[i].dst_rect.x > player[0].dst_rect.x)
+            if (enemy[i].dst_rect.x > player[min_k].dst_rect.x)
             {
               enemy[i].dst_rect.x -= enemy[i].speed;
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                enemy[i].dst_rect.x += enemy[i].speed;
+              }
+              //enemy[i].move_angle = 270;
             }
-            else if (enemy[i].dst_rect.x < player[0].dst_rect.x)
+            else if (enemy[i].dst_rect.x < player[min_k].dst_rect.x)
             {
               enemy[i].dst_rect.x += enemy[i].speed;
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                enemy[i].dst_rect.x -= enemy[i].speed;
+              }
+              //enemy[i].move_angle = 90;
             }
             break;
           case 270:
             enemy[i].dst_rect.x += enemy[i].speed; //めり込みを戻す
-            if (enemy[i].dst_rect.y > player[0].dst_rect.y)
+            if (enemy[i].dst_rect.y > player[min_k].dst_rect.y)
             {                                        //NPCが下、プレイヤーが上のとき
               enemy[i].dst_rect.y -= enemy[i].speed; //NPCを上に移動
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                enemy[i].dst_rect.y += enemy[i].speed;
+              }
+              //enemy[i].move_angle = 180;
             }
-            else if (enemy[i].dst_rect.y < player[0].dst_rect.y)
+            else if (enemy[i].dst_rect.y < player[min_k].dst_rect.y)
             {                                        //NPCが上、プレイヤーが下のとき
               enemy[i].dst_rect.y += enemy[i].speed; //NPCを下に移動
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                enemy[i].dst_rect.y -= enemy[i].speed;
+              }
+              //enemy[i].move_angle = 0;
             }
             break;
           }
@@ -709,7 +784,8 @@ void MoveChara()
 
     //if (!(sqrt(pow(enemy[i].dst_rect.x - before_enemy_x, 2))) == 0 && sqrt(pow(enemy[i].dst_rect.y - before_enemy_y, 2)) == 0)
     //現在のNPCのx座標と1つ前のNPCのx座標が異なる　かつ　現在のNPCのy座標と1つ前のNPCのy座標が異なる時
-    if(enemy[i].dst_rect.x != before_enemy_x || enemy[i].dst_rect.y != before_enemy_y){
+    if (enemy[i].dst_rect.x != before_enemy_x || enemy[i].dst_rect.y != before_enemy_y)
+    {
       stay_start = SDL_GetTicks(); //留まっている時間カウントの開始時間を更新
     }
     stay_time = SDL_GetTicks() - stay_start; //留まっている時間
@@ -717,14 +793,15 @@ void MoveChara()
     printf("same_place_flag= %d\n", same_place_flag);
     if (stay_time >= 2000 && random_start_flag == 0) //留まっている時間が2秒以上の時
     {
-      same_place_flag = 1; //同じ座標に一定時間留まっていることを表すフラグを上げる
+      same_place_flag = 1;           //同じ座標に一定時間留まっていることを表すフラグを上げる
       random_start = SDL_GetTicks(); //ランダムウォーク時間カウントの開始時間を設定
       random_start_flag = 1;
     }
     random_time = SDL_GetTicks() - random_start; //ランダムウォークをしている時間
     printf("random_time = %d\n", random_time);
-    if(same_place_flag == 1 && random_time >= 3000){
-      same_place_flag = 0; //same_place_flagを下ろす
+    if (same_place_flag == 1 && random_time >= 3000)
+    {
+      same_place_flag = 0;   //same_place_flagを下ろす
       random_start_flag = 0; //random_start_flagを下ろす
     }
     before_enemy_x = enemy[i].dst_rect.x; //1つ前の座標を格納(x)
