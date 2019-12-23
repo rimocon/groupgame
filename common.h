@@ -50,9 +50,15 @@ extern void terminate_client();
 extern void joystick_send(int);
 
 /*  グローバル変数  */
-int status; //ゲームの現在の状態
-bool run; //プログラムが動いてるかどうか
-int elapsed_time; //ゲーム開始時からの経過時間
+int status;          //ゲームの現在の状態
+bool run;            //プログラムが動いてるかどうか
+int elapsed_time;    //ゲーム開始時からの経過時間
+bool same_place_flag; //NPCが一定時間同じ座標にとどまっているかどうかを示すフラグ
+bool random_start_flag; //NPCが一定時間同じ座標にとどまっため、ランダムウォークを始めたことを示すフラグ
+Uint32 stay_start;   //NPCが同じ場所に留まり始めた時間を格納する変数
+int stay_time;       //留まっている時間を格納する変数
+int random_time;     //ランダムウォークをしている時間
+
 SDL_Window *mainwindow; //メイン画面用
 SDL_Renderer *mainrenderer; //メイン画面用レンダラー
 SDL_Joystick *joystick; //ジョイスティックを特定,利用するための構造体
