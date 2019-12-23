@@ -311,7 +311,16 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
         // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][1],player[i].spray_hitlines[1][1], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
         // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][2],player[i].spray_hitlines[1][2], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
         // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][3],player[i].spray_hitlines[1][3], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
-        }
+      }
+      //催涙スプレーのゲージ描画
+      double unit = 500 / (double)SPRAY_TIME; // 500pxがスプレーのMAX
+      int line_h = 20; // スプレーの残りを表すゲージの縦幅
+      int spraygauge = WINDOWWIDTH - abs(player[i].spraytime-SPRAY_TIME) * unit; // スプレーの残りを描画するために値を変換
+      SDL_Rect dst = {WINDOWWIDTH - 534, (WINDOWHEIGHT-65) + i * line_h + 5, 20, 20}; // ゲージ横のプレイヤー画像
+      SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &dst); // プレイヤー画像をレンダーに出力
+      if(player[i].spraytime > 0){
+        boxColor(mainrenderer, WINDOWWIDTH - 500, (WINDOWHEIGHT-65) + i * line_h + 5 ,spraygauge , (WINDOWHEIGHT-65) + (i+1) * line_h, 0xff00ffff); // スプレーの残りをゲージで描画
+      }
     }
   }
   // 敵の描画
