@@ -43,6 +43,8 @@ extern void MoveTriangle(void); //三角形移動
 extern void Collision(); //当たり判定
 extern void MakeMap(void);
 extern void DrawResult(void); //結果描画
+extern void PlayerAction(); // プレイヤーが行う妨害アクション
+
 
 extern void setup_client(char *, u_short);
 extern int control_requests();

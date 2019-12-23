@@ -87,7 +87,7 @@ void setup_server(int num_cl, u_short port)
     len = sizeof(cl_addr);
     /*接続ソケットの生成と接続の確立
     戻り値：新しいソケットのディスクリプタであるSOCKET型の値
-    
+
     acceptシステムコールについて詳しく
     この関数は、保留状態の接続要求が入っているキューから先頭の接続要求を取り出し、接続済みソケットを新規に生成し、
     そのソケットを参照する新しいファイル・ディスクリプタを返す。新規に生成されたソケットは，接続待ち(listen)状態ではない．
@@ -241,6 +241,14 @@ int control_requests()
         fprintf(stderr, "client[%d] %s: quit\n", clients[i].cid, clients[i].name);
         send_data(BROADCAST, &data, sizeof(data));
         result = 0;
+        break;
+      case X_ON_COMMAND: //'X'のとき(2ボタン押された時)
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case X_OFF_COMMAND: //'Y'のとき(2ボタン押された時)
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
         break;
       default: //その他の文字が入力された場合
         fprintf(stderr, "control_requests(): %c is not a valid command.\n", data.command);

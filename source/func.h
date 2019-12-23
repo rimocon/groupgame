@@ -11,15 +11,11 @@ bool up,down;
 #define WINDOWHEIGHT 960 //ウィンドウの高さ
 
 #define PLAYER_NUM 3 // オブジェクトの数などはテキストファイルで読み込めるようにしたほうがいろんなマップに対応できるから後から修正したい
-#define PLAYER_SPEED 1
+#define PLAYER_SPEED 4
 
 // 金塊、カメラ、棚、出入り口の数
-#define KINKAI_NUM 2
-#define SHELF_NUM 10 // 棚の数、マップデータ(map0)の棚の数と合わせる
-#define ENTRANCE_NUM 3
-#define  KOTEI_OBJECT_NUM 16 // KINKAI_NUM + CAMERA_NUM + SHELF_NUM + ENTRANCE_NUMを足したもの
-
-#define CAMERA_NUM 5
+//#define CAMERA_NUM 5
+#define CAMERA_NUM 0
 #define BACKGROUND_NUM 1
 #define FONT_NUM 2
 #define ENEMY_NUM 1
@@ -30,6 +26,12 @@ bool up,down;
 #define MAP_CHIPSIZE 64 //変数map0の、1マス分のピクセルの大きさ（仮置き）
 #define MAP_WIDTH 20 // 変数map0の横の数、ゲーム画面を横に20等分してる
 #define MAP_HEIGHT 15 // 変数map0の縦の数、ゲーム画面を縦に16等分してる
+
+//催涙スプレーの幅と高さと敵が固まる時間を設定する
+#define SPRAY_WIDTH 80
+#define SPRAY_HEIGHT 50
+#define SAIRUI_TIME 3000
+#define SPRAY_TIME 300 // スプレーが使える時間
 
 /*  変数  */
 bool kinkai_flag; //金塊を描画するかしないか
@@ -64,7 +66,7 @@ static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
 	{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 6, 2, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{2, 0, 0, 6, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
@@ -95,7 +97,8 @@ typedef enum{
 	TYPE_ENEMY_MOVING_FLOOR_DR = 12, // DR = DownRightの略
 	TYPE_ENEMY_MOVING_FLOOR_REV = 13, // REV = Reverseの略です
   TYPE_BACKGROUND = 14,
-	TYPE_NUM = 15
+  TYPE_SPRAY = 15,
+	TYPE_NUM = 16
 }objecttype;
 
 typedef struct {
@@ -110,19 +113,28 @@ typedef struct { //キー入力用の構造体を型宣言
 		right, //右矢印
 		up, //上矢印
 		down, //下矢印
-		a;  //4ボタン(決定ボタン)
+		a,  //4ボタン(決定ボタン)
+		x;  //2ボタン(催涙スプレー)
 }inputkeys;
 
 typedef struct {
 	objecttype type;
 	SDL_Texture * image_texture;
+	SDL_Texture *spray_texture;
 	SDL_Rect src_rect;
 	SDL_Rect dst_rect;
 	float back_zahyo_x;
     float back_zahyo_y;
 	bool flag_kinkai;
 	int speed;
-  inputkeys key; //inputkeys構造体をinputという名前で実体化
+ 	inputkeys key; //inputkeys構造体をinputという名前で実体化
+  	int look_angle;
+	int spray_flag;
+	SDL_Rect spray_src_rect;
+	SDL_Rect spray_dst_rect;
+	int spray_hitlines[2][4];
+	SDL_Point spray_origin;
+	int spraytime;
 }playerinfo;
 
 
@@ -157,8 +169,11 @@ typedef struct {
 	int speed; //敵の移動速度
 	int look_angle; // 敵が向いている方向(0度〜360度)、視野の描画する方法によるので仮
 	int move_angle; // 敵が動く方向
-	bool isgodest; // 目的地まで行ってるかどうか
+	bool flag_sairui; // 止まってるかどうか
 	enemymovetype movetype; // 敵の動きのタイプ
+	unsigned int savetime; // 時間を保存する
+	int tri[2][3]; // 視界の三角形
+	int prev_angle;
 }enemyinfo; // 敵の構造体
 
 typedef struct {
@@ -184,16 +199,16 @@ static int num_sock;
 static fd_set mask; //FD集合を表す構造体
 
 //画像ファイルパス
-static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png", "./images/player2.png", "./images/player3.png","./images/floor_ul.png","./images/floor_ur.png","./images/floor_dl.png","./images/floor_dr.png","./images/floor_rev.png","./images/menu.png"}; // 読み込む画像ファイルを指定
+static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png", "./images/player2.png", "./images/player3.png","./images/floor_ul.png","./images/floor_ur.png","./images/floor_dl.png","./images/floor_dr.png","./images/floor_rev.png","./images/menu.png","./images/spray.png"}; // 読み込む画像ファイルを指定
 //フォント
 static char *fonts[FONT_NUM] = {"開始","終了"};
 
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
-  {700,200,120,100},
-  {600,400,120,100},
-  {800,100,120,100},
-  {500,800,120,100},
-  {600,300,120,100}
+//   {700,200,120,100},
+//   {600,400,120,100},
+//   {800,100,120,100},
+//   {500,800,120,100},
+//   {600,300,120,100}
 };
 
 // 敵が最初に向いている方向,敵の動きのタイプを指定する
