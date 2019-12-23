@@ -180,7 +180,7 @@ void Input()
       //2ボタンが押された時(jbuttonだと1)
       if (inputevent.jbutton.button == 1)
       {
-        joystick_send(9);
+        joystick_send(11);
       }
       break;
       // ボタンが離された時
@@ -190,7 +190,7 @@ void Input()
       // 2ボタンが離された
       if (inputevent.jbutton.button == 1)
       {
-        joystick_send(10);
+        joystick_send(12);
       }
       if (inputevent.jbutton.button == 0)
       {
@@ -1024,13 +1024,13 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
     data.command = AENTER_COMMAND; //コマンドを格納
     data.cid = myid;               //クライアントIDを格納
   }
-  else if (num == 9)
+  else if (num == 11)
   { //3ボタンを押した時
     //コマンドとして、2ボタンをスーファミに見立てたときの'X'を代入
     data.command = X_ON_COMMAND; //コマンドを格納
     data.cid = myid;               //クライアントIDを格納
   }
-  else if (num == 10)
+  else if (num == 12)
   { //3ボタンを離した時
     //コマンドとして、2ボタンをスーファミに見立てたときの'X'を代入
     data.command = X_OFF_COMMAND; //コマンドを格納
