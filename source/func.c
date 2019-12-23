@@ -41,6 +41,7 @@ void Startup()
   }
   kinkai_flag = true;                                           //金塊は最初は、配置されている
   kinkai_keep_flag = false;                                     //最初は、プレイヤーは金塊を保持していない
+  hacking_flag = false; //最初ハッキングはされていない
   player_flag[0] = true;                                        //プレイヤー1 は最初は、生存
   player_flag[1] = true;                                        //プレイヤー2 は最初は、生存
   player_flag[2] = true;                                        //プレイヤー3 は最初は、生存
@@ -57,9 +58,12 @@ void Startup()
     printf("camera %d.w = %d\n", i, camera[i].dst_rect.w);
     printf("camera %d.h = %d\n", i, camera[i].dst_rect.h);
   }
+  for (int i = 0; i<PLAYER_NUM;i++){
+    player[i].flag_hack_start = false;
+  }
   MakeMap();
-  status = MENUMODE; //メニューモードに状態を設定
-  run = true;        //動かす
+  status = GAMEMODE; //メニューモードに状態を設定
+  run = true; //動かす
   up = false;
   down = false;
   same_place_flag = 0;
@@ -73,20 +77,65 @@ void Input()
 {
   switch (inputevent.type)
   {
-
-  // ジョイスティックの方向キーまたはアナログキー（スティック)が押された時
-  case SDL_JOYAXISMOTION:
-    printf("kinkai_keep_flag = %d\n", kinkai_keep_flag);
-    printf("The axis ID of the operated key is %d.\n", inputevent.jaxis.axis); // 操作された方向キーの方向軸を表示（0：アナログキー，1：アナログキー，2：方向キー左右方向，3：方向キー上下方向）
-    if (inputevent.jaxis.axis == 0)
-    {
-      printf("--- Analog-Direction Key: 0 Axis\n");
-      if (inputevent.jaxis.value > 0)
-      { //右キーが押されたら
-        //key.right = 1;
-        //key.left = 0;
-        //スティック操作(右),コマンド送信される
-        joystick_send(3);
+    // ジョイスティックの方向キーまたはアナログキー（スティック)が押された時
+    case SDL_JOYAXISMOTION:
+      printf("kinkai_keep_flag = %d\n", kinkai_keep_flag);
+      printf("The axis ID of the operated key is %d.\n", inputevent.jaxis.axis); // 操作された方向キーの方向軸を表示（0：アナログキー，1：アナログキー，2：方向キー左右方向，3：方向キー上下方向）
+      if (inputevent.jaxis.axis == 0)
+      {
+        printf("--- Analog-Direction Key: 0 Axis\n");
+        if (inputevent.jaxis.value > 0)
+        { //右キーが押されたら
+          //key.right = 1;
+          //key.left = 0;
+          //スティック操作(右),コマンド送信される
+          joystick_send(3);
+        }
+        else if (inputevent.jaxis.value < 0)
+        { //左キーが押されたら
+          //key.right = 0;
+          //key.left = 1;
+          //スティック操作(左),コマンド送信される
+          joystick_send(4);
+        }
+        else if (inputevent.jaxis.value == 0)
+        { //真ん中にスティックが戻ったら
+          //key.right = 0;
+          //key.left = 0;
+          //スティック操作(真ん中),コマンド送信される
+          joystick_send(7);
+        }
+      }
+      else if (inputevent.jaxis.axis == 1)
+      {
+        printf("--- Analag-Direction Key: 1 Axis\n");
+        if (inputevent.jaxis.value > 0)
+        { //下キーが押されたら
+          //key.up = 0;
+          //key.down = 1;
+          //スティック操作(下),コマンド送信される
+          joystick_send(6);
+          printf("下\n");
+        }
+        else if (inputevent.jaxis.value < 0)
+        { //上キーが押されたら
+          //key.up = 1;
+          //key.down = 0;
+          //スティック操作(上),コマンド送信される
+          joystick_send(5);
+          printf("上\n");
+        }
+        else if (inputevent.jaxis.value == 0)
+        { //真ん中にスティックが戻ったら
+          //key.up = 0;
+          //key.down = 0;
+          //スティック操作(真ん中),コマンド送信される
+          joystick_send(8);
+        }
+      }
+      else if (inputevent.jaxis.axis == 2)
+      {
+        //	printf("--- Four-Direction Key: Horizontal Axis\n");
       }
       else if (inputevent.jaxis.value < 0)
       { //左キーが押されたら
@@ -95,6 +144,7 @@ void Input()
         //スティック操作(左),コマンド送信される
         joystick_send(4);
       }
+<<<<<<< HEAD
       else if (inputevent.jaxis.value == 0)
       { //真ん中にスティックが戻ったら
         //key.right = 0;
@@ -128,6 +178,20 @@ void Input()
         //key.down = 0;
         //スティック操作(真ん中),コマンド送信される
         joystick_send(8);
+=======
+      break;
+      // ジョイスティックのボタンが押された時
+    case SDL_JOYBUTTONDOWN:
+      //	printf("The ID of the pressed button is %d.\n", inputevent.jbutton.button); // 押されたボタンのIDを表示（0から）
+      // ボタンIDに応じた処理
+      if (inputevent.jbutton.button == 11)
+      {
+        run = false;
+      }
+      if (inputevent.jbutton.button == 1) //ハッキングボタン
+      {
+        joystick_send(10); // ハッキングゲージスタート
+>>>>>>> hacking
       }
     }
     else if (inputevent.jaxis.axis == 2)
@@ -177,6 +241,7 @@ void Input()
         }
         player[myid].key.a = 1;
       }
+<<<<<<< HEAD
     }
     //終了ボタンが押された
     if (inputevent.jbutton.button == 13)
@@ -194,6 +259,29 @@ void Input()
       //		printf("--- You released a button on the joystick.\n");
     }
     break;
+=======
+      //終了ボタンが押された
+      if (inputevent.jbutton.button == 13)
+      {
+        run = false;
+      }
+      break;
+      // ボタンが離された時
+    case SDL_JOYBUTTONUP:
+      //	printf("The ID of the released button is %d.\n",inputevent.jbutton.button); // 離されたボタンのIDを表示（0から）
+      // ボタンIDに応じた処理
+      if (inputevent.jbutton.button == 1) //ハッキングボタン
+      {
+        if(SDL_GetTicks() - player[myid].inputtime > HACKTIME){ //2秒以上経過した場合
+          joystick_send(9); //ハッキングの処理
+        }
+        else{ //途中でキャンセルされた場合
+          gauge = 0;
+          joystick_send(11); //ハッキングキャンセルの処理
+        }
+      }
+      break;
+>>>>>>> hacking
   }
 }
 
@@ -247,6 +335,7 @@ void MoveTriangle()
     {
       camera[i].clockwise = true; //時計回り
     }
+<<<<<<< HEAD
     if (camera[i].clockwise)
     {
       camera[i].theta[2]--; //三角形の頂点の座標の角度を変える
@@ -254,6 +343,17 @@ void MoveTriangle()
     else
     {
       camera[i].theta[2]++;
+=======
+    //ハッキング処理があった場合ここで処理を止める.
+    if (!hacking_flag){
+      if (camera[i].clockwise) {
+        camera[i].theta[2]--; //三角形の頂点の座標の角度を変える
+      }
+      else
+      {
+        camera[i].theta[2]++;
+      }
+>>>>>>> hacking
     }
     camera[i].theta[0] = camera[i].theta[2] + 15; //三角形の残り2点の角度を変える
     camera[i].theta[1] = camera[i].theta[2] - 15;
@@ -296,17 +396,37 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
   {
     SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); //敵をレンダーに出力
   }
-  //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
 
+<<<<<<< HEAD
   for (int i = 0; i < CAMERA_NUM; i++)
   {
     filledTrigonColor(mainrenderer, camera[i].tri[0][0], camera[i].tri[1][0], camera[i].tri[0][1], camera[i].tri[1][1], camera[i].tri[0][2], camera[i].tri[1][2], 0xff0000ff);
     //SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,camera[i].angle,NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect, 90 - camera[i].theta[2], NULL, SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
     //printf("%d,%d \n",i,camera[i].dst_rect.x);
+=======
+  for(int i = 0;  i<CAMERA_NUM; i++){
+    filledTrigonColor(mainrenderer,camera[i].tri[0][0],camera[i].tri[1][0],camera[i].tri[0][1],camera[i].tri[1][1],camera[i].tri[0][2],camera[i].tri[1][2],0xff0000ff);
+    SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,90 - camera[i].theta[2],NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
+  }
+  for(int i=0; i< PLAYER_NUM; i++){
+    if(player[i].flag_hack_start){ //ゲージ描画
+      gauge += 0.53;
+      if(gauge > 64) {
+        gauge = 64;
+        boxColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x -20 + gauge,player[i].dst_rect.y,0xffff0000); //ゲージの枠表示
+
+      }
+      else{
+        rectangleColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x+player[i].dst_rect.w + 22,player[i].dst_rect.y,0xff0000ff); //ゲージ表示
+        boxColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x -20 + gauge,player[i].dst_rect.y,0xff0000ff);  //ゲージの枠表示
+      }
+    }
+>>>>>>> hacking
   }
   SDL_RenderPresent(mainrenderer); // 描画データを表示
 }
+
 void Collision()
 {
   //00,10,01,11->00,10,02,12->01,11,01,11->01,11,02,12で判定
@@ -372,11 +492,18 @@ void MoveChara()
 
   for (int i = 0; i < 3; i++)
   {
+<<<<<<< HEAD
     if (player[i].key.left == 1 || player[i].key.right == 1)
     {
       if (player[i].key.up == 1 || player[i].key.down == 1)
       {
         move = 0.71f; //移動係数を0.71に設定
+=======
+
+    if (player[i].key.left == 1 || player[i].key.right == 1){
+      if (player[i].key.up == 1 || player[i].key.down == 1){
+        move=0.71f; //移動係数を0.71に設定
+>>>>>>> hacking
       }
       else
       {
@@ -388,9 +515,9 @@ void MoveChara()
       move = 1.0f;
     }
 
-    if (player[i].key.left == 1)
+    if (player[i].key.left == 1 )
     {
-      player[i].back_zahyo_x -= (int)1 * move; //プレイヤーの座標をfloat型で保持
+      player[i].back_zahyo_x -= player[i].speed * move; //プレイヤーの座標をfloat型で保持
       if (player[i].back_zahyo_x < 0)
       {
         player[i].back_zahyo_x = 0;
@@ -399,8 +526,13 @@ void MoveChara()
     }
     if (player[i].key.right == 1)
     {
+<<<<<<< HEAD
       player[i].back_zahyo_x += (int)1 * move;
       if (player[i].back_zahyo_x > WINDOWWIDTH - player[i].dst_rect.w)
+=======
+      player[i].back_zahyo_x += player[i].speed * move; //プレイヤーの座標をfloat型で保持
+      if (player[i].back_zahyo_x > WINDOWWIDTH - player[0].dst_rect.w)
+>>>>>>> hacking
       {
         player[i].back_zahyo_x = WINDOWWIDTH - player[i].dst_rect.w;
       }
@@ -408,7 +540,7 @@ void MoveChara()
     }
     if (player[i].key.up == 1)
     {
-      player[i].back_zahyo_y -= (int)1 * move;
+      player[i].back_zahyo_y -= player[i].speed * move; //プレイヤーの座標をfloat型で保持
       if (player[i].back_zahyo_y < 0)
       {
         player[i].back_zahyo_y = 0;
@@ -417,13 +549,44 @@ void MoveChara()
     }
     if (player[i].key.down == 1)
     {
+<<<<<<< HEAD
       player[i].back_zahyo_y += (int)1 * move;
       if (player[i].back_zahyo_y > WINDOWHEIGHT - player[i].dst_rect.h)
+=======
+      player[i].back_zahyo_y += player[i].speed * move; //プレイヤーの座標をfloat型で保持
+      if (player[i].back_zahyo_y > WINDOWHEIGHT - player[0].dst_rect.h)
+>>>>>>> hacking
       {
         player[i].back_zahyo_y = WINDOWHEIGHT - player[i].dst_rect.h;
       }
       player[i].dst_rect.y = player[i].back_zahyo_y;
     }
+    /*
+       if(player[i].flag_hack_start)
+       {
+    // ぶつかったぶんの距離プレイヤーの位置を戻す
+    if (player[i].key.left)
+    {
+    player[i].back_zahyo_x += move;
+    player[i].dst_rect.x = player[i].back_zahyo_x;
+    }
+    if (player[i].key.right)
+    {
+    player[i].back_zahyo_x -= move;
+    player[i].dst_rect.x = player[i].back_zahyo_x;
+    }
+    if (player[i].key.up)
+    {
+    player[i].back_zahyo_y += move;
+    player[i].dst_rect.y = player[i].back_zahyo_y;
+    }
+    if (player[i].key.down)
+    {
+    player[i].back_zahyo_y -= move;
+    player[i].dst_rect.y = player[i].back_zahyo_y;
+    }
+    }
+     */
     //棚との衝突判定
     for (int i = 0; i < kotei_object_num; i++)
     {
@@ -1141,9 +1304,26 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
     data.command = AENTER_COMMAND; //コマンドを格納
     data.cid = myid;               //クライアントIDを格納
   }
+  else if (num == 9) //ハッキング
+  {
+    printf("joystickhack\n");
+    data.command = HACK_COMMAND;
+    data.cid = myid;
+  }
+  else if (num == 10) //ハッキングチャージ
+  {
+    printf("hackstart\n");
+    data.command = HACK_START_COMMAND;
+    data.cid = myid;
+  }
+  else if (num == 11) //ハッキングキャンセル
+  {
+    printf("joystickhack\n");
+    data.command = NOT_HACK_COMMAND;
+    data.cid = myid;
+  }
   send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
 }
-
 static int input_command()
 { //クライアントがデータをインプットした時
   CONTAINER data;
@@ -1188,6 +1368,7 @@ static int execute_command()
   switch (data.command)
   {
 
+<<<<<<< HEAD
   case ZAHYO_COMMAND: //'Z'のとき
     //自分の座標は、スティックを動かした段階で更新してるので、ここでは、更新せず。
     if (myid != data.cid)
@@ -1263,6 +1444,103 @@ static int execute_command()
     //fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
     //exit(1); //異常終了
     break;
+=======
+    case ZAHYO_COMMAND: //'Z'のとき
+      //自分の座標は、スティックを動かした段階で更新してるので、ここでは、更新せず。
+      if (myid != data.cid)
+      {
+        player[data.cid].dst_rect.x = data.zahyo_x; //クライアントのx座標を各プレイヤーの座標を反映
+        player[data.cid].dst_rect.y = data.zahyo_y; //クライアントのy座標を各プレイヤーの座標を反映
+      }
+      //fprintf(stderr, "client[%d], name : %s,zahyo_x = %d, zahyo_y = %d \n", data.cid, clients[data.cid].name, data.zahyo_x, data.zahyo_y);
+      result = 1;
+      break;
+    case KINKAI_COMMAND: //'K'のとき
+      fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
+      kinkai_flag = false;
+      if (data.cid == myid)
+      { //金塊を取った、クライアントのIDが自分のIDと同じであれば
+        kinkai_keep_flag = true;
+      }
+      result = 1;
+      break;
+    case HACK_COMMAND: //'H'のとき
+      printf("executehack\n");
+      time_now = SDL_GetTicks();
+      hacking_flag = true;
+      player[data.cid].flag_hack_start = false;
+      player[data.cid].key.x= 0;
+      player[data.cid].speed= PLAYER_SPEED;
+      result = 1;
+      break;
+    case NOT_HACK_COMMAND: //'N'のとき(長押ししたけどキャンセルしたとき)
+      printf("cancelhack\n");
+      player[data.cid].flag_hack_start = false;
+      player[data.cid].key.x= 0;
+      player[data.cid].speed= PLAYER_SPEED;
+      result = 1;
+      break;
+    case HACK_START_COMMAND: //'S'のとき
+      player[data.cid].inputtime = SDL_GetTicks();
+      player[data.cid].flag_hack_start = true;
+      player[data.cid].key.x= 1;
+      player[data.cid].speed= 0;
+      gauge = 0;
+      printf("executestarthack\n");
+      result = 1;
+      break;
+    case PLAYER_COMMAND: //'P'のとき
+      if (myid != data.cid)
+      {
+        player_flag[data.cid] = false; //他のクライアントから消えたと通知がきたプレイヤーを描画しないようにする
+      }
+      //fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
+      //kinkai_flag = false;
+      result = 1;
+      break;
+    case RIGHT_COMMAND:               //'R'のとき
+      player[data.cid].key.right = 1; //スティックが右に入っていることを維持
+      player[data.cid].key.left = 0;
+      result = 1;
+      break;
+    case LEFT_COMMAND: //'L'のとき
+      player[data.cid].key.right = 0;
+      player[data.cid].key.left = 1; //スティックが右に入っていることを維持
+      result = 1;
+      break;
+    case UP_COMMAND:               //'U'のとき
+      player[data.cid].key.up = 1; //スティックが上に入っていることを維持
+      player[data.cid].key.down = 0;
+      result = 1;
+      break;
+    case DOWN_COMMAND: //'D'のとき
+      player[data.cid].key.up = 0;
+      player[data.cid].key.down = 1; //スティックが右に入っていることを維持
+      result = 1;
+      break;
+    case CENTER_COMMAND: //'C'のとき
+      player[data.cid].key.right = 0;
+      player[data.cid].key.left = 0;
+      result = 1;
+      break;
+    case AENTER_COMMAND: //'A'のとき
+      player[data.cid].key.up = 0;
+      player[data.cid].key.down = 0;
+      result = 1;
+      break;
+    case MESSAGE_COMMAND: //'M'のとき
+      fprintf(stderr, "client[%d] %s: %s\n", data.cid, clients[data.cid].name, data.message);
+      result = 1;
+      break;
+    case QUIT_COMMAND: //'Q'のとき
+      fprintf(stderr, "client[%d] %s sent quit command.\n", data.cid, clients[data.cid].name);
+      result = 0;
+      break;
+    default: //その他の文字が入力された場合
+      //fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
+      //exit(1); //異常終了
+      break;
+>>>>>>> hacking
   }
 
   return result;
@@ -1367,6 +1645,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
   }
   else if ((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_ENTRANCE) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV))
   { // マップから読み込んだのが金塊、棚、出入り口、敵の移動床のとき
+
     kotei_objects[index].type = loadmap_objecttype;
     s = IMG_Load(imgfiles[loadmap_objecttype]);
     if (s == NULL)
@@ -1379,9 +1658,16 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 
     kotei_objects[index].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
     kotei_objects[index].dst_rect.y = dst.y;
-    kotei_objects[index].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
+    kotei_objects[index].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする   
     kotei_objects[index].dst_rect.h = MAP_CHIPSIZE;
     index++;
   }
   return index;
+}
+
+void Events() {
+  //ハッキング関連
+  if(hacking_flag){
+    if(SDL_GetTicks() - time_now > STOPTIME) hacking_flag = false;
+  }
 }

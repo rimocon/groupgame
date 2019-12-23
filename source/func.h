@@ -1,4 +1,4 @@
-/*  二重インクルード防止  */
+ /*  二重インクルード防止  */
 #ifndef _FUNC_H_
 #define _FUNC_H_
 
@@ -31,8 +31,11 @@ bool up,down;
 #define MAP_WIDTH 20 // 変数map0の横の数、ゲーム画面を横に20等分してる
 #define MAP_HEIGHT 15 // 変数map0の縦の数、ゲーム画面を縦に16等分してる
 
+#define HACKTIME 2000 //ハッキングに要する時間
+#define STOPTIME 2000 //ハッキング中にカメラを止める時間
 /*  変数  */
 bool kinkai_flag; //金塊を描画するかしないか
+bool hacking_flag; //金塊を描画するかしないか
 bool kinkai_keep_flag; //プレイヤーが金塊を持っているかどうか
 bool player_flag[3]; //プレイヤーを描画するか、しないか
 
@@ -40,6 +43,8 @@ int before_enemy_x; 	//敵の前の座標 x
 int before_enemy_y; 	//敵の前の座標 y
 Uint32 random_start;	//ランダム移動を開始した時間を格納
 
+int time_now,time_left;
+float gauge;
 /*  mapデータ */
 // static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 // 	{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
@@ -110,7 +115,8 @@ typedef struct { //キー入力用の構造体を型宣言
 		right, //右矢印
 		up, //上矢印
 		down, //下矢印
-		a;  //4ボタン(決定ボタン)
+		a,  //4ボタン(決定ボタン)
+    x; //2ボタン(ハッキングボタン)
 }inputkeys;
 
 typedef struct {
@@ -119,9 +125,12 @@ typedef struct {
 	SDL_Rect src_rect;
 	SDL_Rect dst_rect;
 	float back_zahyo_x;
-    float back_zahyo_y;
+  float back_zahyo_y;
 	bool flag_kinkai;
+  bool flag_hack_start;
+  bool flag_hack_end;
 	int speed;
+  int inputtime;
   inputkeys key; //inputkeys構造体をinputという名前で実体化
 }playerinfo;
 
@@ -131,6 +140,7 @@ typedef struct {
 	SDL_Rect src_rect;
 	SDL_Rect dst_rect;
 	bool flag_kinkai;
+	bool flag_hack;
   int tri[2][3];
   float theta[3];
   bool clockwise;
