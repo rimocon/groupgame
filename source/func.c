@@ -960,7 +960,7 @@ void MoveChara()
     // ゆっくり振り向く,最短で90度振り向いてほしいけど270度回ってしまう
     if (enemy[i].prev_angle != enemy[i].move_angle)
     {
-      enemy[i].prev_angle += 3;
+      enemy[i].prev_angle += 3; // 振り向く速さ
       if (enemy[i].prev_angle >= 360)
         enemy[i].prev_angle -= 360;
 
