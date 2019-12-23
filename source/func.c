@@ -469,22 +469,34 @@ void MoveChara()
       if (player[i].key.up == 1 || player[i].key.down == 1)
       {
         move = 0.71f; //移動係数を0.71に設定
-        if (player[i].key.right && player[i].key.up)
+        if (player[i].key.right && player[i].key.up){
           player[i].look_angle = 45;
-        else if (player[i].key.right && player[i].key.down)
+          player[i].src_rect.y = 120;
+        }
+        else if (player[i].key.right && player[i].key.down){
           player[i].look_angle = 135;
-        else if (player[i].key.left && player[i].key.down)
+          player[i].src_rect.y = 168;
+        }
+        else if (player[i].key.left && player[i].key.down){
           player[i].look_angle = 225;
-        else if (player[i].key.left && player[i].key.up)
+          player[i].src_rect.y = 144;
+        }
+        else if (player[i].key.left && player[i].key.up){
           player[i].look_angle = 315;
+          player[i].src_rect.y = 96;
+        }
       }
       else
       {
         move = 1.0f; //斜めじゃなければ1.0に設定
-        if (player[i].key.left)
+        if (player[i].key.left){
           player[i].look_angle = 270;
-        else if (player[i].key.right)
+          player[i].src_rect.y = 48;
+        }
+        else if (player[i].key.right){
           player[i].look_angle = 90;
+          player[i].src_rect.y = 72;
+        }
       }
     }
     else if (player[i].key.up == 1 || player[i].key.down == 1)
@@ -494,22 +506,34 @@ void MoveChara()
       if (player[i].key.right == 1 || player[i].key.left == 1)
       {
         move = 0.71f; //移動係数を0.71に設定
-        if (player[i].key.right && player[i].key.up)
+        if (player[i].key.right && player[i].key.up){
           player[i].look_angle = 45;
-        else if (player[i].key.right && player[i].key.down)
+          player[i].src_rect.y = 120;
+        }
+        else if (player[i].key.right && player[i].key.down){
           player[i].look_angle = 135;
-        else if (player[i].key.left && player[i].key.down)
+          player[i].src_rect.y = 168;
+        }
+        else if (player[i].key.left && player[i].key.down){
           player[i].look_angle = 225;
-        else if (player[i].key.left && player[i].key.up)
+          player[i].src_rect.y = 144;
+        }
+        else if (player[i].key.left && player[i].key.up){
           player[i].look_angle = 315;
+          player[i].src_rect.y = 96;
+        }
       }
       else
       {
         move = 1.0f; ////斜めじゃなければ1.0に設定
-        if (player[i].key.up)
+        if (player[i].key.up){
           player[i].look_angle = 0;
-        else if (player[i].key.down)
+          player[i].src_rect.y = 0;
+        }
+        else if (player[i].key.down){
           player[i].look_angle = 180;
+          player[i].src_rect.y = 24;
+        }
       }
     }
 
@@ -1554,12 +1578,12 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     player[index].src_rect.x = 0;
     player[index].src_rect.y = 0;
-    player[index].src_rect.w = s->w;                                // 読み込んだ画像ファイルの幅を元画像の領域として設定
-    player[index].src_rect.h = s->h;                                // 読み込んだ画像ファイルの高さを元画像の領域として設定
+    player[index].src_rect.w = 24;                                // 読み込んだ画像ファイルの幅を元画像の領域として設定
+    player[index].src_rect.h = 24;                                // 読み込んだ画像ファイルの高さを元画像の領域として設定
     player[index].dst_rect.x = dst.x + ((MAP_CHIPSIZE - s->w) / 2); // マップで指定された場所 + MAP_CHIPSIZEの中心になるように足し算
     player[index].dst_rect.y = dst.y + ((MAP_CHIPSIZE - s->h) / 2);
-    player[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
-    player[index].dst_rect.h = s->h;
+    player[index].dst_rect.w = 24; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
+    player[index].dst_rect.h = 24;
     s = IMG_Load(imgfiles[TYPE_SPRAY]);
     if (s == NULL)
       fprintf(stderr, "Missing Open Surface: %s", imgfiles[TYPE_SPRAY]);
