@@ -771,14 +771,7 @@ void MoveChara()
         }
       }
     }
-    /*
-    printf("stay_start = %d\n", stay_start);
-    printf("stay_time = %d\n", SDL_GetTicks() - stay_start);
-    printf("diff_x = %lf\n", sqrt(pow(enemy[i].dst_rect.x - before_enemy_x, 2)));
-    printf("diff_y = %lf\n", sqrt(pow(enemy[i].dst_rect.y - before_enemy_y, 2)));
-    printf("random_start = %d\n", random_start);
-    printf("random_time = %d\n", SDL_GetTicks() - random_start);
-    */
+   
     printf("dest_rect.x = %d, before_enemy_x = %d\n", enemy[i].dst_rect.x, before_enemy_x);
     printf("dest_rect.y = %d, before_enemy_y = %d\n", enemy[i].dst_rect.y, before_enemy_y);
 
