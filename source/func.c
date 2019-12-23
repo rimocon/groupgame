@@ -145,7 +145,7 @@ void Input()
       }
       if (inputevent.jbutton.button == 1) //ハッキングボタン
       {
-        joystick_send(10);
+        joystick_send(10); // ハッキングゲージスタート
       }
 
       //金塊を取る
@@ -180,12 +180,13 @@ void Input()
       // ボタンIDに応じた処理
       if (inputevent.jbutton.button == 1) //ハッキングボタン
       {
-        if(SDL_GetTicks() - player[myid].inputtime > HACKTIME){
-          joystick_send(9);
+        if(SDL_GetTicks() - player[myid].inputtime > HACKTIME){ //2秒以上経過した場合
+          joystick_send(9); //ハッキングの処理
         }
-        else{
+        else{ //途中でキャンセルされた場合
           gauge = 0;
-
+          joystick_send(11); //ハッキングキャンセルの処理
+        }
       }
       break;
   }
@@ -296,11 +297,12 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
       gauge += 0.53;
       if(gauge > 64) {
         gauge = 64;
-        boxColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x -20 + gauge,player[i].dst_rect.y,0xffff0000);
+        boxColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x -20 + gauge,player[i].dst_rect.y,0xffff0000); //ゲージの枠表示
+
       }
       else{
-        rectangleColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x+player[i].dst_rect.w + 22,player[i].dst_rect.y,0xff0000ff);
-        boxColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x -20 + gauge,player[i].dst_rect.y,0xff0000ff);
+        rectangleColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x+player[i].dst_rect.w + 22,player[i].dst_rect.y,0xff0000ff); //ゲージ表示
+        boxColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x -20 + gauge,player[i].dst_rect.y,0xff0000ff);  //ゲージの枠表示
       }
     }
   }
@@ -949,10 +951,14 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
     data.command = HACK_START_COMMAND;
     data.cid = myid;
   }
-
+  else if (num == 11) //ハッキングキャンセル
+  {
+    printf("joystickhack\n");
+    data.command = NOT_HACK_COMMAND;
+    data.cid = myid;
+  }
   send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
 }
-
 static int input_command()
 { //クライアントがデータをインプットした時
   CONTAINER data;
@@ -1020,6 +1026,13 @@ static int execute_command()
       printf("executehack\n");
       time_now = SDL_GetTicks();
       hacking_flag = true;
+      player[data.cid].flag_hack_start = false;
+      player[data.cid].key.x= 0;
+      player[data.cid].speed= PLAYER_SPEED;
+      result = 1;
+      break;
+    case NOT_HACK_COMMAND: //'N'のとき(長押ししたけどキャンセルしたとき)
+      printf("cancelhack\n");
       player[data.cid].flag_hack_start = false;
       player[data.cid].key.x= 0;
       player[data.cid].speed= PLAYER_SPEED;
