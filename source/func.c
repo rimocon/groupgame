@@ -147,6 +147,7 @@ void Input()
       //	printf("--- Four-Direction Key: Vertical Axis\n");
     }
     // ジョイスティックのボタンが押された時
+    break;
   case SDL_JOYBUTTONDOWN:
     //	printf("The ID of the pressed button is %d.\n", inputevent.jbutton.button); // 押されたボタンのIDを表示（0から）
     // ボタンIDに応じた処理
@@ -183,12 +184,21 @@ void Input()
     {
       run = false;
     }
+    //2ボタンが押された時(jbuttonだと1)
+    if (inputevent.jbutton.button == 1)
+    {
+      joystick_send(11);
+    }
     break;
-
     // ボタンが離された時
   case SDL_JOYBUTTONUP:
     //	printf("The ID of the released button is %d.\n",inputevent.jbutton.button); // 離されたボタンのIDを表示（0から）
     // ボタンIDに応じた処理
+    // 2ボタンが離された
+    if (inputevent.jbutton.button == 1)
+    {
+      joystick_send(12);
+    }
     if (inputevent.jbutton.button == 0)
     {
       //		printf("--- You released a button on the joystick.\n");
@@ -270,6 +280,30 @@ void MoveTriangle()
     camera[i].tri[0][2] = camera[i].tri[0][0] + sin(camera[i].theta[1] * M_PI / 180.0) * 250; //x3の計算
     camera[i].tri[1][2] = camera[i].tri[1][0] + cos(camera[i].theta[1] * M_PI / 180.0) * 250; //x3の計算
   }
+
+  //敵の視界を動かす処理
+  int origin_x, origin_y;
+  for (int i = 0; i < ENEMY_NUM; i++)
+  {
+    origin_x = enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2;
+    origin_y = enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2;
+    origin_x += 13 * sin(enemy[i].prev_angle * M_PI / 180);
+    origin_y += 13 * -cos(enemy[i].prev_angle * M_PI / 180);
+    enemy[i].tri[0][0] = origin_x;
+    enemy[i].tri[1][0] = origin_y;
+    // 20度回転させた敵の視界の当たり判定を作る
+    int vision[2] = {enemy[i].prev_angle - 20, enemy[i].prev_angle + 20};
+    for (int j = 0; j < 2; j++)
+    {
+      if (vision[j] < 0)
+        vision[j] += 360;
+      else if (vision[j] >= 360)
+        vision[j] -= 360;
+      // 200が視界の範囲
+      enemy[i].tri[0][j + 1] = origin_x + 200 * sin(vision[j] * M_PI / 180);
+      enemy[i].tri[1][j + 1] = origin_y + 200 * -cos((vision[j]) * M_PI / 180);
+    }
+  }
 }
 
 void RenderWindow(void) //画面の描画(イベントが無い時)
@@ -284,17 +318,40 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
       SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
     }
   }
+  // 催涙スプレーの描画
   for (int i = 0; i < PLAYER_NUM; i++)
   {
-    //描画対象がプレイヤーで、プレイヤーが消えていれば(カメラにバレるなどして)、描画しない
     if (player_flag[i] == true)
     {
       SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
+      if (player[i].spray_flag == 1)
+      {
+        SDL_RenderCopyEx(mainrenderer, player[i].spray_texture, &player[i].spray_src_rect, &player[i].spray_dst_rect, player[i].look_angle - 90, &player[i].spray_origin, SDL_FLIP_NONE);
+        // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][1],player[i].spray_hitlines[1][1], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
+        // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][2],player[i].spray_hitlines[1][2], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
+        // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][3],player[i].spray_hitlines[1][3], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
+      }
+      //催涙スプレーのゲージ描画
+      double unit = 500 / (double)SPRAY_TIME;                                           // 500pxがスプレーのMAX
+      int line_h = 20;                                                                  // スプレーの残りを表すゲージの縦幅
+      int spraygauge = WINDOWWIDTH - abs(player[i].spraytime - SPRAY_TIME) * unit;      // スプレーの残りを描画するために値を変換
+      SDL_Rect dst = {WINDOWWIDTH - 534, (WINDOWHEIGHT - 65) + i * line_h + 5, 20, 20}; // ゲージ横のプレイヤー画像
+      SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &dst); // プレイヤー画像をレンダーに出力
+      if (player[i].spraytime > 0)
+      {
+        boxColor(mainrenderer, WINDOWWIDTH - 500, (WINDOWHEIGHT - 65) + i * line_h + 5, spraygauge, (WINDOWHEIGHT - 65) + (i + 1) * line_h, 0xff00ffff); // スプレーの残りをゲージで描画
+      }
     }
   }
+  // 敵の描画
   for (int i = 0; i < ENEMY_NUM; i++)
   {
     SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); //敵をレンダーに出力
+    // lineColor(mainrenderer,enemy[i].tri[0][0],enemy[i].tri[1][0],enemy[i].tri[0][1],enemy[i].tri[1][1], 0xff00ff00); // 当たり判定、デバッグ用
+    // lineColor(mainrenderer,enemy[i].tri[0][0],enemy[i].tri[1][0],enemy[i].tri[0][2],enemy[i].tri[1][2], 0xff00ff00); // 当たり判定、デバッグ用
+    // lineColor(mainrenderer,enemy[i].tri[0][1],enemy[i].tri[1][1],enemy[i].tri[0][2],enemy[i].tri[1][2], 0xff00ff00); // 当たり判定、デバッグ用
+    if (enemy[i].flag_sairui == false)
+      filledTrigonColor(mainrenderer, enemy[i].tri[0][0], enemy[i].tri[1][0], enemy[i].tri[0][1], enemy[i].tri[1][1], enemy[i].tri[0][2], enemy[i].tri[1][2], 0xff0000ff);
   }
   //filledCircleColor(mainrenderer, circle_x, circle_y, 9, 0xff0000ff); //丸の描画
 
@@ -343,6 +400,41 @@ void Collision()
     }
   }
   //ここまでカメラの判定
+
+  //敵の判定
+  int tri_before[2][3];
+  for (int i = 0; i < PLAYER_NUM; i++)
+  {
+    for (int j = 0; j < ENEMY_NUM; j++)
+    {
+      tri_before[0][0] = enemy[j].tri[0][0];
+      tri_before[1][0] = enemy[j].tri[1][0];
+      tri_before[0][1] = enemy[j].tri[0][1];
+      tri_before[1][1] = enemy[j].tri[1][1];
+      tri_before[0][2] = enemy[j].tri[0][2];
+      tri_before[1][2] = enemy[j].tri[1][2];
+
+      if ((SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][0], &enemy[j].tri[1][0], &enemy[j].tri[0][1], &enemy[j].tri[1][1]) ||
+           SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][0], &enemy[j].tri[1][0], &enemy[j].tri[0][2], &enemy[j].tri[1][2]) ||
+           SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][1], &enemy[j].tri[1][1], &enemy[j].tri[0][2], &enemy[j].tri[1][2])) &&
+          enemy[j].flag_sairui == false)
+      {
+        player_flag[myid] = false; // 他のプレイヤーも消える？
+        joystick_send(2);          //プレイヤーが消えたことが他のクライアントに通知される。
+        player[myid].dst_rect.x = 0;
+        player[myid].dst_rect.y = 0;
+        player[myid].dst_rect.w = 0;
+        player[myid].dst_rect.h = 0;
+        enemy[j].tri[0][0] = tri_before[0][0];
+        enemy[j].tri[1][0] = tri_before[1][0];
+        enemy[j].tri[0][1] = tri_before[0][1];
+        enemy[j].tri[1][1] = tri_before[1][1];
+        enemy[j].tri[0][2] = tri_before[0][2];
+        enemy[j].tri[1][2] = tri_before[1][2];
+      }
+    }
+  }
+  //ここまで敵の判定
 }
 void MoveChara()
 {
@@ -370,27 +462,62 @@ void MoveChara()
   }
   */
 
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < PLAYER_NUM; i++)
   {
     if (player[i].key.left == 1 || player[i].key.right == 1)
     {
       if (player[i].key.up == 1 || player[i].key.down == 1)
       {
         move = 0.71f; //移動係数を0.71に設定
+        if (player[i].key.right && player[i].key.up)
+          player[i].look_angle = 45;
+        else if (player[i].key.right && player[i].key.down)
+          player[i].look_angle = 135;
+        else if (player[i].key.left && player[i].key.down)
+          player[i].look_angle = 225;
+        else if (player[i].key.left && player[i].key.up)
+          player[i].look_angle = 315;
       }
       else
       {
         move = 1.0f; //斜めじゃなければ1.0に設定
+        if (player[i].key.left)
+          player[i].look_angle = 270;
+        else if (player[i].key.right)
+          player[i].look_angle = 90;
       }
     }
     else if (player[i].key.up == 1 || player[i].key.down == 1)
     {
       move = 1.0f;
+
+      if (player[i].key.right == 1 || player[i].key.left == 1)
+      {
+        move = 0.71f; //移動係数を0.71に設定
+        if (player[i].key.right && player[i].key.up)
+          player[i].look_angle = 45;
+        else if (player[i].key.right && player[i].key.down)
+          player[i].look_angle = 135;
+        else if (player[i].key.left && player[i].key.down)
+          player[i].look_angle = 225;
+        else if (player[i].key.left && player[i].key.up)
+          player[i].look_angle = 315;
+      }
+      else
+      {
+        move = 1.0f; ////斜めじゃなければ1.0に設定
+        if (player[i].key.up)
+          player[i].look_angle = 0;
+        else if (player[i].key.down)
+          player[i].look_angle = 180;
+      }
     }
+
+    //printf("left %d, right %d, up %d, down %d",player[0].key.left,player[0].key.right,player[0].key.up,player[0].key.down);
 
     if (player[i].key.left == 1)
     {
-      player[i].back_zahyo_x -= (int)1 * move; //プレイヤーの座標をfloat型で保持
+      player[i].back_zahyo_x -= player[i].speed * move; //プレイヤーの座標をfloat型で保持
       if (player[i].back_zahyo_x < 0)
       {
         player[i].back_zahyo_x = 0;
@@ -399,8 +526,8 @@ void MoveChara()
     }
     if (player[i].key.right == 1)
     {
-      player[i].back_zahyo_x += (int)1 * move;
-      if (player[i].back_zahyo_x > WINDOWWIDTH - player[i].dst_rect.w)
+      player[i].back_zahyo_x += player[i].speed * move;
+      if (player[i].back_zahyo_x > WINDOWWIDTH - player[0].dst_rect.w)
       {
         player[i].back_zahyo_x = WINDOWWIDTH - player[i].dst_rect.w;
       }
@@ -408,7 +535,7 @@ void MoveChara()
     }
     if (player[i].key.up == 1)
     {
-      player[i].back_zahyo_y -= (int)1 * move;
+      player[i].back_zahyo_y -= player[i].speed * move;
       if (player[i].back_zahyo_y < 0)
       {
         player[i].back_zahyo_y = 0;
@@ -417,47 +544,46 @@ void MoveChara()
     }
     if (player[i].key.down == 1)
     {
-      player[i].back_zahyo_y += (int)1 * move;
-      if (player[i].back_zahyo_y > WINDOWHEIGHT - player[i].dst_rect.h)
+      player[i].back_zahyo_y += player[i].speed * move;
+      if (player[i].back_zahyo_y > WINDOWHEIGHT - player[0].dst_rect.h)
       {
         player[i].back_zahyo_y = WINDOWHEIGHT - player[i].dst_rect.h;
       }
       player[i].dst_rect.y = player[i].back_zahyo_y;
     }
+
     //棚との衝突判定
-    for (int i = 0; i < kotei_object_num; i++)
+    for (int j = 0; j < kotei_object_num; j++)
     {
-      for (int j = 0; j < PLAYER_NUM; j++)
+      if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &player[i].dst_rect)) // プレイヤーと固定オブジェクトが重なった時
       {
-        if (SDL_HasIntersection(&kotei_objects[i].dst_rect, &player[j].dst_rect)) // プレイヤーと固定オブジェクトが重なった時
+        if (kotei_objects[j].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
+          break;
+        // ぶつかったぶんの距離プレイヤーの位置を戻す
+        if (player[i].key.left)
         {
-          if (kotei_objects[i].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
-            break;
-          // ぶつかったぶんの距離プレイヤーの位置を戻す
-          if (player[j].key.left)
-          {
-            player[j].back_zahyo_x += move;
-            player[j].dst_rect.x = player[j].back_zahyo_x;
-          }
-          if (player[j].key.right)
-          {
-            player[j].back_zahyo_x -= move;
-            player[j].dst_rect.x = player[j].back_zahyo_x;
-          }
-          if (player[j].key.up)
-          {
-            player[j].back_zahyo_y += move;
-            player[j].dst_rect.y = player[j].back_zahyo_y;
-          }
-          if (player[j].key.down)
-          {
-            player[j].back_zahyo_y -= move;
-            player[j].dst_rect.y = player[j].back_zahyo_y;
-          }
+          player[i].back_zahyo_x += player[i].speed * move;
+          player[i].dst_rect.x = player[i].back_zahyo_x;
+        }
+        if (player[i].key.right)
+        {
+          player[i].back_zahyo_x -= player[i].speed * move;
+          player[i].dst_rect.x = player[i].back_zahyo_x;
+        }
+        if (player[i].key.up)
+        {
+          player[i].back_zahyo_y += player[i].speed * move;
+          player[i].dst_rect.y = player[i].back_zahyo_y;
+        }
+        if (player[i].key.down)
+        {
+          player[i].back_zahyo_y -= player[i].speed * move;
+          player[i].dst_rect.y = player[i].back_zahyo_y;
         }
       }
     }
   }
+
   //敵キャラの移動
   for (int i = 0; i < ENEMY_NUM; i++)
   {
@@ -524,13 +650,13 @@ void MoveChara()
             //現在は、x,y座標に対して、プレイヤー側に寄ってくるようにしているが、
             //x座標または、y座標のどちらか片方のみに設定すると、道の追跡ではなく、
             //道の”とうせんぼ”ができる！
-           
 
-        if (enemy[i].dst_rect.x > player[i].dst_rect.x) 
+
+        if (enemy[i].dst_rect.x > player[i].dst_rect.x)
         {
           enemy[i].move_angle = 270;
         }
-        if (enemy[i].dst_rect.x < player[i].dst_rect.x) 
+        if (enemy[i].dst_rect.x < player[i].dst_rect.x)
         {
           enemy[i].move_angle = 90;
         }
@@ -546,7 +672,7 @@ void MoveChara()
       */
       case MT_RANDOM_AND_TRACKING:
         //プレイヤーとNPCとの距離が一定の距離より近い　かつ　same_place_flag == 0の時(追跡する)
-        printf("%d\n",enemy[i].move_angle);
+        printf("%d\n", enemy[i].move_angle);
         //プレイヤー3人の中で一番NPCとの距離が近いプレイヤーを求める
         min_distance = sqrt(pow(enemy[i].dst_rect.x - player[0].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[0].dst_rect.y, 2));
         min_x = player[0].dst_rect.x;
@@ -587,8 +713,8 @@ void MoveChara()
           {
             enemy[i].move_angle = 180;
           }
-          
-          if(enemy[i].dst_rect.x == player[min_k].dst_rect.x && enemy[i].dst_rect.y == player[min_k].dst_rect.y)
+
+          if (enemy[i].dst_rect.x == player[min_k].dst_rect.x && enemy[i].dst_rect.y == player[min_k].dst_rect.y)
           {
             enemy[i].move_angle = 360;
           }
@@ -658,6 +784,27 @@ void MoveChara()
         enemy[i].move_angle -= 360;
     }
 
+    int startTime, temp;
+    // 催涙スプレーと、敵の判定
+    for (int j = 0; j < PLAYER_NUM; j++)
+    {
+      // 催涙スプレーの当たり判定
+      if (SDL_IntersectRectAndLine(&enemy[i].dst_rect, &player[j].spray_hitlines[0][0], &player[j].spray_hitlines[1][0], &player[j].spray_hitlines[0][1], &player[j].spray_hitlines[1][1]) ||
+          SDL_IntersectRectAndLine(&enemy[i].dst_rect, &player[j].spray_hitlines[0][0], &player[j].spray_hitlines[1][0], &player[j].spray_hitlines[0][2], &player[j].spray_hitlines[1][2]) ||
+          SDL_IntersectRectAndLine(&enemy[i].dst_rect, &player[j].spray_hitlines[0][0], &player[j].spray_hitlines[1][0], &player[j].spray_hitlines[0][3], &player[j].spray_hitlines[1][3]))
+      {
+        enemy[i].savetime = SDL_GetTicks(); // 催涙スプレーを当てた時間を保存
+        enemy[i].speed = 0;                 // 敵のスピードを0にする
+        enemy[i].flag_sairui = true;        // 催涙スプレーフラグを立てる
+      }
+    }
+    // 催涙スプレーを当てた時間からSAIRUI_TIME立ったら元に戻る
+    if (SDL_GetTicks() - enemy[i].savetime > SAIRUI_TIME && enemy[i].flag_sairui == true)
+    {
+      enemy[i].speed = ENEMY_SPEED; // 敵のスピードをもとに戻す
+      enemy[i].flag_sairui = false; // 催涙スプレーフラグを下ろす
+    }
+
     //動く方向を格納してる変数（move_angle）にしたがって進んでいく
     switch (enemy[i].move_angle)
     {
@@ -675,8 +822,10 @@ void MoveChara()
       break;
     case 360: //何もしない
       break;
+    default:
+      break; // その場で待機
     }
-    // 棚との衝突判定、敵のmovetypeによって処理を分ける
+    // 敵と棚との衝突判定、敵のmovetypeによって処理を分ける
     for (int j = 0; j < kotei_object_num; j++)
     {
       SDL_Rect overrap_rect;
@@ -692,8 +841,9 @@ void MoveChara()
             enemy[i].dst_rect.y += enemy[i].speed; //めり込みを戻す
             if (enemy[i].dst_rect.x > player[min_k].dst_rect.x)
             { //プレイヤーが左方向にいる時
-               enemy[i].dst_rect.x -= enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+              enemy[i].dst_rect.x -= enemy[i].speed;
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF)
+              {
                 enemy[i].dst_rect.x += enemy[i].speed;
               }
               //enemy[i].move_angle = 270;
@@ -701,7 +851,8 @@ void MoveChara()
             else if (enemy[i].dst_rect.x < player[min_k].dst_rect.x)
             { //プレイヤーが右方向にいる時
               enemy[i].dst_rect.x += enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF)
+              {
                 enemy[i].dst_rect.x -= enemy[i].speed;
               }
               //enemy[i].move_angle = 90;
@@ -712,7 +863,8 @@ void MoveChara()
             if (enemy[i].dst_rect.y > player[min_k].dst_rect.y)
             { //プレイヤーが上方向にいる時
               enemy[i].dst_rect.y -= enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF)
+              {
                 enemy[i].dst_rect.y += enemy[i].speed;
               }
               //enemy[i].move_angle = 180;
@@ -720,7 +872,8 @@ void MoveChara()
             else if (enemy[i].dst_rect.y < player[min_k].dst_rect.y)
             { //プレイヤーが下方向にいる時
               enemy[i].dst_rect.y += enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF)
+              {
                 enemy[i].dst_rect.y -= enemy[i].speed;
               }
               //enemy[i].move_angle = 0;
@@ -731,7 +884,8 @@ void MoveChara()
             if (enemy[i].dst_rect.x > player[min_k].dst_rect.x)
             {
               enemy[i].dst_rect.x -= enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF)
+              {
                 enemy[i].dst_rect.x += enemy[i].speed;
               }
               //enemy[i].move_angle = 270;
@@ -739,7 +893,8 @@ void MoveChara()
             else if (enemy[i].dst_rect.x < player[min_k].dst_rect.x)
             {
               enemy[i].dst_rect.x += enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF)
+              {
                 enemy[i].dst_rect.x -= enemy[i].speed;
               }
               //enemy[i].move_angle = 90;
@@ -750,7 +905,8 @@ void MoveChara()
             if (enemy[i].dst_rect.y > player[min_k].dst_rect.y)
             {                                        //NPCが下、プレイヤーが上のとき
               enemy[i].dst_rect.y -= enemy[i].speed; //NPCを上に移動
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF)
+              {
                 enemy[i].dst_rect.y += enemy[i].speed;
               }
               //enemy[i].move_angle = 180;
@@ -758,7 +914,8 @@ void MoveChara()
             else if (enemy[i].dst_rect.y < player[min_k].dst_rect.y)
             {                                        //NPCが上、プレイヤーが下のとき
               enemy[i].dst_rect.y += enemy[i].speed; //NPCを下に移動
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF)
+              {
                 enemy[i].dst_rect.y -= enemy[i].speed;
               }
               //enemy[i].move_angle = 0;
@@ -771,7 +928,7 @@ void MoveChara()
         }
       }
     }
-   
+
     printf("dest_rect.x = %d, before_enemy_x = %d\n", enemy[i].dst_rect.x, before_enemy_x);
     printf("dest_rect.y = %d, before_enemy_y = %d\n", enemy[i].dst_rect.y, before_enemy_y);
 
@@ -799,9 +956,29 @@ void MoveChara()
     }
     before_enemy_x = enemy[i].dst_rect.x; //1つ前の座標を格納(x)
     before_enemy_y = enemy[i].dst_rect.y; //1つ前の座標を格納(y)
+
+    // ゆっくり振り向く,最短で90度振り向いてほしいけど270度回ってしまう
+    if (enemy[i].prev_angle != enemy[i].move_angle)
+    {
+      enemy[i].prev_angle += 3;
+      if (enemy[i].prev_angle >= 360)
+        enemy[i].prev_angle -= 360;
+
+      // int diff = enemy[i].move_angle - enemy[i].prev_angle;
+      // if(abs(diff) > 180){ diff -= 180; diff *= -1;}
+      // if(diff < 0) {
+      //   enemy[i].prev_angle += 10;
+      // }
+      // else if(diff > 0) {
+      //   enemy[i].prev_angle -= 10;
+      // }
+      // if(enemy[i].prev_angle >= 360) enemy[i].prev_angle -= 360;
+      // else if(enemy[i].prev_angle < 0) enemy[i].prev_angle += 360;
+    }
   }
 }
 
+//敵が移動床に乗った時に、移動する方向を変える関数
 int ChangeEnemyMoveAngle(enemyinfo *e, SDL_Rect movefloor, objecttype type)
 {
   SDL_Rect adjusted_rect = e->dst_rect;
@@ -1141,7 +1318,21 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
     data.command = AENTER_COMMAND; //コマンドを格納
     data.cid = myid;               //クライアントIDを格納
   }
+  else if (num == 11)
+  { //3ボタンを押した時
+    //コマンドとして、2ボタンをスーファミに見立てたときの'X'を代入
+    data.command = X_ON_COMMAND; //コマンドを格納
+    data.cid = myid;             //クライアントIDを格納
+  }
+  else if (num == 12)
+  { //3ボタンを離した時
+    //コマンドとして、2ボタンをスーファミに見立てたときの'X'を代入
+    data.command = X_OFF_COMMAND; //コマンドを格納
+    data.cid = myid;              //クライアントIDを格納
+  }
+
   send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
+  fprintf(stderr, "send_data %d\n", num);
 }
 
 static int input_command()
@@ -1259,6 +1450,14 @@ static int execute_command()
     fprintf(stderr, "client[%d] %s sent quit command.\n", data.cid, clients[data.cid].name);
     result = 0;
     break;
+  case X_ON_COMMAND:            //'X'のとき
+    player[data.cid].key.x = 1; //2ボタンが入力されていることを維持
+    result = 1;
+    break;
+  case X_OFF_COMMAND:           //'Y'のとき
+    player[data.cid].key.x = 0; //2ボタンが離されていることを維持
+    result = 1;
+    break;
   default: //その他の文字が入力された場合
     //fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
     //exit(1); //異常終了
@@ -1333,7 +1532,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
     enemy[index].dst_rect.h = s->h;
     enemy[index].speed = ENEMY_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
-    enemy[index].isgodest = false;
+    enemy[index].flag_sairui = false;
     enemy[index].look_angle = enemy_lookangles[index];
     enemy[index].move_angle = enemy_moveangles[index];
     enemy[index].prev_overlap_rect.x = 0;
@@ -1341,6 +1540,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].prev_overlap_rect.w = 0;
     enemy[index].prev_overlap_rect.h = 0;
     enemy[index].movetype = enemy_movetypes[index];
+    enemy[index].prev_angle = enemy_moveangles[index];
     index++;
   }
   else if (loadmap_objecttype == TYPE_PLAYER1 || loadmap_objecttype == TYPE_PLAYER2 || loadmap_objecttype == TYPE_PLAYER3)
@@ -1358,11 +1558,33 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].src_rect.h = s->h;                                // 読み込んだ画像ファイルの高さを元画像の領域として設定
     player[index].dst_rect.x = dst.x + ((MAP_CHIPSIZE - s->w) / 2); // マップで指定された場所 + MAP_CHIPSIZEの中心になるように足し算
     player[index].dst_rect.y = dst.y + ((MAP_CHIPSIZE - s->h) / 2);
+    player[index].dst_rect.w = s->w; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
+    player[index].dst_rect.h = s->h;
+    s = IMG_Load(imgfiles[TYPE_SPRAY]);
+    if (s == NULL)
+      fprintf(stderr, "Missing Open Surface: %s", imgfiles[TYPE_SPRAY]);
+    player[index].spray_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
+    player[index].spray_src_rect.x = 0;
+    player[index].spray_src_rect.y = 0;
+    player[index].spray_src_rect.w = s->w;
+    player[index].spray_src_rect.h = s->h;
+    player[index].spray_dst_rect.w = SPRAY_WIDTH;
+    player[index].spray_dst_rect.h = SPRAY_HEIGHT;
+    for (int i = 0; i < 2; i++)
+    {
+      for (int j = 0; j < 4; j++)
+      {
+        player[index].spray_hitlines[i][j] = 0;
+      }
+    }
+    player[index].spray_origin.x = 0;
+    player[index].spray_origin.y = SPRAY_HEIGHT / 2;
     player[index].back_zahyo_x = player[index].dst_rect.x; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
     player[index].back_zahyo_y = player[index].dst_rect.y; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
-    player[index].dst_rect.w = s->w;                       // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
-    player[index].dst_rect.h = s->h;
-    player[index].speed = PLAYER_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+    player[index].speed = PLAYER_SPEED;                    // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
+    player[index].look_angle = 0;                          // プレイヤーの最初の見てる角度、0度に設定
+    player[index].spray_flag = 0;
+    player[index].spraytime = SPRAY_TIME;
     index++;
   }
   else if ((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_ENTRANCE) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV))
@@ -1384,4 +1606,91 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     index++;
   }
   return index;
+}
+
+void PlayerAction()
+{
+  // 催涙スプレーを出す動作
+  int origin_x, origin_y;
+  for (int i = 0; i < PLAYER_NUM; i++)
+  {
+    if (player_flag[myid] == false)
+      continue; // プレイヤーがいないとき、催涙スプレーを出さない
+    // スプレーが切れたとき、出さない
+    if (player[i].spraytime < 0)
+    {
+      player[i].spray_flag = false;
+      continue;
+    }
+    if (player[i].key.x)
+    {
+      origin_x = player[i].dst_rect.x;
+      origin_y = player[i].dst_rect.y;
+      switch (player[i].look_angle)
+      {
+      case 0:
+        origin_x += player[i].src_rect.w / 2;
+        origin_y -= SPRAY_HEIGHT / 2;
+        break;
+      case 45:
+        origin_x += player[i].src_rect.w;
+        origin_y -= SPRAY_HEIGHT / 2;
+        break;
+      case 90:
+        origin_x += player[i].src_rect.w;
+        origin_y += player[i].src_rect.h / 2 - SPRAY_HEIGHT / 2;
+        break;
+      case 135:
+        origin_x += player[i].src_rect.w;
+        origin_y += player[i].src_rect.h - SPRAY_HEIGHT / 2;
+        break;
+      case 180:
+        origin_x += player[i].src_rect.w / 2;
+        origin_y += player[i].src_rect.h - SPRAY_HEIGHT / 2;
+        break;
+      case 225:
+        origin_y += player[i].src_rect.h - SPRAY_HEIGHT / 2;
+        break;
+      case 270:
+        origin_y += player[i].src_rect.h / 2 - SPRAY_HEIGHT / 2;
+        break;
+      case 315:
+        origin_y -= SPRAY_HEIGHT / 2;
+        break;
+      }
+      //催涙スプレーの当たり判定(線)を作る, 当たり判定の範囲はSPRAY_WIDTH,HEIGHTの定数で調節(現在は画像の幅と一緒に)
+      player[i].spray_dst_rect.x = origin_x;
+      player[i].spray_dst_rect.y = origin_y;
+      player[i].spray_dst_rect.w = SPRAY_WIDTH;
+      player[i].spray_dst_rect.h = SPRAY_HEIGHT;
+      player[i].spray_hitlines[0][0] = origin_x;
+      player[i].spray_hitlines[1][0] = origin_y + player[i].dst_rect.h;
+      player[i].spray_hitlines[0][1] = origin_x + SPRAY_WIDTH * sin(player[i].look_angle * M_PI / 180);
+      player[i].spray_hitlines[1][1] = origin_y + player[i].dst_rect.h + SPRAY_WIDTH * -cos((player[i].look_angle) * M_PI / 180);
+      // 15度回転させた催涙スプレーの当たり判定を作る
+      int look_angle_vision[2] = {player[i].look_angle - 15, player[i].look_angle + 15};
+      for (int j = 0; j < 2; j++)
+      {
+        if (look_angle_vision[j] < 0)
+          look_angle_vision[j] += 360;
+        else if (look_angle_vision[j] >= 360)
+          look_angle_vision[j] -= 360;
+        player[i].spray_hitlines[0][j + 2] = origin_x + SPRAY_WIDTH * sin(look_angle_vision[j] * M_PI / 180);
+        player[i].spray_hitlines[1][j + 2] = origin_y + player[i].dst_rect.h + SPRAY_WIDTH * -cos((look_angle_vision[j]) * M_PI / 180);
+      }
+      player[i].spraytime--;
+      //催涙スプレーフラグを立てる
+      player[i].spray_flag = 1;
+    }
+    // キー押されてないとき、催涙スプレーの当たり判定をリセットする
+    else if (player[i].key.x == 0)
+    {
+      player[i].spray_flag = 0;
+      for (int j = 0; j < 4; j++)
+      {
+        player[i].spray_hitlines[0][j] = 0;
+        player[i].spray_hitlines[1][j] = 0;
+      }
+    }
+  }
 }
