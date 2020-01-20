@@ -144,7 +144,6 @@ void Input()
         //スティック操作(左),コマンド送信される
         joystick_send(4);
       }
-<<<<<<< HEAD
       else if (inputevent.jaxis.value == 0)
       { //真ん中にスティックが戻ったら
         //key.right = 0;
@@ -152,33 +151,33 @@ void Input()
         //スティック操作(真ん中),コマンド送信される
         joystick_send(7);
       }
-    }
-    else if (inputevent.jaxis.axis == 1)
-    {
-      printf("--- Analag-Direction Key: 1 Axis\n");
-      if (inputevent.jaxis.value > 0)
-      { //下キーが押されたら
-        //key.up = 0;
-        //key.down = 1;
-        //スティック操作(下),コマンド送信される
-        joystick_send(6);
-        printf("下\n");
+      else if (inputevent.jaxis.axis == 1)
+      {
+        printf("--- Analag-Direction Key: 1 Axis\n");
+        if (inputevent.jaxis.value > 0)
+        { //下キーが押されたら
+          //key.up = 0;
+          //key.down = 1;
+          //スティック操作(下),コマンド送信される
+          joystick_send(6);
+          printf("下\n");
+        }
+        else if (inputevent.jaxis.value < 0)
+        { //上キーが押されたら
+          //key.up = 1;
+          //key.down = 0;
+          //スティック操作(上),コマンド送信される
+          joystick_send(5);
+          printf("上\n");
+        }
+        else if (inputevent.jaxis.value == 0)
+        { //真ん中にスティックが戻ったら
+          //key.up = 0;
+          //key.down = 0;
+          //スティック操作(真ん中),コマンド送信される
+          joystick_send(8);
+        }
       }
-      else if (inputevent.jaxis.value < 0)
-      { //上キーが押されたら
-        //key.up = 1;
-        //key.down = 0;
-        //スティック操作(上),コマンド送信される
-        joystick_send(5);
-        printf("上\n");
-      }
-      else if (inputevent.jaxis.value == 0)
-      { //真ん中にスティックが戻ったら
-        //key.up = 0;
-        //key.down = 0;
-        //スティック操作(真ん中),コマンド送信される
-        joystick_send(8);
-=======
       break;
       // ジョイスティックのボタンが押された時
     case SDL_JOYBUTTONDOWN:
@@ -191,75 +190,34 @@ void Input()
       if (inputevent.jbutton.button == 1) //ハッキングボタン
       {
         joystick_send(10); // ハッキングゲージスタート
->>>>>>> hacking
       }
-    }
-    else if (inputevent.jaxis.axis == 2)
-    {
-      //	printf("--- Four-Direction Key: Horizontal Axis\n");
-    }
-    else if (inputevent.jaxis.axis == 3)
-    {
-      //	printf("--- Four-Direction Key: Vertical Axis\n");
-    }
-    else if (inputevent.jaxis.axis == 2)
-    {
-      //	printf("--- Four-Direction Key: Horizontal Axis\n");
-    }
-    else if (inputevent.jaxis.axis == 3)
-    {
-      //	printf("--- Four-Direction Key: Vertical Axis\n");
-    }
-    // ジョイスティックのボタンが押された時
-  case SDL_JOYBUTTONDOWN:
-    //	printf("The ID of the pressed button is %d.\n", inputevent.jbutton.button); // 押されたボタンのIDを表示（0から）
-    // ボタンIDに応じた処理
-    if (inputevent.jbutton.button == 11)
-    {
-      run = false;
-    }
-    if (inputevent.jbutton.button == 5)
-    {
-    }
-
-    //金塊を取る
-    if (inputevent.jbutton.button == 3)
-    {
-      for (int i = 0; i < kotei_object_num; i++)
+      else if (inputevent.jaxis.axis == 2)
       {
-        if (kotei_objects[i].type == TYPE_KINKAI)
+        //	printf("--- Four-Direction Key: Horizontal Axis\n");
+      }
+      if (inputevent.jbutton.button == 5)
+      {
+      }
+      //金塊を取る
+      if (inputevent.jbutton.button == 3)
+      {
+        for (int i = 0; i < kotei_object_num; i++)
         {
-          if (player[myid].dst_rect.x >= kotei_objects[i].dst_rect.x && player[myid].dst_rect.x <= kotei_objects[i].dst_rect.x + 100)
+          if (kotei_objects[i].type == TYPE_KINKAI)
           {
-            if (player[myid].dst_rect.y >= kotei_objects[i].dst_rect.y && player[myid].dst_rect.y <= kotei_objects[i].dst_rect.y + 100)
+            if (player[myid].dst_rect.x >= kotei_objects[i].dst_rect.x && player[myid].dst_rect.x <= kotei_objects[i].dst_rect.x + 100)
             {
-              //kinkai_flag = false;
-              //スティック操作がされた時、金塊情報などのデータ送信される
-              joystick_send(1);
+              if (player[myid].dst_rect.y >= kotei_objects[i].dst_rect.y && player[myid].dst_rect.y <= kotei_objects[i].dst_rect.y + 100)
+              {
+                //kinkai_flag = false;
+                //スティック操作がされた時、金塊情報などのデータ送信される
+                joystick_send(1);
+              }
             }
           }
+          player[myid].key.a = 1;
         }
-        player[myid].key.a = 1;
       }
-<<<<<<< HEAD
-    }
-    //終了ボタンが押された
-    if (inputevent.jbutton.button == 13)
-    {
-      run = false;
-    }
-    break;
-
-    // ボタンが離された時
-  case SDL_JOYBUTTONUP:
-    //	printf("The ID of the released button is %d.\n",inputevent.jbutton.button); // 離されたボタンのIDを表示（0から）
-    // ボタンIDに応じた処理
-    if (inputevent.jbutton.button == 0)
-    {
-      //		printf("--- You released a button on the joystick.\n");
-    }
-    break;
-=======
       //終了ボタンが押された
       if (inputevent.jbutton.button == 13)
       {
@@ -281,7 +239,6 @@ void Input()
         }
       }
       break;
->>>>>>> hacking
   }
 }
 
@@ -335,15 +292,6 @@ void MoveTriangle()
     {
       camera[i].clockwise = true; //時計回り
     }
-<<<<<<< HEAD
-    if (camera[i].clockwise)
-    {
-      camera[i].theta[2]--; //三角形の頂点の座標の角度を変える
-    }
-    else
-    {
-      camera[i].theta[2]++;
-=======
     //ハッキング処理があった場合ここで処理を止める.
     if (!hacking_flag){
       if (camera[i].clockwise) {
@@ -353,17 +301,16 @@ void MoveTriangle()
       {
         camera[i].theta[2]++;
       }
->>>>>>> hacking
     }
     camera[i].theta[0] = camera[i].theta[2] + 15; //三角形の残り2点の角度を変える
     camera[i].theta[1] = camera[i].theta[2] - 15;
     Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w - camera_dst_rects[i].w / 4,
-             camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
-             camera_dst_rects[i].x + camera_dst_rects[i].w / 2,
-             camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
-             90 - camera[i].theta[2],
-             &camera[i].tri[0][0],
-             &camera[i].tri[1][0]); //右端縦真ん中の座標を中心座標から三角形の頂点の座標角度分回転(回転座標系のとり方が違うので90から引いて正規化)
+        camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
+        camera_dst_rects[i].x + camera_dst_rects[i].w / 2,
+        camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
+        90 - camera[i].theta[2],
+        &camera[i].tri[0][0],
+        &camera[i].tri[1][0]); //右端縦真ん中の座標を中心座標から三角形の頂点の座標角度分回転(回転座標系のとり方が違うので90から引いて正規化)
     //三角形の残り2点の位置計算
     camera[i].tri[0][1] = camera[i].tri[0][0] + sin(camera[i].theta[0] * M_PI / 180.0) * 250; //x2の計算
     camera[i].tri[1][1] = camera[i].tri[1][0] + cos(camera[i].theta[0] * M_PI / 180.0) * 250; //y2の計算
@@ -397,14 +344,6 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
     SDL_RenderCopy(mainrenderer, enemy[i].image_texture, &enemy[i].src_rect, &enemy[i].dst_rect); //敵をレンダーに出力
   }
 
-<<<<<<< HEAD
-  for (int i = 0; i < CAMERA_NUM; i++)
-  {
-    filledTrigonColor(mainrenderer, camera[i].tri[0][0], camera[i].tri[1][0], camera[i].tri[0][1], camera[i].tri[1][1], camera[i].tri[0][2], camera[i].tri[1][2], 0xff0000ff);
-    //SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,camera[i].angle,NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-    SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect, 90 - camera[i].theta[2], NULL, SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
-    //printf("%d,%d \n",i,camera[i].dst_rect.x);
-=======
   for(int i = 0;  i<CAMERA_NUM; i++){
     filledTrigonColor(mainrenderer,camera[i].tri[0][0],camera[i].tri[1][0],camera[i].tri[0][1],camera[i].tri[1][1],camera[i].tri[0][2],camera[i].tri[1][2],0xff0000ff);
     SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect,90 - camera[i].theta[2],NULL,SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
@@ -422,7 +361,6 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
         boxColor(mainrenderer,player[i].dst_rect.x-20,player[i].dst_rect.y -10,player[i].dst_rect.x -20 + gauge,player[i].dst_rect.y,0xff0000ff);  //ゲージの枠表示
       }
     }
->>>>>>> hacking
   }
   SDL_RenderPresent(mainrenderer); // 描画データを表示
 }
@@ -444,10 +382,10 @@ void Collision()
         camera_before[i].tri[0][k] = camera[i].tri[0][k];
         camera_before[i].tri[1][k] = camera[i].tri[1][k];
         bool judge = SDL_IntersectRectAndLine(&player[myid].dst_rect,
-                                              &camera[i].tri[0][j],
-                                              &camera[i].tri[1][j],
-                                              &camera[i].tri[0][k],
-                                              &camera[i].tri[1][k]);
+            &camera[i].tri[0][j],
+            &camera[i].tri[1][j],
+            &camera[i].tri[0][k],
+            &camera[i].tri[1][k]);
         //カメラとプレイヤーがぶつかった時
         if (judge)
         {
@@ -478,32 +416,23 @@ void MoveChara()
   int k;
 
   /*
-  if (same_place_flag == 1)
-  {
-    random_start = SDL_GetTicks();
-    same_place_flag = 2;
-  }
-  if (SDL_GetTicks() - random_start > 5000)
-  {
-    same_place_flag = 0;
-    random_start = 0;
-  }
-  */
+     if (same_place_flag == 1)
+     {
+     random_start = SDL_GetTicks();
+     same_place_flag = 2;
+     }
+     if (SDL_GetTicks() - random_start > 5000)
+     {
+     same_place_flag = 0;
+     random_start = 0;
+     }
+   */
 
   for (int i = 0; i < 3; i++)
   {
-<<<<<<< HEAD
-    if (player[i].key.left == 1 || player[i].key.right == 1)
-    {
-      if (player[i].key.up == 1 || player[i].key.down == 1)
-      {
-        move = 0.71f; //移動係数を0.71に設定
-=======
-
     if (player[i].key.left == 1 || player[i].key.right == 1){
       if (player[i].key.up == 1 || player[i].key.down == 1){
-        move=0.71f; //移動係数を0.71に設定
->>>>>>> hacking
+        move = 0.71f; //移動係数を0.71に設定
       }
       else
       {
@@ -526,13 +455,8 @@ void MoveChara()
     }
     if (player[i].key.right == 1)
     {
-<<<<<<< HEAD
-      player[i].back_zahyo_x += (int)1 * move;
-      if (player[i].back_zahyo_x > WINDOWWIDTH - player[i].dst_rect.w)
-=======
       player[i].back_zahyo_x += player[i].speed * move; //プレイヤーの座標をfloat型で保持
       if (player[i].back_zahyo_x > WINDOWWIDTH - player[0].dst_rect.w)
->>>>>>> hacking
       {
         player[i].back_zahyo_x = WINDOWWIDTH - player[i].dst_rect.w;
       }
@@ -549,13 +473,8 @@ void MoveChara()
     }
     if (player[i].key.down == 1)
     {
-<<<<<<< HEAD
-      player[i].back_zahyo_y += (int)1 * move;
-      if (player[i].back_zahyo_y > WINDOWHEIGHT - player[i].dst_rect.h)
-=======
       player[i].back_zahyo_y += player[i].speed * move; //プレイヤーの座標をfloat型で保持
       if (player[i].back_zahyo_y > WINDOWHEIGHT - player[0].dst_rect.h)
->>>>>>> hacking
       {
         player[i].back_zahyo_y = WINDOWHEIGHT - player[i].dst_rect.h;
       }
@@ -633,168 +552,168 @@ void MoveChara()
       //敵の動くタイプによって処理変える
       switch (enemy[i].movetype)
       {
-      // 敵が移動床に乗った時の処理
-      case MT_MOVING_FLOOR:
-        if (SDL_IntersectRect(&kotei_objects[j].dst_rect, &enemy[i].dst_rect, &overrap_rect) &&                                            // 敵が固定オブジェクトに重なる、かつ
-            kotei_objects[j].type >= TYPE_ENEMY_MOVING_FLOOR_UL &&                                                                         // 固定オブジェクトが移動床だったとき、かつ
-            overrap_rect.w >= enemy[i].dst_rect.w && overrap_rect.h >= enemy[i].dst_rect.h &&                                              // 敵と、移動床が完全に重なって、かつ
-            abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2) - (kotei_objects[j].dst_rect.x + kotei_objects[j].dst_rect.w / 2)) <= 2 && // 敵のx座標が移動床の真ん中に近くなって、かつ
-            abs((enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2) - (kotei_objects[j].dst_rect.y + kotei_objects[j].dst_rect.h / 2)) <= 2)
-        { // 敵のy座標が移動床の真ん中に近くなったとき
-          if (enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0)
-          {                                                                                    // 前回移動床に乗った時の座標から、MAP_CHIPSIZE分離れているか、または移動床に乗ったのが最初のとき
-            ChangeEnemyMoveAngle(&enemy[i], kotei_objects[j].dst_rect, kotei_objects[j].type); // 床のタイプによって、敵の動く方向をかえる
-            enemy[i].prev_overlap_rect = overrap_rect;                                         // 前回移動床に乗った時の座標を保存しておく（同じ床で判定して無限ループにならないように）
+        // 敵が移動床に乗った時の処理
+        case MT_MOVING_FLOOR:
+          if (SDL_IntersectRect(&kotei_objects[j].dst_rect, &enemy[i].dst_rect, &overrap_rect) &&                                            // 敵が固定オブジェクトに重なる、かつ
+              kotei_objects[j].type >= TYPE_ENEMY_MOVING_FLOOR_UL &&                                                                         // 固定オブジェクトが移動床だったとき、かつ
+              overrap_rect.w >= enemy[i].dst_rect.w && overrap_rect.h >= enemy[i].dst_rect.h &&                                              // 敵と、移動床が完全に重なって、かつ
+              abs((enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2) - (kotei_objects[j].dst_rect.x + kotei_objects[j].dst_rect.w / 2)) <= 2 && // 敵のx座標が移動床の真ん中に近くなって、かつ
+              abs((enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2) - (kotei_objects[j].dst_rect.y + kotei_objects[j].dst_rect.h / 2)) <= 2)
+          { // 敵のy座標が移動床の真ん中に近くなったとき
+            if (enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0)
+            {                                                                                    // 前回移動床に乗った時の座標から、MAP_CHIPSIZE分離れているか、または移動床に乗ったのが最初のとき
+              ChangeEnemyMoveAngle(&enemy[i], kotei_objects[j].dst_rect, kotei_objects[j].type); // 床のタイプによって、敵の動く方向をかえる
+              enemy[i].prev_overlap_rect = overrap_rect;                                         // 前回移動床に乗った時の座標を保存しておく（同じ床で判定して無限ループにならないように）
+            }
           }
-        }
-        // 敵が移動床に乗った時の処理ここまで
-        break;
+          // 敵が移動床に乗った時の処理ここまで
+          break;
 
-      // 敵がランダムに動く処理
-      case MT_RANDOM:
-        if (((enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2 + MAP_CHIPSIZE / 2) % MAP_CHIPSIZE <= 2) && ((enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2 + MAP_CHIPSIZE / 2) % MAP_CHIPSIZE <= 2))
-        { // 敵がMAP_CHIPSIZE*MAP_CHIPSIZEマスの真ん中に来た時
-          if (enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0)
-          { // 前回真ん中に来た時の座標から、MAP_CHIPSIZE分離れているか、または移動床に乗ったのが最初のとき
-            //ランダムにする処理
-            if (random >= 0 && random <= 40)
-            {
-              enemy[i].move_angle = 0;
+          // 敵がランダムに動く処理
+        case MT_RANDOM:
+          if (((enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2 + MAP_CHIPSIZE / 2) % MAP_CHIPSIZE <= 2) && ((enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2 + MAP_CHIPSIZE / 2) % MAP_CHIPSIZE <= 2))
+          { // 敵がMAP_CHIPSIZE*MAP_CHIPSIZEマスの真ん中に来た時
+            if (enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0)
+            { // 前回真ん中に来た時の座標から、MAP_CHIPSIZE分離れているか、または移動床に乗ったのが最初のとき
+              //ランダムにする処理
+              if (random >= 0 && random <= 40)
+              {
+                enemy[i].move_angle = 0;
+              }
+              else if (random > 40 && random <= 50)
+              {
+                enemy[i].move_angle = 90;
+              }
+              else if (random > 50 && random <= 70)
+              {
+                enemy[i].move_angle = 180;
+              }
+              else if (random > 70 && random <= 100)
+              {
+                enemy[i].move_angle = 270;
+              }
+              else
+              {
+                printf("random 値エラー\n");
+              }
+              enemy[i].prev_overlap_rect = enemy[i].dst_rect; // 前回移動床に乗った時の座標を保存しておく（同じ床で判定して無限ループにならないように）
             }
-            else if (random > 40 && random <= 50)
-            {
-              enemy[i].move_angle = 90;
-            }
-            else if (random > 50 && random <= 70)
-            {
-              enemy[i].move_angle = 180;
-            }
-            else if (random > 70 && random <= 100)
-            {
-              enemy[i].move_angle = 270;
-            }
-            else
-            {
-              printf("random 値エラー\n");
-            }
-            enemy[i].prev_overlap_rect = enemy[i].dst_rect; // 前回移動床に乗った時の座標を保存しておく（同じ床で判定して無限ループにならないように）
           }
-        }
-        break;
-      /*
-      case MT_TRACKING:
-            //追跡してくるNPC
-            //現在は、x,y座標に対して、プレイヤー側に寄ってくるようにしているが、
-            //x座標または、y座標のどちらか片方のみに設定すると、道の追跡ではなく、
-            //道の”とうせんぼ”ができる！
-           
-
-        if (enemy[i].dst_rect.x > player[i].dst_rect.x) 
-        {
-          enemy[i].move_angle = 270;
-        }
-        if (enemy[i].dst_rect.x < player[i].dst_rect.x) 
-        {
-          enemy[i].move_angle = 90;
-        }
-        if (enemy[i].dst_rect.y > player[i].dst_rect.y)
-        {
-          enemy[i].move_angle = 0;
-        }
-        if (enemy[i].dst_rect.y < player[i].dst_rect.y)
-        {
-          enemy[i].move_angle = 180;
-        }
-        break;
-      */
-      case MT_RANDOM_AND_TRACKING:
-        //プレイヤーとNPCとの距離が一定の距離より近い　かつ　same_place_flag == 0の時(追跡する)
-        printf("%d\n",enemy[i].move_angle);
-        //プレイヤー3人の中で一番NPCとの距離が近いプレイヤーを求める
-        min_distance = sqrt(pow(enemy[i].dst_rect.x - player[0].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[0].dst_rect.y, 2));
-        min_x = player[0].dst_rect.x;
-        min_y = player[0].dst_rect.y;
-        min_k = 0;
-        if (min_distance > sqrt(pow(enemy[i].dst_rect.x - player[1].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[1].dst_rect.y, 2)))
-        {
-          min_distance = sqrt(pow(enemy[i].dst_rect.x - player[1].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[1].dst_rect.y, 2));
-          min_x = player[1].dst_rect.x;
-          min_y = player[1].dst_rect.y;
-          min_k = 1;
-        }
-        if (min_distance > sqrt(pow(enemy[i].dst_rect.x - player[2].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[2].dst_rect.y, 2)))
-        {
-          min_distance = sqrt(pow(enemy[i].dst_rect.x - player[2].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[2].dst_rect.y, 2));
-          min_x = player[2].dst_rect.x;
-          min_y = player[2].dst_rect.y;
-          min_k = 2;
-        }
-
-        //if (sqrt(pow(enemy[i].dst_rect.x - player[min_k].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[min_k].dst_rect.y, 2)) < 200 && same_place_flag == 0)
-        if (min_distance < 200 && same_place_flag == 0)
-        {
-          printf("%d\n", min_distance);
-          if (enemy[i].dst_rect.x > player[min_k].dst_rect.x) //プレイヤーが左方向にいる時
-          {
-            enemy[i].move_angle = 270;
-          }
-          if (enemy[i].dst_rect.x < player[min_k].dst_rect.x) //プレイヤーが右方向にいる時
-          {
-            enemy[i].move_angle = 90;
-          }
-          if (enemy[i].dst_rect.y > player[min_k].dst_rect.y) //プレイヤーが上方向にいる時
-          {
-            enemy[i].move_angle = 0;
-          }
-          if (enemy[i].dst_rect.y < player[min_k].dst_rect.y) //プレイヤーが下方向にいる時
-          {
-            enemy[i].move_angle = 180;
-          }
-          
-          if(enemy[i].dst_rect.x == player[min_k].dst_rect.x && enemy[i].dst_rect.y == player[min_k].dst_rect.y)
-          {
-            enemy[i].move_angle = 360;
-          }
+          break;
           /*
-            if (enemy[i].dst_rect.x == min_x && enemy[i].dst_rect.y == min_y)
-            {
-              enemy[i].move_angle = 360; //プレイヤーとx,y座標が等しい時、動かない
-            }
+             case MT_TRACKING:
+          //追跡してくるNPC
+          //現在は、x,y座標に対して、プレイヤー側に寄ってくるようにしているが、
+          //x座標または、y座標のどちらか片方のみに設定すると、道の追跡ではなく、
+          //道の”とうせんぼ”ができる！
 
-            if (k != min_k)
-            {
-              enemy[i].move_angle = 360; //プレイヤーとx,y座標が等しい時、動かない
-            }
-            */
-        }
-        //プレイヤーとNPCとの距離が一定の距離より遠い時(ランダムウォークする)
-        else
-        {
-          if (same_place_flag == 1 || enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0)
+
+          if (enemy[i].dst_rect.x > player[i].dst_rect.x) 
           {
-            if (random >= 0 && random <= 40)
-            {
-              enemy[i].move_angle = 0;
-            }
-            else if (random > 40 && random <= 50)
-            {
-              enemy[i].move_angle = 90;
-            }
-            else if (random > 50 && random <= 70)
-            {
-              enemy[i].move_angle = 180;
-            }
-            else if (random > 70 && random <= 100)
+          enemy[i].move_angle = 270;
+          }
+          if (enemy[i].dst_rect.x < player[i].dst_rect.x) 
+          {
+          enemy[i].move_angle = 90;
+          }
+          if (enemy[i].dst_rect.y > player[i].dst_rect.y)
+          {
+          enemy[i].move_angle = 0;
+          }
+          if (enemy[i].dst_rect.y < player[i].dst_rect.y)
+          {
+          enemy[i].move_angle = 180;
+          }
+          break;
+           */
+        case MT_RANDOM_AND_TRACKING:
+          //プレイヤーとNPCとの距離が一定の距離より近い　かつ　same_place_flag == 0の時(追跡する)
+          printf("%d\n",enemy[i].move_angle);
+          //プレイヤー3人の中で一番NPCとの距離が近いプレイヤーを求める
+          min_distance = sqrt(pow(enemy[i].dst_rect.x - player[0].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[0].dst_rect.y, 2));
+          min_x = player[0].dst_rect.x;
+          min_y = player[0].dst_rect.y;
+          min_k = 0;
+          if (min_distance > sqrt(pow(enemy[i].dst_rect.x - player[1].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[1].dst_rect.y, 2)))
+          {
+            min_distance = sqrt(pow(enemy[i].dst_rect.x - player[1].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[1].dst_rect.y, 2));
+            min_x = player[1].dst_rect.x;
+            min_y = player[1].dst_rect.y;
+            min_k = 1;
+          }
+          if (min_distance > sqrt(pow(enemy[i].dst_rect.x - player[2].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[2].dst_rect.y, 2)))
+          {
+            min_distance = sqrt(pow(enemy[i].dst_rect.x - player[2].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[2].dst_rect.y, 2));
+            min_x = player[2].dst_rect.x;
+            min_y = player[2].dst_rect.y;
+            min_k = 2;
+          }
+
+          //if (sqrt(pow(enemy[i].dst_rect.x - player[min_k].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[min_k].dst_rect.y, 2)) < 200 && same_place_flag == 0)
+          if (min_distance < 200 && same_place_flag == 0)
+          {
+            printf("%d\n", min_distance);
+            if (enemy[i].dst_rect.x > player[min_k].dst_rect.x) //プレイヤーが左方向にいる時
             {
               enemy[i].move_angle = 270;
             }
-            else
+            if (enemy[i].dst_rect.x < player[min_k].dst_rect.x) //プレイヤーが右方向にいる時
             {
-              printf("random 値エラー\n");
+              enemy[i].move_angle = 90;
             }
-            enemy[i].prev_overlap_rect = enemy[i].dst_rect; // 前回ランダムに方向転換した時の座標を保存しておく（同じ床で判定して無限ループにならないように）
+            if (enemy[i].dst_rect.y > player[min_k].dst_rect.y) //プレイヤーが上方向にいる時
+            {
+              enemy[i].move_angle = 0;
+            }
+            if (enemy[i].dst_rect.y < player[min_k].dst_rect.y) //プレイヤーが下方向にいる時
+            {
+              enemy[i].move_angle = 180;
+            }
+
+            if(enemy[i].dst_rect.x == player[min_k].dst_rect.x && enemy[i].dst_rect.y == player[min_k].dst_rect.y)
+            {
+              enemy[i].move_angle = 360;
+            }
+            /*
+               if (enemy[i].dst_rect.x == min_x && enemy[i].dst_rect.y == min_y)
+               {
+               enemy[i].move_angle = 360; //プレイヤーとx,y座標が等しい時、動かない
+               }
+
+               if (k != min_k)
+               {
+               enemy[i].move_angle = 360; //プレイヤーとx,y座標が等しい時、動かない
+               }
+             */
           }
-        }
+          //プレイヤーとNPCとの距離が一定の距離より遠い時(ランダムウォークする)
+          else
+          {
+            if (same_place_flag == 1 || enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0)
+            {
+              if (random >= 0 && random <= 40)
+              {
+                enemy[i].move_angle = 0;
+              }
+              else if (random > 40 && random <= 50)
+              {
+                enemy[i].move_angle = 90;
+              }
+              else if (random > 50 && random <= 70)
+              {
+                enemy[i].move_angle = 180;
+              }
+              else if (random > 70 && random <= 100)
+              {
+                enemy[i].move_angle = 270;
+              }
+              else
+              {
+                printf("random 値エラー\n");
+              }
+              enemy[i].prev_overlap_rect = enemy[i].dst_rect; // 前回ランダムに方向転換した時の座標を保存しておく（同じ床で判定して無限ループにならないように）
+            }
+          }
       }
       break;
     }
@@ -824,20 +743,20 @@ void MoveChara()
     //動く方向を格納してる変数（move_angle）にしたがって進んでいく
     switch (enemy[i].move_angle)
     {
-    case 0:
-      enemy[i].dst_rect.y -= enemy[i].speed;
-      break;
-    case 90:
-      enemy[i].dst_rect.x += enemy[i].speed;
-      break;
-    case 180:
-      enemy[i].dst_rect.y += enemy[i].speed;
-      break;
-    case 270:
-      enemy[i].dst_rect.x -= enemy[i].speed;
-      break;
-    case 360: //何もしない
-      break;
+      case 0:
+        enemy[i].dst_rect.y -= enemy[i].speed;
+        break;
+      case 90:
+        enemy[i].dst_rect.x += enemy[i].speed;
+        break;
+      case 180:
+        enemy[i].dst_rect.y += enemy[i].speed;
+        break;
+      case 270:
+        enemy[i].dst_rect.x -= enemy[i].speed;
+        break;
+      case 360: //何もしない
+        break;
     }
     // 棚との衝突判定、敵のmovetypeによって処理を分ける
     for (int j = 0; j < kotei_object_num; j++)
@@ -851,82 +770,82 @@ void MoveChara()
         {
           switch (enemy[i].move_angle)
           {
-          case 0:                                  //プレイヤーが上方向にいる　かつ　上方向に棚がある
-            enemy[i].dst_rect.y += enemy[i].speed; //めり込みを戻す
-            if (enemy[i].dst_rect.x > player[min_k].dst_rect.x)
-            { //プレイヤーが左方向にいる時
-               enemy[i].dst_rect.x -= enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
-                enemy[i].dst_rect.x += enemy[i].speed;
-              }
-              //enemy[i].move_angle = 270;
-            }
-            else if (enemy[i].dst_rect.x < player[min_k].dst_rect.x)
-            { //プレイヤーが右方向にいる時
-              enemy[i].dst_rect.x += enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+            case 0:                                  //プレイヤーが上方向にいる　かつ　上方向に棚がある
+              enemy[i].dst_rect.y += enemy[i].speed; //めり込みを戻す
+              if (enemy[i].dst_rect.x > player[min_k].dst_rect.x)
+              { //プレイヤーが左方向にいる時
                 enemy[i].dst_rect.x -= enemy[i].speed;
+                if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                  enemy[i].dst_rect.x += enemy[i].speed;
+                }
+                //enemy[i].move_angle = 270;
               }
-              //enemy[i].move_angle = 90;
-            }
-            break;
-          case 90:                                 //プレイヤーが右方向にいる　かつ　右方向に棚がある
-            enemy[i].dst_rect.x -= enemy[i].speed; //めり込みを戻す
-            if (enemy[i].dst_rect.y > player[min_k].dst_rect.y)
-            { //プレイヤーが上方向にいる時
-              enemy[i].dst_rect.y -= enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
-                enemy[i].dst_rect.y += enemy[i].speed;
-              }
-              //enemy[i].move_angle = 180;
-            }
-            else if (enemy[i].dst_rect.y < player[min_k].dst_rect.y)
-            { //プレイヤーが下方向にいる時
-              enemy[i].dst_rect.y += enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
-                enemy[i].dst_rect.y -= enemy[i].speed;
-              }
-              //enemy[i].move_angle = 0;
-            }
-            break;
-          case 180:
-            enemy[i].dst_rect.y -= enemy[i].speed; //めり込みを戻す
-            if (enemy[i].dst_rect.x > player[min_k].dst_rect.x)
-            {
-              enemy[i].dst_rect.x -= enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+              else if (enemy[i].dst_rect.x < player[min_k].dst_rect.x)
+              { //プレイヤーが右方向にいる時
                 enemy[i].dst_rect.x += enemy[i].speed;
+                if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                  enemy[i].dst_rect.x -= enemy[i].speed;
+                }
+                //enemy[i].move_angle = 90;
               }
-              //enemy[i].move_angle = 270;
-            }
-            else if (enemy[i].dst_rect.x < player[min_k].dst_rect.x)
-            {
-              enemy[i].dst_rect.x += enemy[i].speed;
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
-                enemy[i].dst_rect.x -= enemy[i].speed;
-              }
-              //enemy[i].move_angle = 90;
-            }
-            break;
-          case 270:
-            enemy[i].dst_rect.x += enemy[i].speed; //めり込みを戻す
-            if (enemy[i].dst_rect.y > player[min_k].dst_rect.y)
-            {                                        //NPCが下、プレイヤーが上のとき
-              enemy[i].dst_rect.y -= enemy[i].speed; //NPCを上に移動
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
-                enemy[i].dst_rect.y += enemy[i].speed;
-              }
-              //enemy[i].move_angle = 180;
-            }
-            else if (enemy[i].dst_rect.y < player[min_k].dst_rect.y)
-            {                                        //NPCが上、プレイヤーが下のとき
-              enemy[i].dst_rect.y += enemy[i].speed; //NPCを下に移動
-              if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+              break;
+            case 90:                                 //プレイヤーが右方向にいる　かつ　右方向に棚がある
+              enemy[i].dst_rect.x -= enemy[i].speed; //めり込みを戻す
+              if (enemy[i].dst_rect.y > player[min_k].dst_rect.y)
+              { //プレイヤーが上方向にいる時
                 enemy[i].dst_rect.y -= enemy[i].speed;
+                if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                  enemy[i].dst_rect.y += enemy[i].speed;
+                }
+                //enemy[i].move_angle = 180;
               }
-              //enemy[i].move_angle = 0;
-            }
-            break;
+              else if (enemy[i].dst_rect.y < player[min_k].dst_rect.y)
+              { //プレイヤーが下方向にいる時
+                enemy[i].dst_rect.y += enemy[i].speed;
+                if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                  enemy[i].dst_rect.y -= enemy[i].speed;
+                }
+                //enemy[i].move_angle = 0;
+              }
+              break;
+            case 180:
+              enemy[i].dst_rect.y -= enemy[i].speed; //めり込みを戻す
+              if (enemy[i].dst_rect.x > player[min_k].dst_rect.x)
+              {
+                enemy[i].dst_rect.x -= enemy[i].speed;
+                if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                  enemy[i].dst_rect.x += enemy[i].speed;
+                }
+                //enemy[i].move_angle = 270;
+              }
+              else if (enemy[i].dst_rect.x < player[min_k].dst_rect.x)
+              {
+                enemy[i].dst_rect.x += enemy[i].speed;
+                if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                  enemy[i].dst_rect.x -= enemy[i].speed;
+                }
+                //enemy[i].move_angle = 90;
+              }
+              break;
+            case 270:
+              enemy[i].dst_rect.x += enemy[i].speed; //めり込みを戻す
+              if (enemy[i].dst_rect.y > player[min_k].dst_rect.y)
+              {                                        //NPCが下、プレイヤーが上のとき
+                enemy[i].dst_rect.y -= enemy[i].speed; //NPCを上に移動
+                if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                  enemy[i].dst_rect.y += enemy[i].speed;
+                }
+                //enemy[i].move_angle = 180;
+              }
+              else if (enemy[i].dst_rect.y < player[min_k].dst_rect.y)
+              {                                        //NPCが上、プレイヤーが下のとき
+                enemy[i].dst_rect.y += enemy[i].speed; //NPCを下に移動
+                if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &enemy[i].dst_rect) && kotei_objects[j].type == TYPE_SHELF){
+                  enemy[i].dst_rect.y -= enemy[i].speed;
+                }
+                //enemy[i].move_angle = 0;
+              }
+              break;
           }
           enemy[i].move_angle += 180;
           if (enemy[i].move_angle >= 360)
@@ -934,7 +853,7 @@ void MoveChara()
         }
       }
     }
-   
+
     printf("dest_rect.x = %d, before_enemy_x = %d\n", enemy[i].dst_rect.x, before_enemy_x);
     printf("dest_rect.y = %d, before_enemy_y = %d\n", enemy[i].dst_rect.y, before_enemy_y);
 
@@ -973,35 +892,35 @@ int ChangeEnemyMoveAngle(enemyinfo *e, SDL_Rect movefloor, objecttype type)
   e->dst_rect = adjusted_rect;
   switch (type)
   {
-  case TYPE_ENEMY_MOVING_FLOOR_UL:
-    if (e->move_angle == 90)
-      e->move_angle = 0;
-    if (e->move_angle == 180)
-      e->move_angle = 270;
-    break;
-  case TYPE_ENEMY_MOVING_FLOOR_UR:
-    if (e->move_angle == 270)
-      e->move_angle = 0;
-    if (e->move_angle == 180)
-      e->move_angle = 90;
-    break;
-  case TYPE_ENEMY_MOVING_FLOOR_DL:
-    if (e->move_angle == 90)
-      e->move_angle = 180;
-    if (e->move_angle == 0)
-      e->move_angle = 270;
-    break;
-  case TYPE_ENEMY_MOVING_FLOOR_DR:
-    if (e->move_angle == 270)
-      e->move_angle = 180;
-    if (e->move_angle == 0)
-      e->move_angle = 90;
-    break;
-  case TYPE_ENEMY_MOVING_FLOOR_REV:
-    e->move_angle += 180;
-    if (e->move_angle >= 360)
-      e->move_angle -= 360;
-    break;
+    case TYPE_ENEMY_MOVING_FLOOR_UL:
+      if (e->move_angle == 90)
+        e->move_angle = 0;
+      if (e->move_angle == 180)
+        e->move_angle = 270;
+      break;
+    case TYPE_ENEMY_MOVING_FLOOR_UR:
+      if (e->move_angle == 270)
+        e->move_angle = 0;
+      if (e->move_angle == 180)
+        e->move_angle = 90;
+      break;
+    case TYPE_ENEMY_MOVING_FLOOR_DL:
+      if (e->move_angle == 90)
+        e->move_angle = 180;
+      if (e->move_angle == 0)
+        e->move_angle = 270;
+      break;
+    case TYPE_ENEMY_MOVING_FLOOR_DR:
+      if (e->move_angle == 270)
+        e->move_angle = 180;
+      if (e->move_angle == 0)
+        e->move_angle = 90;
+      break;
+    case TYPE_ENEMY_MOVING_FLOOR_REV:
+      e->move_angle += 180;
+      if (e->move_angle >= 360)
+        e->move_angle -= 360;
+      break;
   }
 }
 
@@ -1023,12 +942,12 @@ void SetCamera()
   {
     camera[i].clockwise = true;
     Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w, //回転後の座標を計算して返す
-             camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
-             camera_dst_rects[i].x + camera_dst_rects[i].w / 2,
-             camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
-             camera[i].angle,
-             &camera[i].tri[0][0],
-             &camera[i].tri[1][0]);
+        camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
+        camera_dst_rects[i].x + camera_dst_rects[i].w / 2,
+        camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
+        camera[i].angle,
+        &camera[i].tri[0][0],
+        &camera[i].tri[1][0]);
     printf("x2 %d\n", camera[i].tri[0][0]);
     printf("y2 %d\n", camera[i].tri[1][0]);
     /*
@@ -1335,24 +1254,24 @@ static int input_command()
 
   switch (com)
   {
-  case MESSAGE_COMMAND: //'M'のとき
-    fprintf(stderr, "Input message: ");
-    if (fgets(data.message, MAX_LEN_BUFFER, stdin) == NULL)
-    { //メッセージの受け取り
-      handle_error("fgets()");
-    }
-    data.command = MESSAGE_COMMAND;                //コマンドを格納
-    data.message[strlen(data.message) - 1] = '\0'; //メッセージの最後にヌル文字を代入
-    data.cid = myid;                               //クライアントIDを格納
-    send_data(&data, sizeof(CONTAINER));           //クライアントのデータを送信
-    break;
-  case QUIT_COMMAND:                     //'Q'のとき
-    data.command = QUIT_COMMAND;         //コマンドを格納
-    data.cid = myid;                     //クライアントIDを格納
-    send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
-    break;
-  default: //その他の文字が入力された場合
-    fprintf(stderr, "%c is not a valid command.\n", com);
+    case MESSAGE_COMMAND: //'M'のとき
+      fprintf(stderr, "Input message: ");
+      if (fgets(data.message, MAX_LEN_BUFFER, stdin) == NULL)
+      { //メッセージの受け取り
+        handle_error("fgets()");
+      }
+      data.command = MESSAGE_COMMAND;                //コマンドを格納
+      data.message[strlen(data.message) - 1] = '\0'; //メッセージの最後にヌル文字を代入
+      data.cid = myid;                               //クライアントIDを格納
+      send_data(&data, sizeof(CONTAINER));           //クライアントのデータを送信
+      break;
+    case QUIT_COMMAND:                     //'Q'のとき
+      data.command = QUIT_COMMAND;         //コマンドを格納
+      data.cid = myid;                     //クライアントIDを格納
+      send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
+      break;
+    default: //その他の文字が入力された場合
+      fprintf(stderr, "%c is not a valid command.\n", com);
   }
 
   return 1;
@@ -1367,84 +1286,6 @@ static int execute_command()
 
   switch (data.command)
   {
-
-<<<<<<< HEAD
-  case ZAHYO_COMMAND: //'Z'のとき
-    //自分の座標は、スティックを動かした段階で更新してるので、ここでは、更新せず。
-    if (myid != data.cid)
-    {
-      player[data.cid].dst_rect.x = data.zahyo_x; //クライアントのx座標を各プレイヤーの座標を反映
-      player[data.cid].dst_rect.y = data.zahyo_y; //クライアントのy座標を各プレイヤーの座標を反映
-    }
-    //fprintf(stderr, "client[%d], name : %s,zahyo_x = %d, zahyo_y = %d \n", data.cid, clients[data.cid].name, data.zahyo_x, data.zahyo_y);
-    result = 1;
-    break;
-  case KINKAI_COMMAND: //'K'のとき
-    fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
-    kinkai_flag = false;
-    if (data.cid == myid)
-    { //金塊を取った、クライアントのIDが自分のIDと同じであれば
-      kinkai_keep_flag = true;
-    }
-    result = 1;
-    break;
-  case PLAYER_COMMAND: //'P'のとき
-    if (myid != data.cid)
-    {
-      player_flag[data.cid] = false; //他のクライアントから消えたと通知がきたプレイヤーを描画しないようにする
-    }
-    //fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
-    //kinkai_flag = false;
-    result = 1;
-    break;
-  case RIGHT_COMMAND:               //'R'のとき
-    player[data.cid].key.right = 1; //スティックが右に入っていることを維持
-    player[data.cid].key.left = 0;
-    result = 1;
-    break;
-  case LEFT_COMMAND: //'L'のとき
-    player[data.cid].key.right = 0;
-    player[data.cid].key.left = 1; //スティックが右に入っていることを維持
-    result = 1;
-    break;
-  case UP_COMMAND:               //'U'のとき
-    player[data.cid].key.up = 1; //スティックが上に入っていることを維持
-    player[data.cid].key.down = 0;
-    result = 1;
-    break;
-  case DOWN_COMMAND: //'D'のとき
-    player[data.cid].key.up = 0;
-    player[data.cid].key.down = 1; //スティックが右に入っていることを維持
-    result = 1;
-    break;
-  case CENTER_COMMAND: //'C'のとき
-    player[data.cid].key.right = 0;
-    player[data.cid].key.left = 0;
-    result = 1;
-    break;
-  case AENTER_COMMAND: //'A'のとき
-    player[data.cid].key.up = 0;
-    player[data.cid].key.down = 0;
-    result = 1;
-    break;
-  case MESSAGE_COMMAND: //'M'のとき
-    fprintf(stderr, "client[%d] %s: %s\n", data.cid, clients[data.cid].name, data.message);
-    result = 1;
-    break;
-  case START_COMMAND: //'S'のとき
-    fprintf(stderr, "client[%d] %s: %s\n", data.cid, clients[data.cid].name, data.message);
-    status = GAMEMODE;
-    result = 1;
-    stay_start = SDL_GetTicks();
-  case QUIT_COMMAND: //'Q'のとき
-    fprintf(stderr, "client[%d] %s sent quit command.\n", data.cid, clients[data.cid].name);
-    result = 0;
-    break;
-  default: //その他の文字が入力された場合
-    //fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
-    //exit(1); //異常終了
-    break;
-=======
     case ZAHYO_COMMAND: //'Z'のとき
       //自分の座標は、スティックを動かした段階で更新してるので、ここでは、更新せず。
       if (myid != data.cid)
@@ -1540,7 +1381,6 @@ static int execute_command()
       //fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
       //exit(1); //異常終了
       break;
->>>>>>> hacking
   }
 
   return result;
