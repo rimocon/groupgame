@@ -403,8 +403,6 @@ void Collision()
 
   //敵の判定
   int tri_before[2][3];
-  for (int i = 0; i < PLAYER_NUM; i++)
-  {
     for (int j = 0; j < ENEMY_NUM; j++)
     {
       tri_before[0][0] = enemy[j].tri[0][0];
@@ -417,7 +415,8 @@ void Collision()
       if ((SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][0], &enemy[j].tri[1][0], &enemy[j].tri[0][1], &enemy[j].tri[1][1]) ||
            SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][0], &enemy[j].tri[1][0], &enemy[j].tri[0][2], &enemy[j].tri[1][2]) ||
            SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][1], &enemy[j].tri[1][1], &enemy[j].tri[0][2], &enemy[j].tri[1][2])) &&
-          enemy[j].flag_sairui == false)
+          enemy[j].flag_sairui == false &&
+          player[myid].flag_kinkai == true)
       {
         player_flag[myid] = false; // 他のプレイヤーも消える？
         joystick_send(2);          //プレイヤーが消えたことが他のクライアントに通知される。
@@ -432,8 +431,16 @@ void Collision()
         enemy[j].tri[0][2] = tri_before[0][2];
         enemy[j].tri[1][2] = tri_before[1][2];
       }
+      else {
+        enemy[j].tri[0][0] = tri_before[0][0];
+        enemy[j].tri[1][0] = tri_before[1][0];
+        enemy[j].tri[0][1] = tri_before[0][1];
+        enemy[j].tri[1][1] = tri_before[1][1];
+        enemy[j].tri[0][2] = tri_before[0][2];
+        enemy[j].tri[1][2] = tri_before[1][2];
+      }
     }
-  }
+
   //ここまで敵の判定
 }
 void MoveChara()
@@ -557,28 +564,34 @@ void MoveChara()
     {
       if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &player[i].dst_rect)) // プレイヤーと固定オブジェクトが重なった時
       {
-        if (kotei_objects[j].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
-          break;
-        // ぶつかったぶんの距離プレイヤーの位置を戻す
-        if (player[i].key.left)
-        {
-          player[i].back_zahyo_x += player[i].speed * move;
-          player[i].dst_rect.x = player[i].back_zahyo_x;
+        if (kotei_objects[j].type == TYPE_SHELF){ // 棚以外とぶつかったときは無視
+          // ぶつかったぶんの距離プレイヤーの位置を戻す
+          if (player[i].key.left)
+          {
+            player[i].back_zahyo_x += player[i].speed * move;
+            player[i].dst_rect.x = player[i].back_zahyo_x;
+          }
+          if (player[i].key.right)
+          {
+            player[i].back_zahyo_x -= player[i].speed * move;
+            player[i].dst_rect.x = player[i].back_zahyo_x;
+          }
+          if (player[i].key.up)
+          {
+            player[i].back_zahyo_y += player[i].speed * move;
+            player[i].dst_rect.y = player[i].back_zahyo_y;
+          }
+          if (player[i].key.down)
+          {
+            player[i].back_zahyo_y -= player[i].speed * move;
+            player[i].dst_rect.y = player[i].back_zahyo_y;
+          }
         }
-        if (player[i].key.right)
-        {
-          player[i].back_zahyo_x -= player[i].speed * move;
-          player[i].dst_rect.x = player[i].back_zahyo_x;
-        }
-        if (player[i].key.up)
-        {
-          player[i].back_zahyo_y += player[i].speed * move;
-          player[i].dst_rect.y = player[i].back_zahyo_y;
-        }
-        if (player[i].key.down)
-        {
-          player[i].back_zahyo_y -= player[i].speed * move;
-          player[i].dst_rect.y = player[i].back_zahyo_y;
+        else if(kotei_objects[j].type == TYPE_ENTRANCE){
+          if(player[i].flag_kinkai == true){
+            //gameclear処理
+            printf("GAME CLEAR!!\n");
+          }
         }
       }
     }
@@ -963,17 +976,6 @@ void MoveChara()
       enemy[i].prev_angle += 3; // 振り向く速さ
       if (enemy[i].prev_angle >= 360)
         enemy[i].prev_angle -= 360;
-
-      // int diff = enemy[i].move_angle - enemy[i].prev_angle;
-      // if(abs(diff) > 180){ diff -= 180; diff *= -1;}
-      // if(diff < 0) {
-      //   enemy[i].prev_angle += 10;
-      // }
-      // else if(diff > 0) {
-      //   enemy[i].prev_angle -= 10;
-      // }
-      // if(enemy[i].prev_angle >= 360) enemy[i].prev_angle -= 360;
-      // else if(enemy[i].prev_angle < 0) enemy[i].prev_angle += 360;
     }
   }
 }
@@ -1395,6 +1397,7 @@ static int execute_command()
     if (data.cid == myid)
     { //金塊を取った、クライアントのIDが自分のIDと同じであれば
       kinkai_keep_flag = true;
+      player[myid].flag_kinkai = true;
     }
     result = 1;
     break;
@@ -1581,6 +1584,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].spray_origin.y = SPRAY_HEIGHT / 2;
     player[index].back_zahyo_x = player[index].dst_rect.x; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
     player[index].back_zahyo_y = player[index].dst_rect.y; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
+    player[index].flag_kinkai = false;
     player[index].speed = PLAYER_SPEED;                    // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
     player[index].look_angle = 0;                          // プレイヤーの最初の見てる角度、0度に設定
     player[index].spray_flag = 0;
@@ -1620,6 +1624,11 @@ void PlayerAction()
     if (player[i].spraytime < 0)
     {
       player[i].spray_flag = false;
+      for (int j = 0; j < 4; j++)
+      {
+        player[i].spray_hitlines[0][j] = 0;
+        player[i].spray_hitlines[1][j] = 0;
+      }
       continue;
     }
     if (player[i].key.x)
