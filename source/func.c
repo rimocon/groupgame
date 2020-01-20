@@ -189,7 +189,9 @@ void Input()
       }
       if (inputevent.jbutton.button == 0) //ハッキングボタン
       {
-        joystick_send(10); // ハッキングゲージスタート
+        if(player[myid].hack>0){
+          joystick_send(10); // ハッキングゲージスタート
+        }
       }
       //金塊を取る
       if (inputevent.jbutton.button == 3)
@@ -228,14 +230,16 @@ void Input()
         joystick_send(13);
       }
       if (inputevent.jbutton.button == 0) //ハッキングボタン
-      {
-        if(SDL_GetTicks() - player[myid].inputtime > HACKTIME){ //2秒以上経過した場合
-          joystick_send(9); //ハッキングの処理
-        }
-        else{ //途中でキャンセルされた場合
+      { 
+        if(player[myid].hack > 0){
+          if(SDL_GetTicks() - player[myid].inputtime > HACKTIME){ //2秒以上経過した場合
+            joystick_send(9); //ハッキングの処理
+          }
+          else{ //途中でキャンセルされた場合
           gauge = 0;
           joystick_send(11); //ハッキングキャンセルの処理
-        }
+          }
+       }
       }
       break;
   }
@@ -1511,6 +1515,7 @@ static int execute_command()
       hacking_flag = true;
       player[data.cid].flag_hack_start = false;
       player[data.cid].key.y= 0;
+      player[data.cid].hack = 0;
       player[data.cid].speed= PLAYER_SPEED;
       result = 1;
       break;
@@ -1716,6 +1721,8 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].look_angle = 0;                          // プレイヤーの最初の見てる角度、0度に設定
     player[index].spray_flag = 0;
     player[index].spraytime = SPRAY_TIME;
+    
+    player[index].hack = 1;
     index++;
   }
   else if ((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_ENTRANCE) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV))

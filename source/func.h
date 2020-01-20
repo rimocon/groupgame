@@ -134,6 +134,7 @@ typedef struct {
   bool flag_kinkai;
   bool flag_hack_start;
   bool flag_hack_end;
+  int hack; //ハッキングできる回数
   int inputtime;
   int speed;
   inputkeys key; //inputkeys構造体をinputという名前で実体化
