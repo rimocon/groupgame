@@ -420,10 +420,6 @@ void Collision()
       {
         player_flag[myid] = false; // 他のプレイヤーも消える？
         joystick_send(2);          //プレイヤーが消えたことが他のクライアントに通知される。
-        player[myid].dst_rect.x = 0;
-        player[myid].dst_rect.y = 0;
-        player[myid].dst_rect.w = 0;
-        player[myid].dst_rect.h = 0;
         enemy[j].tri[0][0] = tri_before[0][0];
         enemy[j].tri[1][0] = tri_before[1][0];
         enemy[j].tri[0][1] = tri_before[0][1];
@@ -440,7 +436,6 @@ void Collision()
         enemy[j].tri[1][2] = tri_before[1][2];
       }
     }
-
   //ここまで敵の判定
 }
 void MoveChara()
@@ -471,6 +466,8 @@ void MoveChara()
 
   for (int i = 0; i < PLAYER_NUM; i++)
   {
+    if (player_flag[i] == true)
+    {
     if (player[i].key.left == 1 || player[i].key.right == 1)
     {
       if (player[i].key.up == 1 || player[i].key.down == 1)
@@ -594,6 +591,11 @@ void MoveChara()
           }
         }
       }
+    }
+  }
+    else{
+      player[i].dst_rect.x = -10000;
+      player[i].dst_rect.y = -10000;
     }
   }
 
