@@ -62,7 +62,7 @@ void Startup()
     player[i].flag_hack_start = false;
   }
   MakeMap();
-  status = GAMEMODE; //メニューモードに状態を設定
+  status = MENUMODE; //メニューモードに状態を設定
   run = true; //動かす
   up = false;
   down = false;
@@ -200,9 +200,9 @@ void Input()
         {
           if (kotei_objects[i].type == TYPE_KINKAI)
           {
-            if (player[myid].dst_rect.x >= kotei_objects[i].dst_rect.x && player[myid].dst_rect.x <= kotei_objects[i].dst_rect.x + 100)
+            if (player[myid].dst_rect.x >= kotei_objects[i].dst_rect.x && player[myid].dst_rect.x <= kotei_objects[i].dst_rect.x + MAP_CHIPSIZE)
             {
-              if (player[myid].dst_rect.y >= kotei_objects[i].dst_rect.y && player[myid].dst_rect.y <= kotei_objects[i].dst_rect.y + 100)
+              if (player[myid].dst_rect.y >= kotei_objects[i].dst_rect.y && player[myid].dst_rect.y <= kotei_objects[i].dst_rect.y + MAP_CHIPSIZE)
               {
                 //kinkai_flag = false;
                 //スティック操作がされた時、金塊情報などのデータ送信される
@@ -230,7 +230,7 @@ void Input()
         joystick_send(13);
       }
       if (inputevent.jbutton.button == 0) //ハッキングボタン
-      { 
+      {
         if(player[myid].hack > 0){
           if(SDL_GetTicks() - player[myid].inputtime > HACKTIME){ //2秒以上経過した場合
             joystick_send(9); //ハッキングの処理
@@ -436,7 +436,7 @@ void Collision()
             &camera[i].tri[0][k],
             &camera[i].tri[1][k]);
         //カメラとプレイヤーがぶつかった時
-        if (judge)
+        if (judge && player[myid].flag_kinkai == true)
         {
           player_flag[myid] = false;
           joystick_send(2); //プレイヤーが消えたことが他のクライアントに通知される。
@@ -446,6 +446,12 @@ void Collision()
           camera[i].tri[1][k] = camera_before[i].tri[1][k];
           break;
         }
+        else{
+          camera[i].tri[0][j] = camera_before[i].tri[0][j];
+          camera[i].tri[1][j] = camera_before[i].tri[1][j];
+          camera[i].tri[0][k] = camera_before[i].tri[0][k];
+          camera[i].tri[1][k] = camera_before[i].tri[1][k];
+        }
       }
     }
   }
@@ -453,8 +459,6 @@ void Collision()
 
   //敵の判定
   int tri_before[2][3];
-  for (int i = 0; i < PLAYER_NUM; i++)
-  {
     for (int j = 0; j < ENEMY_NUM; j++)
     {
       tri_before[0][0] = enemy[j].tri[0][0];
@@ -465,16 +469,21 @@ void Collision()
       tri_before[1][2] = enemy[j].tri[1][2];
 
       if ((SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][0], &enemy[j].tri[1][0], &enemy[j].tri[0][1], &enemy[j].tri[1][1]) ||
-            SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][0], &enemy[j].tri[1][0], &enemy[j].tri[0][2], &enemy[j].tri[1][2]) ||
-            SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][1], &enemy[j].tri[1][1], &enemy[j].tri[0][2], &enemy[j].tri[1][2])) &&
-          enemy[j].flag_sairui == false)
+           SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][0], &enemy[j].tri[1][0], &enemy[j].tri[0][2], &enemy[j].tri[1][2]) ||
+           SDL_IntersectRectAndLine(&player[myid].dst_rect, &enemy[j].tri[0][1], &enemy[j].tri[1][1], &enemy[j].tri[0][2], &enemy[j].tri[1][2])) &&
+          enemy[j].flag_sairui == false &&
+          player[myid].flag_kinkai == true)
       {
         player_flag[myid] = false; // 他のプレイヤーも消える？
         joystick_send(2);          //プレイヤーが消えたことが他のクライアントに通知される。
-        player[myid].dst_rect.x = 0;
-        player[myid].dst_rect.y = 0;
-        player[myid].dst_rect.w = 0;
-        player[myid].dst_rect.h = 0;
+        enemy[j].tri[0][0] = tri_before[0][0];
+        enemy[j].tri[1][0] = tri_before[1][0];
+        enemy[j].tri[0][1] = tri_before[0][1];
+        enemy[j].tri[1][1] = tri_before[1][1];
+        enemy[j].tri[0][2] = tri_before[0][2];
+        enemy[j].tri[1][2] = tri_before[1][2];
+      }
+      else {
         enemy[j].tri[0][0] = tri_before[0][0];
         enemy[j].tri[1][0] = tri_before[1][0];
         enemy[j].tri[0][1] = tri_before[0][1];
@@ -483,7 +492,6 @@ void Collision()
         enemy[j].tri[1][2] = tri_before[1][2];
       }
     }
-  }
   //ここまで敵の判定
 }
 void MoveChara()
@@ -514,8 +522,12 @@ void MoveChara()
 
   for (int i = 0; i < PLAYER_NUM; i++)
   {
-    if (player[i].key.left == 1 || player[i].key.right == 1){
-      if (player[i].key.up == 1 || player[i].key.down == 1){
+    if (player_flag[i] == true)
+    {
+    if (player[i].key.left == 1 || player[i].key.right == 1)
+    {
+      if (player[i].key.up == 1 || player[i].key.down == 1)
+      {
         move = 0.71f; //移動係数を0.71に設定
         if (player[i].key.right && player[i].key.up){
           player[i].look_angle = 45;
@@ -653,30 +665,41 @@ void MoveChara()
     {
       if (SDL_HasIntersection(&kotei_objects[j].dst_rect, &player[i].dst_rect)) // プレイヤーと固定オブジェクトが重なった時
       {
-        if (kotei_objects[j].type != TYPE_SHELF) // 棚以外とぶつかったときは無視
-          break;
-        // ぶつかったぶんの距離プレイヤーの位置を戻す
-        if (player[i].key.left)
-        {
-          player[i].back_zahyo_x += player[i].speed * move;
-          player[i].dst_rect.x = player[i].back_zahyo_x;
+        if (kotei_objects[j].type == TYPE_SHELF){ // 棚以外とぶつかったときは無視
+          // ぶつかったぶんの距離プレイヤーの位置を戻す
+          if (player[i].key.left)
+          {
+            player[i].back_zahyo_x += player[i].speed * move;
+            player[i].dst_rect.x = player[i].back_zahyo_x;
+          }
+          if (player[i].key.right)
+          {
+            player[i].back_zahyo_x -= player[i].speed * move;
+            player[i].dst_rect.x = player[i].back_zahyo_x;
+          }
+          if (player[i].key.up)
+          {
+            player[i].back_zahyo_y += player[i].speed * move;
+            player[i].dst_rect.y = player[i].back_zahyo_y;
+          }
+          if (player[i].key.down)
+          {
+            player[i].back_zahyo_y -= player[i].speed * move;
+            player[i].dst_rect.y = player[i].back_zahyo_y;
+          }
         }
-        if (player[i].key.right)
-        {
-          player[i].back_zahyo_x -= player[i].speed * move;
-          player[i].dst_rect.x = player[i].back_zahyo_x;
-        }
-        if (player[i].key.up)
-        {
-          player[i].back_zahyo_y += player[i].speed * move;
-          player[i].dst_rect.y = player[i].back_zahyo_y;
-        }
-        if (player[i].key.down)
-        {
-          player[i].back_zahyo_y -= player[i].speed * move;
-          player[i].dst_rect.y = player[i].back_zahyo_y;
+        else if(kotei_objects[j].type == TYPE_ENTRANCE){
+          if(player[i].flag_kinkai == true){
+            //gameclear処理
+            printf("GAME CLEAR!!\n");
+          }
         }
       }
+    }
+  }
+    else{
+      player[i].dst_rect.x = -10000;
+      player[i].dst_rect.y = -10000;
     }
   }
 
@@ -1049,26 +1072,15 @@ void MoveChara()
       before_enemy_x = enemy[i].dst_rect.x; //1つ前の座標を格納(x)
       before_enemy_y = enemy[i].dst_rect.y; //1つ前の座標を格納(y)
 
-      // ゆっくり振り向く,最短で90度振り向いてほしいけど270度回ってしまう
-      if (enemy[i].prev_angle != enemy[i].move_angle)
-      {
-        enemy[i].prev_angle += 3;
-        if (enemy[i].prev_angle >= 360)
-          enemy[i].prev_angle -= 360;
-
-        // int diff = enemy[i].move_angle - enemy[i].prev_angle;
-        // if(abs(diff) > 180){ diff -= 180; diff *= -1;}
-        // if(diff < 0) {
-        //   enemy[i].prev_angle += 10;
-        // }
-        // else if(diff > 0) {
-        //   enemy[i].prev_angle -= 10;
-        // }
-        // if(enemy[i].prev_angle >= 360) enemy[i].prev_angle -= 360;
-        // else if(enemy[i].prev_angle < 0) enemy[i].prev_angle += 360;
-      }
+    // ゆっくり振り向く,最短で90度振り向いてほしいけど270度回ってしまう
+    if (enemy[i].prev_angle != enemy[i].move_angle)
+    {
+      enemy[i].prev_angle += 3; // 振り向く速さ
+      if (enemy[i].prev_angle >= 360)
+        enemy[i].prev_angle -= 360;
     }
   }
+}
 }
 //敵が移動床に乗った時に、移動する方向を変える関数
 int ChangeEnemyMoveAngle(enemyinfo *e, SDL_Rect movefloor, objecttype type)
@@ -1506,6 +1518,7 @@ static int execute_command()
       if (data.cid == myid)
       { //金塊を取った、クライアントのIDが自分のIDと同じであれば
         kinkai_keep_flag = true;
+        player[myid].flag_kinkai = true;
       }
       result = 1;
       break;
@@ -1692,8 +1705,8 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].src_rect.y = 0;
     player[index].src_rect.w = 24;                                // 読み込んだ画像ファイルの幅を元画像の領域として設定
     player[index].src_rect.h = 24;                                // 読み込んだ画像ファイルの高さを元画像の領域として設定
-    player[index].dst_rect.x = dst.x + ((MAP_CHIPSIZE - s->w) / 2); // マップで指定された場所 + MAP_CHIPSIZEの中心になるように足し算
-    player[index].dst_rect.y = dst.y + ((MAP_CHIPSIZE - s->h) / 2);
+    player[index].dst_rect.x = dst.x + ((MAP_CHIPSIZE - 24) / 2); // マップで指定された場所 + MAP_CHIPSIZEの中心になるように足し算
+    player[index].dst_rect.y = dst.y + ((MAP_CHIPSIZE - 24) / 2);
     player[index].dst_rect.w = 24; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする
     player[index].dst_rect.h = 24;
     s = IMG_Load(imgfiles[TYPE_SPRAY]);
@@ -1717,11 +1730,12 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].spray_origin.y = SPRAY_HEIGHT / 2;
     player[index].back_zahyo_x = player[index].dst_rect.x; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
     player[index].back_zahyo_y = player[index].dst_rect.y; //プレイヤーの座標をfloat型で持つ(斜め移動の加速防止用)
+    player[index].flag_kinkai = false;
     player[index].speed = PLAYER_SPEED;                    // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
     player[index].look_angle = 0;                          // プレイヤーの最初の見てる角度、0度に設定
     player[index].spray_flag = 0;
     player[index].spraytime = SPRAY_TIME;
-    
+
     player[index].hack = 1;
     index++;
   }
@@ -1740,7 +1754,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
 
     kotei_objects[index].dst_rect.x = dst.x; // マップで指定された場所に出力されるように設定
     kotei_objects[index].dst_rect.y = dst.y;
-    kotei_objects[index].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする   
+    kotei_objects[index].dst_rect.w = MAP_CHIPSIZE; // 幅、高さはCHIPSIZEにする
     kotei_objects[index].dst_rect.h = MAP_CHIPSIZE;
     index++;
   }
@@ -1759,6 +1773,11 @@ void PlayerAction()
     if (player[i].spraytime < 0)
     {
       player[i].spray_flag = false;
+      for (int j = 0; j < 4; j++)
+      {
+        player[i].spray_hitlines[0][j] = 0;
+        player[i].spray_hitlines[1][j] = 0;
+      }
       continue;
     }
     if (player[i].key.x)
