@@ -67,6 +67,12 @@ void Startup()
   stay_time = 0;
   random_start = 0;
   random_time = 0;
+
+  /*
+  player[0].key.left = player[0].key.right = player[0].key.up = player[0].key.down  = 0;
+  player[1].key.left = player[1].key.right = player[1].key.up = player[1].key.down  = 0;
+  player[2].key.left = player[2].key.right = player[2].key.up = player[2].key.down  = 0;
+  */
 }
 
 void Input()
@@ -76,11 +82,11 @@ void Input()
 
   // ジョイスティックの方向キーまたはアナログキー（スティック)が押された時
   case SDL_JOYAXISMOTION:
-    printf("kinkai_keep_flag = %d\n", kinkai_keep_flag);
-    printf("The axis ID of the operated key is %d.\n", inputevent.jaxis.axis); // 操作された方向キーの方向軸を表示（0：アナログキー，1：アナログキー，2：方向キー左右方向，3：方向キー上下方向）
+    //printf("kinkai_keep_flag = %d\n", kinkai_keep_flag);
+    //printf("The axis ID of the operated key is %d.\n", inputevent.jaxis.axis); // 操作された方向キーの方向軸を表示（0：アナログキー，1：アナログキー，2：方向キー左右方向，3：方向キー上下方向）
     if (inputevent.jaxis.axis == 0)
     {
-      printf("--- Analog-Direction Key: 0 Axis\n");
+      //printf("--- Analog-Direction Key: 0 Axis\n");
       if (inputevent.jaxis.value > 0)
       { //右キーが押されたら
         //key.right = 1;
@@ -105,14 +111,14 @@ void Input()
     }
     else if (inputevent.jaxis.axis == 1)
     {
-      printf("--- Analag-Direction Key: 1 Axis\n");
+      //printf("--- Analag-Direction Key: 1 Axis\n");
       if (inputevent.jaxis.value > 0)
       { //下キーが押されたら
         //key.up = 0;
         //key.down = 1;
         //スティック操作(下),コマンド送信される
         joystick_send(6);
-        printf("下\n");
+        //printf("下\n");
       }
       else if (inputevent.jaxis.value < 0)
       { //上キーが押されたら
@@ -120,7 +126,7 @@ void Input()
         //key.down = 0;
         //スティック操作(上),コマンド送信される
         joystick_send(5);
-        printf("上\n");
+        //printf("上\n");
       }
       else if (inputevent.jaxis.value == 0)
       { //真ん中にスティックが戻ったら
@@ -449,6 +455,8 @@ void MoveChara()
   static int min_k = 0; //距離が最小のi
   int k;
 
+  static int count = 0;
+
   /*
   if (same_place_flag == 1)
   {
@@ -469,19 +477,23 @@ void MoveChara()
       if (player[i].key.up == 1 || player[i].key.down == 1)
       {
         move = 0.71f; //移動係数を0.71に設定
-        if (player[i].key.right && player[i].key.up){
+        if (player[i].key.right && player[i].key.up)
+        {
           player[i].look_angle = 45;
           player[i].src_rect.y = 120;
         }
-        else if (player[i].key.right && player[i].key.down){
+        else if (player[i].key.right && player[i].key.down)
+        {
           player[i].look_angle = 135;
           player[i].src_rect.y = 168;
         }
-        else if (player[i].key.left && player[i].key.down){
+        else if (player[i].key.left && player[i].key.down)
+        {
           player[i].look_angle = 225;
           player[i].src_rect.y = 144;
         }
-        else if (player[i].key.left && player[i].key.up){
+        else if (player[i].key.left && player[i].key.up)
+        {
           player[i].look_angle = 315;
           player[i].src_rect.y = 96;
         }
@@ -489,11 +501,13 @@ void MoveChara()
       else
       {
         move = 1.0f; //斜めじゃなければ1.0に設定
-        if (player[i].key.left){
+        if (player[i].key.left)
+        {
           player[i].look_angle = 270;
           player[i].src_rect.y = 48;
         }
-        else if (player[i].key.right){
+        else if (player[i].key.right)
+        {
           player[i].look_angle = 90;
           player[i].src_rect.y = 72;
         }
@@ -506,19 +520,23 @@ void MoveChara()
       if (player[i].key.right == 1 || player[i].key.left == 1)
       {
         move = 0.71f; //移動係数を0.71に設定
-        if (player[i].key.right && player[i].key.up){
+        if (player[i].key.right && player[i].key.up)
+        {
           player[i].look_angle = 45;
           player[i].src_rect.y = 120;
         }
-        else if (player[i].key.right && player[i].key.down){
+        else if (player[i].key.right && player[i].key.down)
+        {
           player[i].look_angle = 135;
           player[i].src_rect.y = 168;
         }
-        else if (player[i].key.left && player[i].key.down){
+        else if (player[i].key.left && player[i].key.down)
+        {
           player[i].look_angle = 225;
           player[i].src_rect.y = 144;
         }
-        else if (player[i].key.left && player[i].key.up){
+        else if (player[i].key.left && player[i].key.up)
+        {
           player[i].look_angle = 315;
           player[i].src_rect.y = 96;
         }
@@ -526,11 +544,13 @@ void MoveChara()
       else
       {
         move = 1.0f; ////斜めじゃなければ1.0に設定
-        if (player[i].key.up){
+        if (player[i].key.up)
+        {
           player[i].look_angle = 0;
           player[i].src_rect.y = 0;
         }
-        else if (player[i].key.down){
+        else if (player[i].key.down)
+        {
           player[i].look_angle = 180;
           player[i].src_rect.y = 24;
         }
@@ -605,6 +625,20 @@ void MoveChara()
           player[i].dst_rect.y = player[i].back_zahyo_y;
         }
       }
+    }
+    /*
+    //金塊を持っているときに、出口から出た時の処理
+    if (player[i].key.down)
+    {
+      if(player[i].dst_rect.y)
+      player[i].back_zahyo_y -= player[i].speed * move;
+      player[i].dst_rect.y = player[i].back_zahyo_y;
+    }
+    */
+    if (i == 1)
+    {
+      printf("通し番号 = %d, x = %d, y = %d\n", count, player[0].dst_rect.x, player[0].dst_rect.y);
+      count++;
     }
   }
 
@@ -696,7 +730,7 @@ void MoveChara()
       */
       case MT_RANDOM_AND_TRACKING:
         //プレイヤーとNPCとの距離が一定の距離より近い　かつ　same_place_flag == 0の時(追跡する)
-        printf("%d\n", enemy[i].move_angle);
+        //printf("%d\n", enemy[i].move_angle);
         //プレイヤー3人の中で一番NPCとの距離が近いプレイヤーを求める
         min_distance = sqrt(pow(enemy[i].dst_rect.x - player[0].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[0].dst_rect.y, 2));
         min_x = player[0].dst_rect.x;
@@ -718,9 +752,9 @@ void MoveChara()
         }
 
         //if (sqrt(pow(enemy[i].dst_rect.x - player[min_k].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[min_k].dst_rect.y, 2)) < 200 && same_place_flag == 0)
-        if (min_distance < 200 && same_place_flag == 0)
+        if (min_distance < 400 && same_place_flag == 0)
         {
-          printf("%d\n", min_distance);
+          //printf("%d\n", min_distance);
           if (enemy[i].dst_rect.x > player[min_k].dst_rect.x) //プレイヤーが左方向にいる時
           {
             enemy[i].move_angle = 270;
@@ -953,8 +987,8 @@ void MoveChara()
       }
     }
 
-    printf("dest_rect.x = %d, before_enemy_x = %d\n", enemy[i].dst_rect.x, before_enemy_x);
-    printf("dest_rect.y = %d, before_enemy_y = %d\n", enemy[i].dst_rect.y, before_enemy_y);
+    //printf("dest_rect.x = %d, before_enemy_x = %d\n", enemy[i].dst_rect.x, before_enemy_x);
+    //printf("dest_rect.y = %d, before_enemy_y = %d\n", enemy[i].dst_rect.y, before_enemy_y);
 
     //if (!(sqrt(pow(enemy[i].dst_rect.x - before_enemy_x, 2))) == 0 && sqrt(pow(enemy[i].dst_rect.y - before_enemy_y, 2)) == 0)
     //現在のNPCのx座標と1つ前のNPCのx座標が異なる　かつ　現在のNPCのy座標と1つ前のNPCのy座標が異なる時
@@ -963,8 +997,8 @@ void MoveChara()
       stay_start = SDL_GetTicks(); //留まっている時間カウントの開始時間を更新
     }
     stay_time = SDL_GetTicks() - stay_start; //留まっている時間
-    printf("stay_time = %d\n", stay_time);
-    printf("same_place_flag= %d\n", same_place_flag);
+    //printf("stay_time = %d\n", stay_time);
+    //printf("same_place_flag= %d\n", same_place_flag);
     if (stay_time >= 2000 && random_start_flag == 0) //留まっている時間が2秒以上の時
     {
       same_place_flag = 1;           //同じ座標に一定時間留まっていることを表すフラグを上げる
@@ -972,7 +1006,7 @@ void MoveChara()
       random_start_flag = 1;
     }
     random_time = SDL_GetTicks() - random_start; //ランダムウォークをしている時間
-    printf("random_time = %d\n", random_time);
+    //printf("random_time = %d\n", random_time);
     if (same_place_flag == 1 && random_time >= 3000)
     {
       same_place_flag = 0;   //same_place_flagを下ろす
@@ -1067,8 +1101,8 @@ void SetCamera()
              camera[i].angle,
              &camera[i].tri[0][0],
              &camera[i].tri[1][0]);
-    printf("x2 %d\n", camera[i].tri[0][0]);
-    printf("y2 %d\n", camera[i].tri[1][0]);
+    //printf("x2 %d\n", camera[i].tri[0][0]);
+    //printf("y2 %d\n", camera[i].tri[1][0]);
     /*
        camera[i].theta[0] = 90.0 - camera[i].angle;
        camera[i].theta[1] = 120.0 - camera[i].angle;
@@ -1290,9 +1324,14 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
     data.cid = myid;                        //クライアントIDを格納
     data.zahyo_x = player[myid].dst_rect.x; //プレイヤーのx座標を格納
     data.zahyo_y = player[myid].dst_rect.y; //プレイヤーのy座標を格納
-    printf("myid = %d\n", myid);
-    printf("Player 0 : axis x = %d, axis y = %d\n", player[0].dst_rect.x, player[0].dst_rect.y);
-    printf("Player 1 : axis x = %d, axis y = %d\n", player[1].dst_rect.x, player[1].dst_rect.y);
+  }
+  else if(num == 13){
+    data.command = ENEMY_MODIFY_COMMAND;           //コマンドを格納
+    data.cid = myid;                        //クライアントIDを格納
+    data.enemy_zahyo_x = enemy[0].dst_rect.x; //NPCのx座標
+    data.enemy_zahyo_y = enemy[0].dst_rect.y; //NPCのy座標
+    data.move_angle = enemy[0].move_angle;
+    data.prev_angle = enemy[0].prev_angle;
   }
   else if (num == 1) //金塊の設置の可否を送信
   {
@@ -1405,11 +1444,13 @@ static int execute_command()
 
   case ZAHYO_COMMAND: //'Z'のとき
     //自分の座標は、スティックを動かした段階で更新してるので、ここでは、更新せず。
-    if (myid != data.cid)
-    {
+    //if (myid != data.cid)
+    //{
       player[data.cid].dst_rect.x = data.zahyo_x; //クライアントのx座標を各プレイヤーの座標を反映
       player[data.cid].dst_rect.y = data.zahyo_y; //クライアントのy座標を各プレイヤーの座標を反映
-    }
+      player[data.cid].back_zahyo_x = data.zahyo_x;
+      player[data.cid].back_zahyo_y = data.zahyo_y;
+    //}
     //fprintf(stderr, "client[%d], name : %s,zahyo_x = %d, zahyo_y = %d \n", data.cid, clients[data.cid].name, data.zahyo_x, data.zahyo_y);
     result = 1;
     break;
@@ -1480,6 +1521,13 @@ static int execute_command()
     break;
   case X_OFF_COMMAND:           //'Y'のとき
     player[data.cid].key.x = 0; //2ボタンが離されていることを維持
+    result = 1;
+    break;
+  case ENEMY_MODIFY_COMMAND:
+    enemy[0].dst_rect.x = data.enemy_zahyo_x; //NPCのx座標
+    enemy[0].dst_rect.y = data.enemy_zahyo_y; //NPCのy座標
+    enemy[0].move_angle = data.move_angle;
+    enemy[0].prev_angle = data.prev_angle;
     result = 1;
     break;
   default: //その他の文字が入力された場合
@@ -1578,8 +1626,8 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
     player[index].src_rect.x = 0;
     player[index].src_rect.y = 0;
-    player[index].src_rect.w = 24;                                // 読み込んだ画像ファイルの幅を元画像の領域として設定
-    player[index].src_rect.h = 24;                                // 読み込んだ画像ファイルの高さを元画像の領域として設定
+    player[index].src_rect.w = 24;                                  // 読み込んだ画像ファイルの幅を元画像の領域として設定
+    player[index].src_rect.h = 24;                                  // 読み込んだ画像ファイルの高さを元画像の領域として設定
     player[index].dst_rect.x = dst.x + ((MAP_CHIPSIZE - s->w) / 2); // マップで指定された場所 + MAP_CHIPSIZEの中心になるように足し算
     player[index].dst_rect.y = dst.y + ((MAP_CHIPSIZE - s->h) / 2);
     player[index].dst_rect.w = 24; // ゲーム画面に描画される敵の画像の幅、高さは元画像のままにする

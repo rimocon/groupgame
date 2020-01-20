@@ -21,6 +21,7 @@
 #define X_OFF_COMMAND 'Y'
 #define QUIT_COMMAND 'Q' //チャットシステムの終了
 #define START_COMMAND 'S' //メニュー画面で、スタートボタンを押したことを表す
+#define ENEMY_MODIFY_COMMAND 'e'
 
 /*  関数のプロトタイプ宣言 */
 //またあとで
@@ -39,6 +40,10 @@ typedef struct {
   char message[MAX_LEN_BUFFER];
   int zahyo_x;
   int zahyo_y;
+  int enemy_zahyo_x; //NPCのx座標
+  int enemy_zahyo_y; //NPCのy座標
+  int move_angle;
+  int prev_angle;
 } CONTAINER;
 
 
