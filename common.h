@@ -60,7 +60,6 @@ bool random_start_flag; //NPCが一定時間同じ座標にとどまっため、
 Uint32 stay_start;   //NPCが同じ場所に留まり始めた時間を格納する変数
 int stay_time;       //留まっている時間を格納する変数
 int random_time;     //ランダムウォークをしている時間
-int myid;
 
 SDL_Window *mainwindow; //メイン画面用
 SDL_Renderer *mainrenderer; //メイン画面用レンダラー
