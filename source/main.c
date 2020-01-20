@@ -42,8 +42,7 @@ int main(int argc, char *argv[])
     framestart = SDL_GetTicks();
     if ((SDL_PollEvent(&inputevent)))
     {
-      Input();
-      //printf("input\n");
+      Input(); 
     }
     control_requests();
     switch(status){
@@ -56,6 +55,7 @@ int main(int argc, char *argv[])
         MoveTriangle(); //三角形移動
         Collision(); //当たり判定
         RenderWindow(); //描画
+        Events();
         //Destroy(); //破棄関連
         //SDL_Delay(3);
         break;
