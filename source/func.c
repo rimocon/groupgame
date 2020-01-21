@@ -71,7 +71,13 @@ void Startup()
   stay_time = 0;
   random_start = 0;
   random_time = 0;
-
+  int j=0;
+  for(int i=0; i<ENEMY_NUM; i++){
+    if(enemy_movetypes[i] == MT_STOP){
+      savestopenemy[j] = i;
+      j++;
+    }
+  }
   /*
   player[0].key.left = player[0].key.right = player[0].key.up = player[0].key.down  = 0;
   player[1].key.left = player[1].key.right = player[1].key.up = player[1].key.down  = 0;
@@ -743,6 +749,7 @@ void MoveChara()
     for (int j = 0; j < kotei_object_num; j++)
     {
       SDL_Rect overrap_rect;
+      int count = 0;
 
       srand((unsigned int)time(NULL)); // MT_RANDOM用に現在時刻の情報で初期化
       int random = rand() % 100;
@@ -910,6 +917,22 @@ void MoveChara()
         }
       }
       break;
+      case MT_STOP:
+        while(savestopenemy[count] != NULL){
+          if(enemy_moveangles[savestopenemy[count]] == 0){
+            if(enemy[i].prev_angle == 90) enemy[i].move_angle = 0;
+          }
+          else if(enemy_moveangles[savestopenemy[count]] == 90){
+
+          }
+          else if(enemy_moveangles[savestopenemy[count]] == 180){
+
+          }
+          else if(enemy_moveangles[savestopenemy[count]] == 270){
+
+          }
+          count++;
+        }
     }
 
     // 敵が1マス分動いてたら、前回の何かの床に乗った情報をリセット
@@ -956,24 +979,27 @@ void MoveChara()
     }
 
     //動く方向を格納してる変数（move_angle）にしたがって進んでいく
-    switch (enemy[i].move_angle)
+    if (enemy[i].movetype != MT_STOP)
     {
-    case 0:
-      enemy[i].dst_rect.y -= enemy[i].speed;
-      break;
-    case 90:
-      enemy[i].dst_rect.x += enemy[i].speed;
-      break;
-    case 180:
-      enemy[i].dst_rect.y += enemy[i].speed;
-      break;
-    case 270:
-      enemy[i].dst_rect.x -= enemy[i].speed;
-      break;
-    case 360: //何もしない
-      break;
-    default:
-      break; // その場で待機
+      switch (enemy[i].move_angle)
+      {
+      case 0:
+        enemy[i].dst_rect.y -= enemy[i].speed;
+        break;
+      case 90:
+        enemy[i].dst_rect.x += enemy[i].speed;
+        break;
+      case 180:
+        enemy[i].dst_rect.y += enemy[i].speed;
+        break;
+      case 270:
+        enemy[i].dst_rect.x -= enemy[i].speed;
+        break;
+      case 360: //何もしない
+        break;
+      default:
+        break; // その場で待機
+      }
     }
     // 敵と棚との衝突判定、敵のmovetypeによって処理を分ける
     for (int j = 0; j < kotei_object_num; j++)
@@ -1110,20 +1136,16 @@ void MoveChara()
     // ゆっくり振り向く,最短で90度振り向いてほしいけど270度回ってしまう
     if (enemy[i].prev_angle != enemy[i].move_angle)
     {
-      enemy[i].prev_angle += 3;
-      if (enemy[i].prev_angle >= 360)
-        enemy[i].prev_angle -= 360;
+      //右回転のみ
+      // enemy[i].prev_angle += 3;
+      // if (enemy[i].prev_angle >= 360)
+        // enemy[i].prev_angle -= 360;
 
-      // int diff = enemy[i].move_angle - enemy[i].prev_angle;
-      // if(abs(diff) > 180){ diff -= 180; diff *= -1;}
-      // if(diff < 0) {
-      //   enemy[i].prev_angle += 10;
-      // }
-      // else if(diff > 0) {
-      //   enemy[i].prev_angle -= 10;
-      // }
-      // if(enemy[i].prev_angle >= 360) enemy[i].prev_angle -= 360;
-      // else if(enemy[i].prev_angle < 0) enemy[i].prev_angle += 360;
+      if(abs(enemy[i].prev_angle + 1 - enemy[i].move_angle) > 
+
+      int rdiff = enemy[i].move_angle - enemy[i].prev_angle;
+      int ldiff = enemy[i].move_angle+360 - enemy[i].prev_angle;
+      if(abs(rdiff))
     }
   }
 }

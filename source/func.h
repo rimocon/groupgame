@@ -166,7 +166,8 @@ typedef enum{
   MT_RIGHT_METHOD = 2, // 右手法で動く
   MT_RANDOM = 3, // MAP_CHIPSIZEごとにランダムな方向へ動く
   MT_TRACKING = 4, // プレイヤーを追跡するように動く
-  MT_RANDOM_AND_TRACKING = 5 //プレイヤーがNPCに一定距離近づいた場合、追跡する
+  MT_RANDOM_AND_TRACKING = 5, //プレイヤーがNPCに一定距離近づいた場合、追跡する
+  MT_STOP = 6 //ずっと動かない
 }enemymovetype; // 敵の動きのタイプをこの中から選ぶ
 
 typedef struct {
@@ -217,11 +218,11 @@ static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png"
 static char *fonts[FONT_NUM] = {"開始","終了"};
 
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
-   //{700,200,120,100},
-   //{600,400,120,100},
-   //{800,100,120,100},
-   //{500,800,120,100},
-   //{600,300,120,100}
+   {700,200,120,100},
+   {600,400,120,100},
+   {800,100,120,100},
+   {500,800,120,100},
+   {600,300,120,100}
 };
 
 // 敵が最初に向いている方向,敵の動きのタイプを指定する
@@ -232,7 +233,7 @@ static int enemy_moveangles[ENEMY_NUM] = {
   90
 };
 static enemymovetype enemy_movetypes[ENEMY_NUM] = {
-  MT_RANDOM_AND_TRACKING,
+  MT_STOP,
 };
 static SDL_Rect font_dst_rects[FONT_NUM] = {
   {540,380,0,0},
@@ -251,6 +252,7 @@ backgroundinfo background[BACKGROUND_NUM]; //背景の情報を実体化
 fontinfo font[FONT_NUM]; //フォントの情報を実体化
 static objectinfo kotei_objects[KOTEI_OBJECT_NUM_MAX]; // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 int kotei_object_num;
+int savestopenemy[ENEMY_NUM];
 
 /*  関数のプロトタイプ宣言 */
 extern void SetCamera(void); //カメラの値など初期化
