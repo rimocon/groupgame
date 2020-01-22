@@ -345,16 +345,41 @@ void MoveTriangle()
       // ゆっくり振り向く,最短で90度振り向いてほしいけど270度回ってしまう
       if (enemy[i].prev_angle != enemy[i].move_angle)
       {
-        //右回転のみ
-        enemy[i].prev_angle += 3;
-        if (enemy[i].prev_angle >= 360)
-          enemy[i].prev_angle -= 360;
+        int turnlr = 1;
+        // //右回転のみ
+        // enemy[i].prev_angle += 3;
+        // if (enemy[i].prev_angle >= 360)
+        //   enemy[i].prev_angle -= 360;
 
         // if(abs(enemy[i].prev_angle + 1 - enemy[i].move_angle) >
 
         // int rdiff = enemy[i].move_angle - enemy[i].prev_angle;
         // int ldiff = enemy[i].move_angle+360 - enemy[i].prev_angle;
         // if(abs(rdiff))
+
+        int taketime[2] = {0,0};
+        for(int j=0; j<2; j++){
+          int target = enemy[i].move_angle;
+          int nowangle = enemy[i].prev_angle;
+          int nowangle2 = nowangle;
+          while(target != nowangle){
+            if(j == 0) nowangle++; //右回りのとき
+            else if(j == 1) nowangle--; // 左回りのとき
+            if(nowangle < 0) nowangle += 360;
+            else if(nowangle >= 360) nowangle -= 360;
+            taketime[j]++;
+            if(taketime[j] >= 360) {
+              taketime[j] = 10000;
+              break;
+            }
+          }
+        }
+        if(taketime[0] <= taketime[1]) turnlr = 1;
+        else turnlr = -1;
+
+        enemy[i].prev_angle += turnlr * 3;
+          if(enemy[i].prev_angle < 0) enemy[i].prev_angle += 360;
+          else if(enemy[i].prev_angle >= 360) enemy[i].prev_angle -= 360;
       }
 
       origin_x = enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2;
