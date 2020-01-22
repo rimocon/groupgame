@@ -73,6 +73,9 @@ void Startup()
   random_time = 0;
   int j=0;
   for(int i=0; i<ENEMY_NUM; i++){
+    savestopenemy[i] = -1;
+  }
+  for(int i=0; i<ENEMY_NUM; i++){
     if(enemy_movetypes[i] == MT_STOP){
       savestopenemy[j] = i;
       j++;
@@ -337,23 +340,108 @@ void MoveTriangle()
   int origin_x, origin_y;
   for (int i = 0; i < ENEMY_NUM; i++)
   {
-    origin_x = enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2;
-    origin_y = enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2;
-    origin_x += 13 * sin(enemy[i].prev_angle * M_PI / 180);
-    origin_y += 13 * -cos(enemy[i].prev_angle * M_PI / 180);
-    enemy[i].tri[0][0] = origin_x;
-    enemy[i].tri[1][0] = origin_y;
-    // 20度回転させた敵の視界の当たり判定を作る
-    int vision[2] = {enemy[i].prev_angle - 20, enemy[i].prev_angle + 20};
-    for (int j = 0; j < 2; j++)
-    {
-      if (vision[j] < 0)
-        vision[j] += 360;
-      else if (vision[j] >= 360)
-        vision[j] -= 360;
-      // 200が視界の範囲
-      enemy[i].tri[0][j + 1] = origin_x + 200 * sin(vision[j] * M_PI / 180);
-      enemy[i].tri[1][j + 1] = origin_y + 200 * -cos((vision[j]) * M_PI / 180);
+    int savestopcount=0;
+    if(enemy[i].movetype != MT_STOP){
+      // ゆっくり振り向く,最短で90度振り向いてほしいけど270度回ってしまう
+      if (enemy[i].prev_angle != enemy[i].move_angle)
+      {
+        //右回転のみ
+        enemy[i].prev_angle += 3;
+        if (enemy[i].prev_angle >= 360)
+          enemy[i].prev_angle -= 360;
+
+        // if(abs(enemy[i].prev_angle + 1 - enemy[i].move_angle) >
+
+        // int rdiff = enemy[i].move_angle - enemy[i].prev_angle;
+        // int ldiff = enemy[i].move_angle+360 - enemy[i].prev_angle;
+        // if(abs(rdiff))
+      }
+
+      origin_x = enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2;
+      origin_y = enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2;
+      origin_x += 13 * sin(enemy[i].prev_angle * M_PI / 180);
+      origin_y += 13 * -cos(enemy[i].prev_angle * M_PI / 180);
+      enemy[i].tri[0][0] = origin_x;
+      enemy[i].tri[1][0] = origin_y;
+      // 20度回転させた敵の視界の当たり判定を作る
+      int vision[2] = {enemy[i].prev_angle - 20, enemy[i].prev_angle + 20};
+      for (int j = 0; j < 2; j++)
+      {
+        if (vision[j] < 0)
+          vision[j] += 360;
+        else if (vision[j] >= 360)
+          vision[j] -= 360;
+        // 200が視界の範囲
+        enemy[i].tri[0][j + 1] = origin_x + 200 * sin(vision[j] * M_PI / 180);
+        enemy[i].tri[1][j + 1] = origin_y + 200 * -cos((vision[j]) * M_PI / 180);
+      }
+    }
+    else{
+      //最初の角度からどこを分け目にするか
+      int moveangles[2];
+      int initangle = enemy_moveangles[savestopenemy[savestopcount]];
+      printf("initangle %d\n",initangle);
+      switch(initangle){
+        case 0:
+          moveangles[0] = 90;
+          moveangles[1] = 270;
+          break;
+        case 90:
+          moveangles[0] = 180;
+          moveangles[1] = 0;
+          break;
+        case 180:
+          moveangles[0] = 270;
+          moveangles[1] = 90;
+          break;
+        case 270:
+          moveangles[0] = 0;
+          moveangles[1] = 180;
+          break;
+      }
+      origin_x = enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2;
+      origin_y = enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2;
+      origin_x += 13 * sin(enemy[i].prev_angle * M_PI / 180);
+      origin_y += 13 * -cos(enemy[i].prev_angle * M_PI / 180);
+      enemy[i].tri[0][0] = origin_x;
+      enemy[i].tri[1][0] = origin_y;
+      // 20度回転させた敵の視界の当たり判定を作る
+      int vision[2] = {enemy[i].prev_angle - 20, enemy[i].prev_angle + 20};
+      for (int j = 0; j < 2; j++)
+      {
+        if (vision[j] < 0)
+          vision[j] += 360;
+        else if (vision[j] >= 360)
+          vision[j] -= 360;
+
+        // 200が視界の範囲
+        enemy[i].tri[0][j + 1] = origin_x + 200 * sin(vision[j] * M_PI / 180);
+        enemy[i].tri[1][j + 1] = origin_y + 200 * -cos((vision[j]) * M_PI / 180);
+      }
+      savestopcount++;
+      // ゆっくり振り向く,最短で90度振り向いてほしいけど270度回ってしまう
+      if (enemy[i].prev_angle != moveangles[lrflag])
+      {
+        //右回転のみ
+        if(lrflag == 0){
+          enemy[i].prev_angle += 3;
+          if (enemy[i].prev_angle >= 360)
+            enemy[i].prev_angle -= 360;
+        }
+        else if(lrflag == 1){
+          enemy[i].prev_angle -= 3;
+          if(enemy[i].prev_angle < 0) enemy[i].prev_angle += 360;
+        }
+        if(abs(enemy[i].prev_angle-moveangles[lrflag]) < 10){
+          if(lrflag ==1) lrflag = 0;
+          else if(lrflag == 0) lrflag = 1;
+        }
+      }
+      else {
+          if(lrflag ==1) lrflag = 0;
+          else if(lrflag == 0) lrflag = 1;
+      }
+      printf("enemy prev_angle : %d\n",enemy[i].prev_angle);
     }
   }
 }
@@ -395,6 +483,7 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
       }
     }
   }
+
   // 敵の描画
   for (int i = 0; i < ENEMY_NUM; i++)
   {
@@ -917,22 +1006,6 @@ void MoveChara()
         }
       }
       break;
-      case MT_STOP:
-        while(savestopenemy[count] != NULL){
-          if(enemy_moveangles[savestopenemy[count]] == 0){
-            if(enemy[i].prev_angle == 90) enemy[i].move_angle = 0;
-          }
-          else if(enemy_moveangles[savestopenemy[count]] == 90){
-
-          }
-          else if(enemy_moveangles[savestopenemy[count]] == 180){
-
-          }
-          else if(enemy_moveangles[savestopenemy[count]] == 270){
-
-          }
-          count++;
-        }
     }
 
     // 敵が1マス分動いてたら、前回の何かの床に乗った情報をリセット
@@ -1133,20 +1206,7 @@ void MoveChara()
     before_enemy_x = enemy[i].dst_rect.x; //1つ前の座標を格納(x)
     before_enemy_y = enemy[i].dst_rect.y; //1つ前の座標を格納(y)
 
-    // ゆっくり振り向く,最短で90度振り向いてほしいけど270度回ってしまう
-    if (enemy[i].prev_angle != enemy[i].move_angle)
-    {
-      //右回転のみ
-      // enemy[i].prev_angle += 3;
-      // if (enemy[i].prev_angle >= 360)
-        // enemy[i].prev_angle -= 360;
 
-      if(abs(enemy[i].prev_angle + 1 - enemy[i].move_angle) > 
-
-      int rdiff = enemy[i].move_angle - enemy[i].prev_angle;
-      int ldiff = enemy[i].move_angle+360 - enemy[i].prev_angle;
-      if(abs(rdiff))
-    }
   }
 }
 
@@ -1765,7 +1825,6 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].dst_rect.h = s->h;
     enemy[index].speed = ENEMY_SPEED; // ヘッダで指定した定数をプレイヤーの移動スピードとして設定
     enemy[index].flag_sairui = false;
-    enemy[index].look_angle = enemy_lookangles[index];
     enemy[index].move_angle = enemy_moveangles[index];
     enemy[index].prev_overlap_rect.x = 0;
     enemy[index].prev_overlap_rect.y = 0;

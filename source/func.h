@@ -18,7 +18,7 @@ bool up,down;
 //#define CAMERA_NUM 0
 #define BACKGROUND_NUM 1
 #define FONT_NUM 2
-#define ENEMY_NUM 1
+#define ENEMY_NUM 2
 #define ENEMY_SPEED 1
 
 #define  KOTEI_OBJECT_NUM_MAX 300 // 固定オブジェクトの最大の数
@@ -74,7 +74,7 @@ static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{2, 0, 0, 2, 2, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 5, 0, 0, 8, 0, 0, 0, 0, 2},
 	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
@@ -171,7 +171,6 @@ typedef enum{
 }enemymovetype; // 敵の動きのタイプをこの中から選ぶ
 
 typedef struct {
-  int rotate_range; // 敵の回転速度
   objecttype type; // タイプ
   SDL_Texture * image_texture; // テクスチャ
   SDL_Rect src_rect; // 元画像の座標、範囲
@@ -179,7 +178,6 @@ typedef struct {
   SDL_Rect prev_overlap_rect; // 移動床内で無限ループしないようにするため、一時的に重なった範囲を保存する変数
   bool flag_kinkai; // 金塊をとったかどうか
   int speed; //敵の移動速度
-  int look_angle; // 敵が向いている方向(0度〜360度)、視野の描画する方法によるので仮
   int move_angle; // 敵が動く方向
   bool flag_sairui; // 止まってるかどうか
   enemymovetype movetype; // 敵の動きのタイプ
@@ -226,14 +224,13 @@ static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
 };
 
 // 敵が最初に向いている方向,敵の動きのタイプを指定する
-static int enemy_lookangles[ENEMY_NUM] = {
-  180
-};
 static int enemy_moveangles[ENEMY_NUM] = {
+  180,
   90
 };
 static enemymovetype enemy_movetypes[ENEMY_NUM] = {
-  MT_STOP,
+  MT_RANDOM_AND_TRACKING,
+  MT_STOP
 };
 static SDL_Rect font_dst_rects[FONT_NUM] = {
   {540,380,0,0},
@@ -253,6 +250,7 @@ fontinfo font[FONT_NUM]; //フォントの情報を実体化
 static objectinfo kotei_objects[KOTEI_OBJECT_NUM_MAX]; // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 int kotei_object_num;
 int savestopenemy[ENEMY_NUM];
+int lrflag = 0;
 
 /*  関数のプロトタイプ宣言 */
 extern void SetCamera(void); //カメラの値など初期化
