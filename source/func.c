@@ -954,6 +954,7 @@ void MoveChara()
               //{ //ステージ中で、クリアした瞬間の1回目の実行時のみ実行
               //one_time_flag = true;
               stage_trans_flag = true; //ステージが遷移タイミングであることを示す
+              player[myid].key.a = 0;
               //}
             }
           }
@@ -1524,6 +1525,67 @@ void DrawMenu()
     rectangleColor(mainrenderer, font[1].dst_rect.x, font[1].dst_rect.y, font[1].dst_rect.x + font[1].dst_rect.w, font[1].dst_rect.y + font[1].dst_rect.h, 0xff00ff00);
     if (player[myid].key.a == 1)
       run = false;
+  }
+  SDL_RenderPresent(mainrenderer); // 描画データを表示
+}
+
+void StageNumShow()
+{
+  CONTAINER data;
+  memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
+
+  //SDL_RenderCopy(mainrenderer, background[0].image_texture, &background[0].src_rect, &background[0].dst_rect); //背景をレンダーに出力
+  //for (int i = 0; i < FONT_NUM; i++)
+  //{
+  //boxColor(mainrenderer, font[i].dst_rect.x, font[i].dst_rect.y, font[i].dst_rect.x + font[i].dst_rect.w, font[i].dst_rect.y + font[i].dst_rect.h, 0xff000000);
+  if (stage_num == 1)
+  {
+    SDL_RenderCopy(mainrenderer, font[2].image_texture, &font[2].src_rect, &font[2].dst_rect); //フォントをレンダーに出力
+  }
+  else if (stage_num == 2)
+  {
+    SDL_RenderCopy(mainrenderer, font[3].image_texture, &font[3].src_rect, &font[3].dst_rect); //フォントをレンダーに出力
+  }
+  else if (stage_num == 3)
+  {
+    SDL_RenderCopy(mainrenderer, font[4].image_texture, &font[4].src_rect, &font[4].dst_rect); //フォントをレンダーに出力
+  }
+
+  //}
+  /*if (player[myid].key.up == 1)
+  {
+    up = true;
+    down = false;
+  }
+  else if (player[myid].key.down == 1)
+  {
+    up = false;
+    down = true;
+  }
+  if (up)
+  {
+    rectangleColor(mainrenderer, font[0].dst_rect.x, font[0].dst_rect.y, font[0].dst_rect.x + font[0].dst_rect.w, font[0].dst_rect.y + font[0].dst_rect.h, 0xff00ff00);
+    if (player[myid].key.a == 1)
+    {                                      //スタートボタンが押された時
+      data.command = START_COMMAND;        //コマンドを格納
+      data.cid = myid;                     //クライアントIDを格納
+      send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
+      player[myid].key.a = 0;
+    }
+  }
+  else if (down)
+  {
+    rectangleColor(mainrenderer, font[1].dst_rect.x, font[1].dst_rect.y, font[1].dst_rect.x + font[1].dst_rect.w, font[1].dst_rect.y + font[1].dst_rect.h, 0xff00ff00);
+    if (player[myid].key.a == 1)
+      run = false;
+  }
+  */
+  if (player[myid].key.a == 1)
+  {                                      //スタートボタンが押された時
+    data.command = START_COMMAND;        //コマンドを格納
+    data.cid = myid;                     //クライアントIDを格納
+    send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
+    player[myid].key.a = 0;
   }
   SDL_RenderPresent(mainrenderer); // 描画データを表示
 }

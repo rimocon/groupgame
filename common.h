@@ -30,6 +30,7 @@
 #define MENUMODE 1
 #define GAMEMODE 2
 #define RESULTMODE 3
+#define STAGENUMMODE 4 
 
 /*  関数のプロトタイプ宣言  */
 
@@ -46,6 +47,7 @@ extern void DrawResult(void); //結果描画
 extern void PlayerAction(); // プレイヤーが行う妨害アクション
 extern void Events(void); //イベント処理
 extern void Stage_Renew(); //ステージが進んだ時の各種変数の更新
+extern void StageNumShow(void); //ステージ1以降にステージ開始前に表示される画面を表示
 
 extern void setup_client(char *, u_short);
 extern int control_requests();

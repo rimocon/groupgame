@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
         if(stage_trans_flag == true){ //ステージの遷移タイミングである時
           stage_num++; //ステージ番号をインクリメント
           Stage_Renew(); //ステージが進んだ事による、各種変数の更新
+          status = STAGENUMMODE; //ステージ番号表示モードに状態を設定
           stage_trans_flag = false; 
         }
         MoveChara(); //$B%-%c%i0\F0(B
@@ -72,6 +73,9 @@ int main(int argc, char *argv[])
         break;
       case RESULTMODE:
         //DrawResult();
+        break;
+      case STAGENUMMODE:
+        StageNumShow();
         break;
     }
     frametime = SDL_GetTicks() - framestart; //処理が終わった時間-処理が始まった時間=1回のループ処理にかかった時間
