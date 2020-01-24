@@ -32,6 +32,8 @@ bool up,down;
 #define SPRAY_HEIGHT 50
 #define SAIRUI_TIME 3000
 #define SPRAY_TIME 300 // スプレーが使える時間
+#define TALK_TIME 3000
+#define TALK_NUM 3
 
 #define HACKTIME 2000 //ハッキングに要する時間
 #define STOPTIME 2000 //ハッキング中にカメラを止める時間
@@ -120,7 +122,8 @@ typedef struct { //キー入力用の構造体を型宣言
           down, //下矢印
           a,  //4ボタン(決定ボタン)
           x,  //2ボタン(催涙スプレー)
-          y; //1ボタン(ハッキングボタン)
+          y, //1ボタン(ハッキングボタン)
+          b; // 3ボタン(会話ボタン)
 }inputkeys;
 
 typedef struct {
@@ -145,6 +148,11 @@ typedef struct {
   int spray_hitlines[2][4];
   SDL_Point spray_origin;
   int spraytime;
+  int talkstarttime;
+  bool flag_talk;
+  int enemy_inview; // どの敵の視界にいるかを格納する変数(どこの視界にもいないとき-1)
+  int talknum;
+  int talksec;
 }playerinfo;
 
 
@@ -184,6 +192,11 @@ typedef struct {
   unsigned int savetime; // 時間を保存する
   int tri[2][3]; // 視界の三角形
   int prev_angle;
+  int save_angle; //
+  int talk_angle;
+  bool flag_talk;
+  int talkstarttime;
+  bool flag_one_talk;
 }enemyinfo; // 敵の構造体
 
 typedef struct {
@@ -197,6 +210,12 @@ typedef struct {
   SDL_Rect src_rect;
   SDL_Rect dst_rect;
 }fontinfo;
+
+typedef struct {
+  SDL_Texture * image_texture;
+  SDL_Rect src_rect;
+  SDL_Rect dst_rect;
+}fukidashiinfo;
 
 
 
@@ -226,14 +245,17 @@ static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
 // 敵が最初に向いている方向,敵の動きのタイプを指定する
 static int enemy_moveangles[ENEMY_NUM] = {
   180,
-  90
+  90,
+  90,
+  90,
+  180
 };
 static enemymovetype enemy_movetypes[ENEMY_NUM] = { //NPCの動きのパターンを選択
+  MT_MOVING_FLOOR,
   MT_RANDOM_AND_TRACKING,
   MT_RANDOM_AND_TRACKING,
   MT_RANDOM_AND_TRACKING,
-  MT_RANDOM_AND_TRACKING,
-  MT_RANDOM_AND_TRACKING
+  MT_STOP
 };
 static SDL_Rect font_dst_rects[FONT_NUM] = {
   {540,380,0,0},
@@ -250,6 +272,7 @@ camerainfo camera_before[CAMERA_NUM];
 enemyinfo enemy[ENEMY_NUM];
 backgroundinfo background[BACKGROUND_NUM]; //背景の情報を実体化
 fontinfo font[FONT_NUM]; //フォントの情報を実体化
+fukidashiinfo fukidashi;
 static objectinfo kotei_objects[KOTEI_OBJECT_NUM_MAX]; // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 int kotei_object_num;
 int savestopenemy[ENEMY_NUM];

@@ -271,6 +271,14 @@ int control_requests()
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;
         break;
+      case TALK_START_COMMAND: // 'T' のとき(3ボタン押された時)
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case TALK_END_COMMAND: // 't' のとき(3ボタン離された時)
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
       default: //その他の文字が入力された場合
         fprintf(stderr, "control_requests(): %c is not a valid command.\n", data.command);
         exit(1); //異常終了
