@@ -43,10 +43,10 @@ typedef struct {
   char message[MAX_LEN_BUFFER];
   int zahyo_x;
   int zahyo_y;
-  int enemy_zahyo_x[2]; //NPCのx座標
-  int enemy_zahyo_y[2]; //NPCのy座標
-  int move_angle[2];
-  int prev_angle[2];
+  int enemy_zahyo_x[5]; //NPCのx座標
+  int enemy_zahyo_y[5]; //NPCのy座標
+  int move_angle[5];
+  int prev_angle[5];
 } CONTAINER;
 
 

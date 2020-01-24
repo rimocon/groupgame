@@ -267,7 +267,7 @@ int control_requests()
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;
         break;
-      case ENEMY_MODIFY_COMMAND : //Bのとき
+      case ENEMY_MODIFY_COMMAND: //Bのとき
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;
         break;
