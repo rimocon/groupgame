@@ -44,7 +44,7 @@ extern void Collision(); //当たり判定
 extern void MakeMap(void);
 extern void DrawResult(void); //結果描画
 extern void PlayerAction(); // プレイヤーが行う妨害アクション
-
+extern void Events(void); //イベント処理
 
 extern void setup_client(char *, u_short);
 extern int control_requests();
@@ -60,6 +60,7 @@ bool random_start_flag; //NPCが一定時間同じ座標にとどまっため、
 Uint32 stay_start;   //NPCが同じ場所に留まり始めた時間を格納する変数
 int stay_time;       //留まっている時間を格納する変数
 int random_time;     //ランダムウォークをしている時間
+int myid;
 
 SDL_Window *mainwindow; //メイン画面用
 SDL_Renderer *mainrenderer; //メイン画面用レンダラー

@@ -9,8 +9,10 @@ int main(int argc, char *argv[])
   const int fps = 60.0;                //1秒に何回描画するか
   const int framedelay = 1000.0 / fps; //1秒 = 1000msなので1回の描画にかけるべき時間
   Uint32 framestart;                   //処理の始まりの時間を格納する変数
+  Uint32 modi_before = SDL_GetTicks();                    //プレイヤーの座標を修正するのに使う時間
   //Uint32 random_start;                 //ランダム移動を開始した時間を格納
   int frametime;                       //1回の処理にかかった時間を格納する変数
+  int modi_time = 0;
   //int random_total_time;               //ランダム運動をしているトータル時間
 
   u_short port = DEFAULT_PORT;
@@ -42,8 +44,7 @@ int main(int argc, char *argv[])
     framestart = SDL_GetTicks();
     if ((SDL_PollEvent(&inputevent)))
     {
-      Input();
-      //printf("input\n");
+      Input(); 
     }
     control_requests();
     switch(status){
@@ -56,6 +57,7 @@ int main(int argc, char *argv[])
         MoveTriangle(); //$B;03Q7A0\F0(B
         Collision(); //$BEv$?$jH=Dj(B
         RenderWindow(); //$BIA2h(B
+        Events();
         //Destroy(); //$BGK4~4XO"(B
         //SDL_Delay(3);
         break;
@@ -65,6 +67,18 @@ int main(int argc, char *argv[])
     }
     frametime = SDL_GetTicks() - framestart; //処理が終わった時間-処理が始まった時間=1回のループ処理にかかった時間
     //printf("一回の処理時間　%d\n",frametime);
+    
+    modi_time += SDL_GetTicks() - modi_before;
+    if(modi_time > 500){ //500msごとに座標を更新
+      joystick_send(0);
+      
+      if(myid == 0){
+        joystick_send(13);
+      }
+      modi_before = SDL_GetTicks();
+      modi_time = 0;
+    }
+
     if(framedelay > frametime) //一回の処理にかける時間より1回のループ処理にかかった時間が小さかったら
     {
       SDL_Delay(framedelay - frametime); //余った時間分おやすみ

@@ -10,6 +10,9 @@
 #define MESSAGE_COMMAND 'M' //メッセージの送信
 #define ZAHYO_COMMAND 'Z' //座標の送信
 #define KINKAI_COMMAND 'K' //金塊の状態
+#define HACK_COMMAND 'H' //ハッキング状態
+#define HACK_START_COMMAND 'V' //ハッキング状態
+#define NOT_HACK_COMMAND 'N' //ハッキングキャンセル
 #define PLAYER_COMMAND 'P' //プレイヤーが死んだことを示す
 #define UP_COMMAND 'U' //上へのスティック操作が行われたことを示す
 #define DOWN_COMMAND 'D' //下へのスティック操作が行われたことを示す
@@ -21,6 +24,7 @@
 #define X_OFF_COMMAND 'Y'
 #define QUIT_COMMAND 'Q' //チャットシステムの終了
 #define START_COMMAND 'S' //メニュー画面で、スタートボタンを押したことを表す
+#define ENEMY_MODIFY_COMMAND 'e'
 
 /*  関数のプロトタイプ宣言 */
 //またあとで
@@ -39,6 +43,10 @@ typedef struct {
   char message[MAX_LEN_BUFFER];
   int zahyo_x;
   int zahyo_y;
+  int enemy_zahyo_x; //NPCのx座標
+  int enemy_zahyo_y; //NPCのy座標
+  int move_angle;
+  int prev_angle;
 } CONTAINER;
 
 

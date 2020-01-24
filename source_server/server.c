@@ -192,6 +192,21 @@ int control_requests()
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;
         break;
+      case HACK_COMMAND: //'H'のとき
+        fprintf(stderr, "client[%d], name : %s, hacking !!!!! \n", clients[i].cid, clients[i].name);
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case HACK_START_COMMAND: //'V'のとき
+        fprintf(stderr, "client[%d], name : %s, hack start !!!!! \n", clients[i].cid, clients[i].name);
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case NOT_HACK_COMMAND: //'N'のとき
+        fprintf(stderr, "client[%d], name : %s, hack start !!!!! \n", clients[i].cid, clients[i].name);
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
       case PLAYER_COMMAND: //'P'のとき
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;
@@ -227,12 +242,14 @@ int control_requests()
         break;
       case START_COMMAND: //'S'のとき
         fprintf(stderr, "client[%d] %s: message = %s\n", clients[i].cid, clients[i].name, data.message);
-        if(start_count_flag[clients[i].cid] == 0){
+        if (start_count_flag[clients[i].cid] == 0)
+        {
           start_count++;
           start_count_flag[clients[i].cid] = 1;
         }
-        printf("%d\n",start_count);
-        if(start_count == num_clients){ //接続しているクライアント全員が、スタートボタンを押したことが確認できた時
+        printf("%d\n", start_count);
+        if (start_count == num_clients)
+        { //接続しているクライアント全員が、スタートボタンを押したことが確認できた時
           send_data(BROADCAST, &data, sizeof(data));
         }
         result = 1;
@@ -247,6 +264,10 @@ int control_requests()
         result = 1;
         break;
       case X_OFF_COMMAND: //'Y'のとき(2ボタン押された時)
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case ENEMY_MODIFY_COMMAND : 
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;
         break;
