@@ -72,12 +72,91 @@ void Startup()
   stay_time = 0;
   random_start = 0;
   random_time = 0;
-  int j=0;
-  for(int i=0; i<ENEMY_NUM; i++){
+  int j = 0;
+  for (int i = 0; i < ENEMY_NUM; i++)
+  {
     savestopenemy[i] = -1;
   }
-  for(int i=0; i<ENEMY_NUM; i++){
-    if(enemy_movetypes[i] == MT_STOP){
+  for (int i = 0; i < ENEMY_NUM; i++)
+  {
+    if (enemy_movetypes[i] == MT_STOP)
+    {
+      savestopenemy[j] = i;
+      j++;
+    }
+  }
+  /*
+  player[0].key.left = player[0].key.right = player[0].key.up = player[0].key.down  = 0;
+  player[1].key.left = player[1].key.right = player[1].key.up = player[1].key.down  = 0;
+  player[2].key.left = player[2].key.right = player[2].key.up = player[2].key.down  = 0;
+  */
+}
+
+//ステージが進んだ事による、各種変数の更新
+void Stage_Renew()
+{
+
+  kinkai_flag = true;       //金塊は最初は、配置されている
+  kinkai_keep_flag = false; //最初は、プレイヤーは金塊を保持していない
+  hacking_flag = false;     //最初ハッキングはされていない
+  player_flag[0] = true;    //プレイヤー1 は最初は、生存
+  player_flag[1] = true;    //プレイヤー2 は最初は、生存
+  player_flag[2] = true;    //プレイヤー3 は最初は、生存
+  //mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0);         //メインウィンドウに対するレンダラー生成
+  //TTF_Init();                                                   //ttfを初期化
+  //japanesefont = TTF_OpenFont("fonts-japanese-gothic.ttf", 80); //フォント読み込み
+  if (stage_num == 2)
+  {
+    for (int i = 0; i < CAMERA_NUM; i++)
+    {
+      camera_dst_rects[i].x = camera_dst_rects_Stage2[i].x;
+      camera_dst_rects[i].y = camera_dst_rects_Stage2[i].y;
+      camera[i].dst_rect = camera_dst_rects_Stage2[i];
+    }
+  }
+  else if (stage_num == 3)
+  {
+    for (int i = 0; i < CAMERA_NUM; i++)
+    {
+      camera_dst_rects[i].x = camera_dst_rects_Stage3[i].x;
+      camera_dst_rects[i].y = camera_dst_rects_Stage3[i].y;
+      camera[i].dst_rect = camera_dst_rects_Stage3[i];
+    }
+  }
+
+  SetCamera(); //カメラの値設定
+               //Fontload();                                                   //フォント読み込み
+               //Imageload();                                                  //画像読み込み
+  /*for (int i = 0; i < CAMERA_NUM; i++)
+  {
+    printf("camera %d.x = %d\n", i, camera[i].dst_rect.x);
+    printf("camera %d.y = %d\n", i, camera[i].dst_rect.y);
+    printf("camera %d.w = %d\n", i, camera[i].dst_rect.w);
+    printf("camera %d.h = %d\n", i, camera[i].dst_rect.h);
+  }*/
+  for (int i = 0; i < PLAYER_NUM; i++)
+  {
+    player[i].flag_hack_start = false;
+  }
+  MakeMap();
+  //status = MENUMODE; //メニューモードに状態を設定
+  //run = true;        //動かす
+  up = false;
+  down = false;
+  same_place_flag = 0;
+  random_start_flag = 0;
+  stay_time = 0;
+  random_start = 0;
+  random_time = 0;
+  int j = 0;
+  for (int i = 0; i < ENEMY_NUM; i++)
+  {
+    savestopenemy[i] = -1;
+  }
+  for (int i = 0; i < ENEMY_NUM; i++)
+  {
+    if (enemy_movetypes[i] == MT_STOP)
+    {
       savestopenemy[j] = i;
       j++;
     }
@@ -347,8 +426,9 @@ void MoveTriangle()
   int origin_x, origin_y;
   for (int i = 0; i < ENEMY_NUM; i++)
   {
-    int savestopcount=0;
-    if(enemy[i].movetype != MT_STOP){
+    int savestopcount = 0;
+    if (enemy[i].movetype != MT_STOP)
+    {
       // ゆっくり振り向く,最短で90度振り向いてほしいけど270度回ってしまう
       if (enemy[i].prev_angle != enemy[i].move_angle)
       {
@@ -364,29 +444,40 @@ void MoveTriangle()
         // int ldiff = enemy[i].move_angle+360 - enemy[i].prev_angle;
         // if(abs(rdiff))
 
-        int taketime[2] = {0,0};
-        for(int j=0; j<2; j++){
+        int taketime[2] = {0, 0};
+        for (int j = 0; j < 2; j++)
+        {
           int target = enemy[i].move_angle;
           int nowangle = enemy[i].prev_angle;
           int nowangle2 = nowangle;
-          while(target != nowangle){
-            if(j == 0) nowangle++; //右回りのとき
-            else if(j == 1) nowangle--; // 左回りのとき
-            if(nowangle < 0) nowangle += 360;
-            else if(nowangle >= 360) nowangle -= 360;
+          while (target != nowangle)
+          {
+            if (j == 0)
+              nowangle++; //右回りのとき
+            else if (j == 1)
+              nowangle--; // 左回りのとき
+            if (nowangle < 0)
+              nowangle += 360;
+            else if (nowangle >= 360)
+              nowangle -= 360;
             taketime[j]++;
-            if(taketime[j] >= 360) {
+            if (taketime[j] >= 360)
+            {
               taketime[j] = 10000;
               break;
             }
           }
         }
-        if(taketime[0] <= taketime[1]) turnlr = 1;
-        else turnlr = -1;
+        if (taketime[0] <= taketime[1])
+          turnlr = 1;
+        else
+          turnlr = -1;
 
         enemy[i].prev_angle += turnlr * 3;
-          if(enemy[i].prev_angle < 0) enemy[i].prev_angle += 360;
-          else if(enemy[i].prev_angle >= 360) enemy[i].prev_angle -= 360;
+        if (enemy[i].prev_angle < 0)
+          enemy[i].prev_angle += 360;
+        else if (enemy[i].prev_angle >= 360)
+          enemy[i].prev_angle -= 360;
       }
 
       origin_x = enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2;
@@ -408,28 +499,30 @@ void MoveTriangle()
         enemy[i].tri[1][j + 1] = origin_y + 200 * -cos((vision[j]) * M_PI / 180);
       }
     }
-    else{
+    else
+    {
       //最初の角度からどこを分け目にするか
       int moveangles[2];
       int initangle = enemy_moveangles[savestopenemy[savestopcount]];
-      printf("initangle %d\n",initangle);
-      switch(initangle){
-        case 0:
-          moveangles[0] = 90;
-          moveangles[1] = 270;
-          break;
-        case 90:
-          moveangles[0] = 180;
-          moveangles[1] = 0;
-          break;
-        case 180:
-          moveangles[0] = 270;
-          moveangles[1] = 90;
-          break;
-        case 270:
-          moveangles[0] = 0;
-          moveangles[1] = 180;
-          break;
+      printf("initangle %d\n", initangle);
+      switch (initangle)
+      {
+      case 0:
+        moveangles[0] = 90;
+        moveangles[1] = 270;
+        break;
+      case 90:
+        moveangles[0] = 180;
+        moveangles[1] = 0;
+        break;
+      case 180:
+        moveangles[0] = 270;
+        moveangles[1] = 90;
+        break;
+      case 270:
+        moveangles[0] = 0;
+        moveangles[1] = 180;
+        break;
       }
       origin_x = enemy[i].dst_rect.x + enemy[i].dst_rect.w / 2;
       origin_y = enemy[i].dst_rect.y + enemy[i].dst_rect.h / 2;
@@ -455,25 +548,34 @@ void MoveTriangle()
       if (enemy[i].prev_angle != moveangles[lrflag])
       {
         //右回転のみ
-        if(lrflag == 0){
+        if (lrflag == 0)
+        {
           enemy[i].prev_angle += 3;
           if (enemy[i].prev_angle >= 360)
             enemy[i].prev_angle -= 360;
         }
-        else if(lrflag == 1){
+        else if (lrflag == 1)
+        {
           enemy[i].prev_angle -= 3;
-          if(enemy[i].prev_angle < 0) enemy[i].prev_angle += 360;
+          if (enemy[i].prev_angle < 0)
+            enemy[i].prev_angle += 360;
         }
-        if(abs(enemy[i].prev_angle-moveangles[lrflag]) < 10){
-          if(lrflag ==1) lrflag = 0;
-          else if(lrflag == 0) lrflag = 1;
+        if (abs(enemy[i].prev_angle - moveangles[lrflag]) < 10)
+        {
+          if (lrflag == 1)
+            lrflag = 0;
+          else if (lrflag == 0)
+            lrflag = 1;
         }
       }
-      else {
-          if(lrflag ==1) lrflag = 0;
-          else if(lrflag == 0) lrflag = 1;
+      else
+      {
+        if (lrflag == 1)
+          lrflag = 0;
+        else if (lrflag == 0)
+          lrflag = 1;
       }
-      printf("enemy prev_angle : %d\n",enemy[i].prev_angle);
+      printf("enemy prev_angle : %d\n", enemy[i].prev_angle);
     }
   }
 }
@@ -848,6 +950,11 @@ void MoveChara()
             {
               //gameclear処理
               printf("GAME CLEAR!!\n");
+              //if (one_time_flag == false)
+              //{ //ステージ中で、クリアした瞬間の1回目の実行時のみ実行
+              //one_time_flag = true;
+              stage_trans_flag = true; //ステージが遷移タイミングであることを示す
+              //}
             }
           }
         }
@@ -1247,8 +1354,6 @@ void MoveChara()
     }
     before_enemy_x = enemy[i].dst_rect.x; //1つ前の座標を格納(x)
     before_enemy_y = enemy[i].dst_rect.y; //1つ前の座標を格納(y)
-
-
   }
 }
 
@@ -1301,29 +1406,84 @@ float Rotation(int x1, int y1, int a, int b, double theta, int *x2, int *y2)
 }
 
 void SetCamera()
-{                         //カメラの初期値セット
-  camera[0].angle = 30.0; //初期の回転位置
-  camera[1].angle = 70.0;
-  camera[2].angle = 180.0;
-  camera[3].angle = 280.0;
-  camera[4].angle = 80.0;
-  for (int i = 0; i < CAMERA_NUM; i++)
+{ //カメラの初期値セット
+  if (stage_num == 1)
   {
-    camera[i].clockwise = true;
-    Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w, //回転後の座標を計算して返す
-             camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
-             camera_dst_rects[i].x + camera_dst_rects[i].w / 2,
-             camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
-             camera[i].angle,
-             &camera[i].tri[0][0],
-             &camera[i].tri[1][0]);
-    //printf("x2 %d\n", camera[i].tri[0][0]);
-    //printf("y2 %d\n", camera[i].tri[1][0]);
-    /*
+    camera[0].angle = 30.0; //初期の回転位置
+    camera[1].angle = 70.0;
+    camera[2].angle = 180.0;
+    camera[3].angle = 280.0;
+    camera[4].angle = 80.0;
+    for (int i = 0; i < CAMERA_NUM; i++)
+    {
+      camera[i].clockwise = true;
+      Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w, //回転後の座標を計算して返す
+               camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
+               camera_dst_rects[i].x + camera_dst_rects[i].w / 2,
+               camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
+               camera[i].angle,
+               &camera[i].tri[0][0],
+               &camera[i].tri[1][0]);
+      //printf("x2 %d\n", camera[i].tri[0][0]);
+      //printf("y2 %d\n", camera[i].tri[1][0]);
+      /*
        camera[i].theta[0] = 90.0 - camera[i].angle;
        camera[i].theta[1] = 120.0 - camera[i].angle;
      */
-    camera[i].theta[2] = 105 - camera[i].angle;
+      camera[i].theta[2] = 105 - camera[i].angle;
+    }
+  }
+  else if (stage_num == 2)
+  {
+    camera[0].angle = 30.0; //初期の回転位置
+    camera[1].angle = 70.0;
+    camera[2].angle = 180.0;
+    camera[3].angle = 280.0;
+    camera[4].angle = 80.0;
+    for (int i = 0; i < CAMERA_NUM; i++)
+    {
+      camera[i].clockwise = true;
+      Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w, //回転後の座標を計算して返す
+               camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
+               camera_dst_rects[i].x + camera_dst_rects[i].w / 2,
+               camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
+               camera[i].angle,
+               &camera[i].tri[0][0],
+               &camera[i].tri[1][0]);
+      //printf("x2 %d\n", camera[i].tri[0][0]);
+      //printf("y2 %d\n", camera[i].tri[1][0]);
+      /*
+       camera[i].theta[0] = 90.0 - camera[i].angle;
+       camera[i].theta[1] = 120.0 - camera[i].angle;
+     */
+      camera[i].theta[2] = 105 - camera[i].angle;
+    }
+  }
+  else if (stage_num == 3)
+  {
+    camera[0].angle = 30.0; //初期の回転位置
+    camera[1].angle = 70.0;
+    camera[2].angle = 180.0;
+    camera[3].angle = 280.0;
+    camera[4].angle = 80.0;
+    for (int i = 0; i < CAMERA_NUM; i++)
+    {
+      camera[i].clockwise = true;
+      Rotation(camera_dst_rects[i].x + camera_dst_rects[i].w, //回転後の座標を計算して返す
+               camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
+               camera_dst_rects[i].x + camera_dst_rects[i].w / 2,
+               camera_dst_rects[i].y + camera_dst_rects[i].h / 2,
+               camera[i].angle,
+               &camera[i].tri[0][0],
+               &camera[i].tri[1][0]);
+      //printf("x2 %d\n", camera[i].tri[0][0]);
+      //printf("y2 %d\n", camera[i].tri[1][0]);
+      /*
+       camera[i].theta[0] = 90.0 - camera[i].angle;
+       camera[i].theta[1] = 120.0 - camera[i].angle;
+     */
+      camera[i].theta[2] = 105 - camera[i].angle;
+    }
   }
 }
 
@@ -1406,7 +1566,19 @@ void MakeMap()
     dst.x = 0;
     for (i = 0; i < MAP_WIDTH; i++, dst.x += MAP_CHIPSIZE)
     {
-      loadmap_objecttype = map0[j][i];      // マップデータを格納する
+      if (stage_num == 1)
+      {
+        loadmap_objecttype = map0[j][i]; // マップデータを格納する(ステージ1)
+      }
+      else if (stage_num == 2)
+      {
+        loadmap_objecttype = map1[j][i]; // マップデータを格納する(ステージ2)
+      }
+      else if (stage_num == 3)
+      {
+        loadmap_objecttype = map2[j][i]; // マップデータを格納する(ステージ3)
+      }
+
       if (loadmap_objecttype == TYPE_ENEMY) // 読み込んだマップデータが敵のとき
       {
         //構造体enemyに、敵の情報を格納
@@ -1543,10 +1715,10 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
   }
   else if (num == 13)
   {
-    data.command = ENEMY_MODIFY_COMMAND;         //コマンドを格納
-    data.cid = myid;                             //クライアントIDを格納
+    data.command = ENEMY_MODIFY_COMMAND; //コマンドを格納
+    data.cid = myid;                     //クライアントIDを格納
     for (int i = 0; i < ENEMY_NUM; i++)
-    {  
+    {
       data.enemy_zahyo_x[i] = enemy[i].dst_rect.x; //NPCのx座標
       data.enemy_zahyo_y[i] = enemy[i].dst_rect.y; //NPCのy座標
       data.move_angle[i] = enemy[i].move_angle;

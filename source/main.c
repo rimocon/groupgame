@@ -15,6 +15,10 @@ int main(int argc, char *argv[])
   int modi_time = 0;
   //int random_total_time;               //ランダム運動をしているトータル時間
 
+  one_time_flag = false;
+  stage_trans_flag = false;
+  stage_num = 1; //最初のステージ番号は'1'
+
   u_short port = DEFAULT_PORT;
   char server_name[MAX_LEN_NAME];
 
@@ -52,6 +56,11 @@ int main(int argc, char *argv[])
         DrawMenu();
         break;
       case GAMEMODE:
+        if(stage_trans_flag == true){ //ステージの遷移タイミングである時
+          stage_num++; //ステージ番号をインクリメント
+          Stage_Renew(); //ステージが進んだ事による、各種変数の更新
+          stage_trans_flag = false; 
+        }
         MoveChara(); //$B%-%c%i0\F0(B
         PlayerAction();
         MoveTriangle(); //$B;03Q7A0\F0(B
