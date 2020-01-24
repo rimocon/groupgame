@@ -18,7 +18,7 @@ bool up,down;
 //#define CAMERA_NUM 0
 #define BACKGROUND_NUM 1
 #define FONT_NUM 2
-#define ENEMY_NUM 2
+#define ENEMY_NUM 5
 #define ENEMY_SPEED 1
 
 #define  KOTEI_OBJECT_NUM_MAX 300 // 固定オブジェクトの最大の数
@@ -69,19 +69,19 @@ float gauge;
 /*  mapデータ */
 static int map0[MAP_HEIGHT][MAP_WIDTH] = {
 	{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-	{2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 2, 2, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 5, 0, 0, 8, 0, 0, 0, 0, 2},
-	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 2},
+	{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 2},
+	{2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 2},
 	{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
-	{2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2},
+	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2},
+	{2, 5, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2},
+	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2},
+	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2},
+	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 0, 0, 2},
+	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2},
+	{2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2},
+	{2, 0, 8, 2, 2, 0, 0, 0, 0, 0, 2, 0, 0, 5, 0, 0, 0, 0, 0, 2},
+	{2, 6, 7, 2, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 2},
 	{2, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
 };
 
@@ -210,7 +210,7 @@ static fd_set mask; //FD集合を表す構造体
 
 //画像ファイルパス
 //static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png", "./images/player2.png", "./images/player3.png","./images/floor_ul.png","./images/floor_ur.png","./images/floor_dl.png","./images/floor_dr.png","./images/floor_rev.png","./images/menu.png","./images/spray.png"}; // 読み込む画像ファイルを指定
-static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player1_8pattern.png", "./images/player1_8pattern.png", "./images/player1_8pattern.png","./images/floor_ul.png","./images/floor_ur.png","./images/floor_dl.png","./images/floor_dr.png","./images/floor_rev.png","./images/menu.png","./images/spray.png"}; // 読み込む画像ファイルを指定
+static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player1_8pattern.png", "./images/player2_8pattern.png", "./images/player3_8pattern.png","./images/floor_ul.png","./images/floor_ur.png","./images/floor_dl.png","./images/floor_dr.png","./images/floor_rev.png","./images/menu.png","./images/spray.png"}; // 読み込む画像ファイルを指定
 
 //フォント
 static char *fonts[FONT_NUM] = {"開始","終了"};
@@ -228,9 +228,12 @@ static int enemy_moveangles[ENEMY_NUM] = {
   180,
   90
 };
-static enemymovetype enemy_movetypes[ENEMY_NUM] = {
+static enemymovetype enemy_movetypes[ENEMY_NUM] = { //NPCの動きのパターンを選択
   MT_RANDOM_AND_TRACKING,
-  MT_STOP
+  MT_RANDOM_AND_TRACKING,
+  MT_RANDOM_AND_TRACKING,
+  MT_RANDOM_AND_TRACKING,
+  MT_RANDOM_AND_TRACKING
 };
 static SDL_Rect font_dst_rects[FONT_NUM] = {
   {540,380,0,0},
