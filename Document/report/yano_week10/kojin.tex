@@ -1,0 +1,66 @@
+\documentclass{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings,jlisting,url,here}
+
+\lstset{%
+  language={C},
+  basicstyle={\small},%
+  identifierstyle={\small},%
+  commentstyle={\small\itshape},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small},%
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  numbers=left,%
+  xrightmargin=0zw,%
+  xleftmargin=3zw,%
+  numberstyle={\scriptsize},% stepnumber=1,
+  numbersep=1zw,%
+  lineskip=-0.5ex%
+}
+% xなんちゃらが変数，進捗書く
+\newcommand{\xd}{敵の視界の回転の改善}
+\newcommand{\xg}{会話処理の追加}
+\newcommand{\xh}{画像の変更}
+
+% []内の数が引数，#数字で引数読む
+\newcommand{\pitem}[3]{
+\item #1
+\item #2
+\item #3
+}
+\title{個人レポート}
+\author{6119019207 矢野大暉}
+\date{\number\year/\number\month/\number\day 提出}
+
+\begin{document}
+\maketitle
+
+\section{開発期間1/20～1/26の進捗状況} 
+
+\subsection{進展事項}
+今回の開発期間では，ゲームの設計として主に
+\begin{itemize}
+\pitem{\xd}{\xg}{\xh}
+\end{itemize}
+を行った．以下にその詳細を示す．
+
+\subsection{\xd}
+プレイヤーを追跡する敵の動きで，敵の視界を回転させるときに右回転しかできない問題が発生していた．これを目標の角度まで最短時間で到達する方向に回転するようにした．
+実装方法としては，敵の視界を描画するより先に「右回転，左回転ではどちらの方がはやく目標の角度に到達できるか？」を毎フレーム計算することで実現した．しかし，この方法によってゲーム全体の動きが少し遅くなった．大きな影響は今のところ見つけられなかったが，改善方法を見つけたい．
+
+\subsection{\xg}
+プレイヤーが敵に近づいてゲームパッドの3ボタンを押すことで会話を行い，一定時間敵の視界を会話しているプレイヤーに固定させるコマンドを追加した．
+会話中は敵と，プレイヤーの両方が一定時間動かなくなる．この間に他のプレイヤーが金塊を取って出入口に向かうなどの利用方法を考えている．
+
+\subsection{\xh}
+各プレイヤーごとに異なった色のプレイヤー画像になるように画像を差し替えた．また，カメラの画像も変更した．
+ゲームに使用しているカメラ画像は，フリー素材のカメラ画像を参考にしながらGIMPで自作した．
+
+\section{次回開発期間での予定}
+次回は全員のプログラムを統合して，不具合がないかを確認したい．
+また，ステージ遷移の際の演出方法や，グラフィック部分を考えたい．
+
+\end{document}
