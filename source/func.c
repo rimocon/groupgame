@@ -1332,13 +1332,14 @@ void MoveChara()
     //printf("dest_rect.y = %d, before_enemy_y = %d\n", enemy[i].dst_rect.y, before_enemy_y);
 
     //if (!(sqrt(pow(enemy[i].dst_rect.x - before_enemy_x, 2))) == 0 && sqrt(pow(enemy[i].dst_rect.y - before_enemy_y, 2)) == 0)
+
     //現在のNPCのx座標と1つ前のNPCのx座標が異なる　かつ　現在のNPCのy座標と1つ前のNPCのy座標が異なる時
     if (enemy[i].dst_rect.x != before_enemy_x || enemy[i].dst_rect.y != before_enemy_y)
     {
       stay_start = SDL_GetTicks(); //留まっている時間カウントの開始時間を更新
     }
     stay_time = SDL_GetTicks() - stay_start; //留まっている時間
-    //printf("stay_time = %d\n", stay_time);
+    printf("stay_time = %d\n", stay_time);
     //printf("same_place_flag= %d\n", same_place_flag);
     if (stay_time >= 2000 && random_start_flag == 0) //留まっている時間が2秒以上の時
     {
@@ -1494,7 +1495,7 @@ void DrawMenu()
   memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
 
   SDL_RenderCopy(mainrenderer, background[0].image_texture, &background[0].src_rect, &background[0].dst_rect); //背景をレンダーに出力
-  for (int i = 0; i < FONT_NUM; i++)
+  for (int i = 0; i < 2; i++) //出力する文字は、"開始"と"終了"の2文字のみ
   {
     boxColor(mainrenderer, font[i].dst_rect.x, font[i].dst_rect.y, font[i].dst_rect.x + font[i].dst_rect.w, font[i].dst_rect.y + font[i].dst_rect.h, 0xff000000);
     SDL_RenderCopy(mainrenderer, font[i].image_texture, &font[i].src_rect, &font[i].dst_rect); //フォントをレンダーに出力
@@ -1541,14 +1542,17 @@ void StageNumShow()
   if (stage_num == 1)
   {
     SDL_RenderCopy(mainrenderer, font[2].image_texture, &font[2].src_rect, &font[2].dst_rect); //フォントをレンダーに出力
+    SDL_RenderCopy(mainrenderer, font[5].image_texture, &font[5].src_rect, &font[5].dst_rect); //フォントをレンダーに出力
   }
   else if (stage_num == 2)
   {
     SDL_RenderCopy(mainrenderer, font[3].image_texture, &font[3].src_rect, &font[3].dst_rect); //フォントをレンダーに出力
+    SDL_RenderCopy(mainrenderer, font[5].image_texture, &font[5].src_rect, &font[5].dst_rect); //フォントをレンダーに出力
   }
   else if (stage_num == 3)
   {
     SDL_RenderCopy(mainrenderer, font[4].image_texture, &font[4].src_rect, &font[4].dst_rect); //フォントをレンダーに出力
+    SDL_RenderCopy(mainrenderer, font[5].image_texture, &font[5].src_rect, &font[5].dst_rect); //フォントをレンダーに出力
   }
 
   //}
@@ -1599,9 +1603,13 @@ void Fontload()
   //int iw,ih;
   for (int i = 0; i < FONT_NUM; i++)
   { //フォントロード
-    s = TTF_RenderUTF8_Blended(japanesefont, fonts[i], white);
+    if(i < 2){ //メニュー画面に使う文字は、白色
+      s = TTF_RenderUTF8_Blended(japanesefont, fonts[i], white);
+    }
+    else if(i >= 2){ //ステージ開始時の文字は、赤色
+      s = TTF_RenderUTF8_Blended(japanesefont, fonts[i], black);
+    }
     font[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
-
     font[i].src_rect.x = 0;
     font[i].src_rect.y = 0;
     font[i].src_rect.w = s->w; // 読み込んだ画像ファイルの幅を元画像の領域として設定

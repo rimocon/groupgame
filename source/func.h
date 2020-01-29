@@ -17,7 +17,7 @@ bool up, down;
 #define CAMERA_NUM 5
 //#define CAMERA_NUM 0
 #define BACKGROUND_NUM 1
-#define FONT_NUM 5
+#define FONT_NUM 6
 #define ENEMY_NUM 5
 #define ENEMY_SPEED 1
 
@@ -277,7 +277,7 @@ static fd_set mask; //FD集合を表す構造体
 static char *imgfiles[TYPE_NUM] = {"", "./images/kinkai.png", "./images/shelf.png", "./images/camera.png", "./images/entrance.png", "./images/enemy.png", "./images/player1_8pattern.png", "./images/player2_8pattern.png", "./images/player3_8pattern.png", "./images/floor_ul.png", "./images/floor_ur.png", "./images/floor_dl.png", "./images/floor_dr.png", "./images/floor_rev.png", "./images/menu.png", "./images/spray.png"}; // 読み込む画像ファイルを指定
 
 //フォント
-static char *fonts[FONT_NUM] = {"開始", "終了", "STAGE 1", "STAGE 2", "STAGE 3"};
+static char *fonts[FONT_NUM] = {"開始", "終了", "STAGE 1", "STAGE 2", "STAGE 3", "4番ボタンで開始！"};
 
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
     {700, 200, 120, 100},
@@ -313,7 +313,12 @@ static enemymovetype enemy_movetypes[ENEMY_NUM] = { //NPCの動きのパター�
     MT_RANDOM_AND_TRACKING};
 static SDL_Rect font_dst_rects[FONT_NUM] = {
     {540, 380, 0, 0},
-    {540, 530, 0, 0}};
+    {540, 530, 0, 0},
+    {540, 380, 0, 0},
+    {540, 380, 0, 0},
+    {540, 380, 0, 0},
+    {400, 530, 0, 0}
+    };
 
 static CLIENT clients[MAX_NUM_CLIENTS];
 
