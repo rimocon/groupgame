@@ -18,7 +18,7 @@ bool up, down;
 //#define CAMERA_NUM 0
 #define BACKGROUND_NUM 1
 #define FONT_NUM 6
-#define ENEMY_NUM 5
+
 #define ENEMY_SPEED 1
 
 #define KOTEI_OBJECT_NUM_MAX 300 // 固定オブジェクトの最大の数
@@ -41,9 +41,9 @@ bool hacking_flag;     //金塊を描画するかしないか
 bool kinkai_keep_flag; //プレイヤーが金塊を持っているかどうか
 bool player_flag[3];   //プレイヤーを描画するか、しないか
 
-int before_enemy_x;  //敵の前の座標 x
-int before_enemy_y;  //敵の前の座標 y
-Uint32 random_start; //ランダム移動を開始した時間を格納
+int before_enemy_x[ENEMY_NUM];  //敵の前の座標 x
+int before_enemy_y[ENEMY_NUM];  //敵の前の座標 y
+Uint32 random_start[ENEMY_NUM]; //ランダム移動を開始した時間を格納
 
 int time_now, time_left;
 float gauge;

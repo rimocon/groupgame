@@ -67,14 +67,15 @@ void Startup()
   run = true;        //動かす
   up = false;
   down = false;
-  same_place_flag = 0;
-  random_start_flag = 0;
-  stay_time = 0;
-  random_start = 0;
-  random_time = 0;
+
   int j = 0;
   for (int i = 0; i < ENEMY_NUM; i++)
   {
+    same_place_flag[i] = 0;
+    random_start_flag[i] = 0;
+    stay_time[i] = 0;
+    random_start[i] = 0;
+    random_time[i] = 0;
     savestopenemy[i] = -1;
   }
   for (int i = 0; i < ENEMY_NUM; i++)
@@ -143,14 +144,14 @@ void Stage_Renew()
   //run = true;        //動かす
   up = false;
   down = false;
-  same_place_flag = 0;
-  random_start_flag = 0;
-  stay_time = 0;
-  random_start = 0;
-  random_time = 0;
   int j = 0;
   for (int i = 0; i < ENEMY_NUM; i++)
   {
+    same_place_flag[i] = 0;
+    random_start_flag[i] = 0;
+    stay_time[i] = 0;
+    random_start[i] = 0;
+    random_time[i] = 0;
     savestopenemy[i] = -1;
   }
   for (int i = 0; i < ENEMY_NUM; i++)
@@ -1091,7 +1092,7 @@ void MoveChara()
         }
 
         //if (sqrt(pow(enemy[i].dst_rect.x - player[min_k].dst_rect.x, 2) + pow(enemy[i].dst_rect.y - player[min_k].dst_rect.y, 2)) < 200 && same_place_flag == 0)
-        if (min_distance < 400 && same_place_flag == 0)
+        if (min_distance < 400 && same_place_flag[i] == 0)
         {
           //printf("%d\n", min_distance);
           if (enemy[i].dst_rect.x > player[min_k].dst_rect.x) //プレイヤーが左方向にいる時
@@ -1129,7 +1130,7 @@ void MoveChara()
         //プレイヤーとNPCとの距離が一定の距離より遠い時(ランダムウォークする)
         else
         {
-          if (same_place_flag == 1 || enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0)
+          if (same_place_flag[i] == 1 || enemy[i].prev_overlap_rect.w == 0 && enemy[i].prev_overlap_rect.h == 0)
           {
             if (random >= 0 && random <= 40)
             {
@@ -1334,28 +1335,28 @@ void MoveChara()
     //if (!(sqrt(pow(enemy[i].dst_rect.x - before_enemy_x, 2))) == 0 && sqrt(pow(enemy[i].dst_rect.y - before_enemy_y, 2)) == 0)
 
     //現在のNPCのx座標と1つ前のNPCのx座標が異なる　かつ　現在のNPCのy座標と1つ前のNPCのy座標が異なる時
-    if (enemy[i].dst_rect.x != before_enemy_x || enemy[i].dst_rect.y != before_enemy_y)
+    if (enemy[i].dst_rect.x != before_enemy_x[i] || enemy[i].dst_rect.y != before_enemy_y[i])
     {
-      stay_start = SDL_GetTicks(); //留まっている時間カウントの開始時間を更新
+      stay_start[i] = SDL_GetTicks(); //留まっている時間カウントの開始時間を更新
     }
-    stay_time = SDL_GetTicks() - stay_start; //留まっている時間
-    printf("stay_time = %d\n", stay_time);
+    stay_time[i] = SDL_GetTicks() - stay_start[i]; //留まっている時間
+    printf("stay_time = %d\n", stay_time[i]);
     //printf("same_place_flag= %d\n", same_place_flag);
-    if (stay_time >= 2000 && random_start_flag == 0) //留まっている時間が2秒以上の時
+    if (stay_time[i] >= 2000 && random_start_flag[i] == 0) //留まっている時間が2秒以上の時
     {
-      same_place_flag = 1;           //同じ座標に一定時間留まっていることを表すフラグを上げる
-      random_start = SDL_GetTicks(); //ランダムウォーク時間カウントの開始時間を設定
-      random_start_flag = 1;
+      same_place_flag[i] = 1;           //同じ座標に一定時間留まっていることを表すフラグを上げる
+      random_start[i] = SDL_GetTicks(); //ランダムウォーク時間カウントの開始時間を設定
+      random_start_flag[i] = 1;
     }
-    random_time = SDL_GetTicks() - random_start; //ランダムウォークをしている時間
+    random_time[i] = SDL_GetTicks() - random_start[i]; //ランダムウォークをしている時間
     //printf("random_time = %d\n", random_time);
-    if (same_place_flag == 1 && random_time >= 3000)
+    if (same_place_flag[i] == 1 && random_time[i] >= 3000)
     {
-      same_place_flag = 0;   //same_place_flagを下ろす
-      random_start_flag = 0; //random_start_flagを下ろす
+      same_place_flag[i] = 0;   //same_place_flagを下ろす
+      random_start_flag[i] = 0; //random_start_flagを下ろす
     }
-    before_enemy_x = enemy[i].dst_rect.x; //1つ前の座標を格納(x)
-    before_enemy_y = enemy[i].dst_rect.y; //1つ前の座標を格納(y)
+    before_enemy_x[i] = enemy[i].dst_rect.x; //1つ前の座標を格納(x)
+    before_enemy_y[i] = enemy[i].dst_rect.y; //1つ前の座標を格納(y)
   }
 }
 
@@ -1495,7 +1496,7 @@ void DrawMenu()
   memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
 
   SDL_RenderCopy(mainrenderer, background[0].image_texture, &background[0].src_rect, &background[0].dst_rect); //背景をレンダーに出力
-  for (int i = 0; i < 2; i++) //出力する文字は、"開始"と"終了"の2文字のみ
+  for (int i = 0; i < 2; i++)                                                                                  //出力する文字は、"開始"と"終了"の2文字のみ
   {
     boxColor(mainrenderer, font[i].dst_rect.x, font[i].dst_rect.y, font[i].dst_rect.x + font[i].dst_rect.w, font[i].dst_rect.y + font[i].dst_rect.h, 0xff000000);
     SDL_RenderCopy(mainrenderer, font[i].image_texture, &font[i].src_rect, &font[i].dst_rect); //フォントをレンダーに出力
@@ -1603,10 +1604,12 @@ void Fontload()
   //int iw,ih;
   for (int i = 0; i < FONT_NUM; i++)
   { //フォントロード
-    if(i < 2){ //メニュー画面に使う文字は、白色
+    if (i < 2)
+    { //メニュー画面に使う文字は、白色
       s = TTF_RenderUTF8_Blended(japanesefont, fonts[i], white);
     }
-    else if(i >= 2){ //ステージ開始時の文字は、赤色
+    else if (i >= 2)
+    { //ステージ開始時の文字は、赤色
       s = TTF_RenderUTF8_Blended(japanesefont, fonts[i], black);
     }
     font[i].image_texture = SDL_CreateTextureFromSurface(mainrenderer, s);
@@ -2017,7 +2020,9 @@ static int execute_command()
     fprintf(stderr, "client[%d] %s: %s\n", data.cid, clients[data.cid].name, data.message);
     status = GAMEMODE;
     result = 1;
-    stay_start = SDL_GetTicks();
+    for(int i = 0; i < ENEMY_NUM; i++){
+      stay_start[i] = SDL_GetTicks();
+    }
   case QUIT_COMMAND: //'Q'のとき
     fprintf(stderr, "client[%d] %s sent quit command.\n", data.cid, clients[data.cid].name);
     result = 0;
