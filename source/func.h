@@ -216,6 +216,8 @@ typedef struct {
   SDL_Texture * image_texture;
   SDL_Rect src_rect;
   SDL_Rect dst_rect;
+  SDL_Texture *textimage[2]; // 0:プレイヤー側のテキスト、1:敵側のテキスト
+  SDL_Rect font_src_rect;
 }fukidashiinfo;
 
 
@@ -234,6 +236,7 @@ static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png"
 
 //フォント
 static char *fonts[FONT_NUM] = {"開始","終了"};
+static char *text_fukidashi[2] = {"Hi!","．．．"};
 
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
    {700,200,120,100},

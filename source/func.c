@@ -581,19 +581,31 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
       // 会話のフキダシの描画(プレイヤー側)
       if(player[i].flag_talk == true){
         SDL_Rect dst = player[i].dst_rect;
-        if(player[i].flag_fukidasiflip == false){
+        if(player[i].flag_fukidasiflip == false){ // プレイヤーが敵の右側
           dst.x += 22;
           dst.y -= 50;
-          dst.w = fukidashi.src_rect.w - 40;
-          dst.h = fukidashi.src_rect.h - 40;
+          dst.w = fukidashi.src_rect.w - 40; // 173 - 40 = 133
+          dst.h = fukidashi.src_rect.h - 40; // 100 - 40 = 60
           SDL_RenderCopyEx(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst,0,NULL,SDL_FLIP_HORIZONTAL); // フキダシ画像をレンダーに出力
+          // フキダシのテキストのための位置調整
+          dst.x += 10;
+          dst.y += 5;
+          dst.w -= 30;
+          dst.h -= 20;
+          SDL_RenderCopy(mainrenderer, fukidashi.textimage[0],&fukidashi.font_src_rect,&dst);
         }
-        else{
+        else{ // プレイヤーが敵の左側
           dst.x -= 125;
           dst.y -= 50;
           dst.w = fukidashi.src_rect.w- 40;
           dst.h = fukidashi.src_rect.h-40;
           SDL_RenderCopy(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst); // フキダシ画像をレンダーに出力
+          // フキダシのテキストのための位置調整
+          dst.x += 10;
+          dst.y += 5;
+          dst.w -= 30;
+          dst.h -= 20;
+          SDL_RenderCopy(mainrenderer, fukidashi.textimage[0],&fukidashi.font_src_rect,&dst);
         }
       }
     }
@@ -607,7 +619,7 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
     // lineColor(mainrenderer,enemy[i].tri[0][0],enemy[i].tri[1][0],enemy[i].tri[0][2],enemy[i].tri[1][2], 0xff00ff00); // 当たり判定、デバッグ用
     // lineColor(mainrenderer,enemy[i].tri[0][1],enemy[i].tri[1][1],enemy[i].tri[0][2],enemy[i].tri[1][2], 0xff00ff00); // 当たり判定、デバッグ用
     if (enemy[i].flag_sairui == false)
-      filledTrigonColor(mainrenderer, enemy[i].tri[0][0], enemy[i].tri[1][0], enemy[i].tri[0][1], enemy[i].tri[1][1], enemy[i].tri[0][2], enemy[i].tri[1][2], 0xff0000ff);
+      filledTrigonColor(mainrenderer, enemy[i].tri[0][0], enemy[i].tri[1][0], enemy[i].tri[0][1], enemy[i].tri[1][1], enemy[i].tri[0][2], enemy[i].tri[1][2], 0x800000ff); // alpha 80, red ff
     // 会話のフキダシ描画(敵側)
     if(enemy[i].flag_talk == true){
       SDL_Rect dst = enemy[i].dst_rect;
@@ -616,7 +628,14 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
           dst.y -= 50;
           dst.w = fukidashi.src_rect.w- 40;
           dst.h = fukidashi.src_rect.h-40;
-        SDL_RenderCopy(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst); // フキダシ画像をレンダーに出力
+          SDL_RenderCopy(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst); // フキダシ画像をレンダーに出力
+          // フキダシのテキストのための位置調整
+          dst.x += 10;
+          dst.y += 5;
+          dst.w -= 30;
+          dst.h -= 20;
+          SDL_RenderCopy(mainrenderer, fukidashi.textimage[0],&fukidashi.font_src_rect,&dst);
+
       }
       else{
           dst.x += 22;
@@ -624,13 +643,19 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
           dst.w = fukidashi.src_rect.w - 40;
           dst.h = fukidashi.src_rect.h - 40;
           SDL_RenderCopyEx(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst,0,NULL,SDL_FLIP_HORIZONTAL); // フキダシ画像をレンダーに出力
+          // フキダシのテキストのための位置調整
+          dst.x += 10;
+          dst.y += 5;
+          dst.w -= 30;
+          dst.h -= 20;
+          SDL_RenderCopy(mainrenderer, fukidashi.textimage[0],&fukidashi.font_src_rect,&dst);
       }
     }
   }
 
   for (int i = 0; i < CAMERA_NUM; i++)
   {
-    filledTrigonColor(mainrenderer, camera[i].tri[0][0], camera[i].tri[1][0], camera[i].tri[0][1], camera[i].tri[1][1], camera[i].tri[0][2], camera[i].tri[1][2], 0xff0000ff);
+    filledTrigonColor(mainrenderer, camera[i].tri[0][0], camera[i].tri[1][0], camera[i].tri[0][1], camera[i].tri[1][1], camera[i].tri[0][2], camera[i].tri[1][2], 0x800000ff); // alpha:80, red:ff
     SDL_RenderCopyEx(mainrenderer, camera[i].image_texture, &camera[i].src_rect, &camera[i].dst_rect, 90 - camera[i].theta[2], NULL, SDL_FLIP_VERTICAL); // ヘッダファイルで指定した領域で、テクスチャからレンダラーに出力
   }
   for (int i = 0; i < PLAYER_NUM; i++)
@@ -1491,6 +1516,14 @@ void Fontload()
     font[i].dst_rect = font_dst_rects[i];
     font[i].dst_rect.w = s->w;
     font[i].dst_rect.h = s->h;
+  }
+  for(int i=0; i<2; i++){
+    s = TTF_RenderUTF8_Blended(japanesefont, text_fukidashi[i], black);
+    fukidashi.textimage[i] = SDL_CreateTextureFromSurface(mainrenderer, s);
+    fukidashi.font_src_rect.x = 0;
+    fukidashi.font_src_rect.y = 0;
+    fukidashi.font_src_rect.w = s->w;
+    fukidashi.font_src_rect.h = s->h;
   }
   printf("フォントロード2終了\n");
 }
