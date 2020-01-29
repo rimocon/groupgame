@@ -32,7 +32,7 @@ bool up,down;
 #define SPRAY_HEIGHT 50
 #define SAIRUI_TIME 3000
 #define SPRAY_TIME 300 // スプレーが使える時間
-#define TALK_TIME 3000
+#define TALK_TIME 1000
 #define TALK_NUM 3
 
 #define HACKTIME 2000 //ハッキングに要する時間
@@ -150,9 +150,7 @@ typedef struct {
   int spraytime;
   int talkstarttime;
   bool flag_talk;
-  int enemy_inview; // どの敵の視界にいるかを格納する変数(どこの視界にもいないとき-1)
-  int talknum;
-  int talksec;
+  bool flag_fukidasiflip;
 }playerinfo;
 
 
@@ -197,6 +195,9 @@ typedef struct {
   bool flag_talk;
   int talkstarttime;
   bool flag_one_talk;
+  int talktime;
+  int talknum;
+  bool flag_fukidasiflip;
 }enemyinfo; // 敵の構造体
 
 typedef struct {

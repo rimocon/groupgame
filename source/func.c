@@ -577,13 +577,24 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
       {
         boxColor(mainrenderer, WINDOWWIDTH - 500, (WINDOWHEIGHT - 65) + i * line_h + 5, spraygauge, (WINDOWHEIGHT - 65) + (i + 1) * line_h, 0xff00ffff); // スプレーの残りをゲージで描画
       }
+
+      // 会話のフキダシの描画(プレイヤー側)
       if(player[i].flag_talk == true){
         SDL_Rect dst = player[i].dst_rect;
-         dst.x -= 120;
-        dst.y -= 50;
-        dst.w = fukidashi.src_rect.w - 40;
-        dst.h = fukidashi.src_rect.h - 40;
-        SDL_RenderCopy(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst); // プレイヤー画像をレンダーに出力
+        if(player[i].flag_fukidasiflip == false){
+          dst.x += 22;
+          dst.y -= 50;
+          dst.w = fukidashi.src_rect.w - 40;
+          dst.h = fukidashi.src_rect.h - 40;
+          SDL_RenderCopyEx(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst,0,NULL,SDL_FLIP_HORIZONTAL); // フキダシ画像をレンダーに出力
+        }
+        else{
+          dst.x -= 125;
+          dst.y -= 50;
+          dst.w = fukidashi.src_rect.w- 40;
+          dst.h = fukidashi.src_rect.h-40;
+          SDL_RenderCopy(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst); // フキダシ画像をレンダーに出力
+        }
       }
     }
   }
@@ -597,13 +608,23 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
     // lineColor(mainrenderer,enemy[i].tri[0][1],enemy[i].tri[1][1],enemy[i].tri[0][2],enemy[i].tri[1][2], 0xff00ff00); // 当たり判定、デバッグ用
     if (enemy[i].flag_sairui == false)
       filledTrigonColor(mainrenderer, enemy[i].tri[0][0], enemy[i].tri[1][0], enemy[i].tri[0][1], enemy[i].tri[1][1], enemy[i].tri[0][2], enemy[i].tri[1][2], 0xff0000ff);
+    // 会話のフキダシ描画(敵側)
     if(enemy[i].flag_talk == true){
       SDL_Rect dst = enemy[i].dst_rect;
-        dst.x -= 120;
-        dst.y -= 50;
-        dst.w = fukidashi.src_rect.w- 40;
-        dst.h = fukidashi.src_rect.h-40;
-      SDL_RenderCopy(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst); // フキダシ画像をレンダーに出力
+      if(enemy[i].flag_fukidasiflip == false){
+          dst.x -= 125;
+          dst.y -= 50;
+          dst.w = fukidashi.src_rect.w- 40;
+          dst.h = fukidashi.src_rect.h-40;
+        SDL_RenderCopy(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst); // フキダシ画像をレンダーに出力
+      }
+      else{
+          dst.x += 22;
+          dst.y -= 50;
+          dst.w = fukidashi.src_rect.w - 40;
+          dst.h = fukidashi.src_rect.h - 40;
+          SDL_RenderCopyEx(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst,0,NULL,SDL_FLIP_HORIZONTAL); // フキダシ画像をレンダーに出力
+      }
     }
   }
 
@@ -1981,6 +2002,8 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     enemy[index].prev_angle = enemy_moveangles[index];
     enemy[index].flag_talk = false;
     enemy[index].flag_one_talk = false;
+    enemy[index].talknum = TALK_NUM;
+    enemy[index].flag_fukidasiflip = false;
     index++;
   }
   else if (loadmap_objecttype == TYPE_PLAYER1 || loadmap_objecttype == TYPE_PLAYER2 || loadmap_objecttype == TYPE_PLAYER3)
@@ -2032,7 +2055,7 @@ int InitObjectFromMap(int index, objecttype loadmap_objecttype, SDL_Rect dst)
     player[index].key.y = 0;
     player[index].flag_talk = false;
     player[index].hack = 1;
-    player[index].talknum = TALK_NUM;
+    player[index].flag_fukidasiflip = false;
     index++;
   }
   else if ((loadmap_objecttype >= TYPE_KINKAI && loadmap_objecttype <= TYPE_ENTRANCE) || (loadmap_objecttype >= TYPE_ENEMY_MOVING_FLOOR_UL && loadmap_objecttype <= TYPE_ENEMY_MOVING_FLOOR_REV))
@@ -2066,11 +2089,13 @@ void PlayerAction()
     if (player_flag[myid] == false)
       continue; // プレイヤーがいないとき、なにもしない
     for(int j=0; j<ENEMY_NUM; j++){
-      // TALK_TIMEを過ぎたら、また動き出す
-      if(SDL_GetTicks() - player[i].talkstarttime > TALK_TIME && player[i].flag_talk == true && enemy[j].flag_talk == true){
-        player[i].flag_talk = false;
-        player[i].talknum--;
+      // 会話が終わった時の処理
+      if(SDL_GetTicks() - player[i].talkstarttime > TALK_TIME * enemy[j].talknum && player[i].flag_talk == true && enemy[j].flag_talk == true){
+        player[i].flag_talk = false; // 敵、プレイヤーの会話フラグを下ろす
         enemy[j].flag_talk = false;
+        enemy[j].talknum--; // 敵の会話カウントを減らす
+        player[i].flag_fukidasiflip = false;
+        enemy[j].flag_fukidasiflip = false;
         enemy[j].move_angle = enemy[j].save_angle;
         if(enemy[j].movetype == MT_MOVING_FLOOR){
           if(enemy[j].move_angle > 315 && enemy[j].move_angle <= 0 || enemy[j].move_angle <= 45){
@@ -2088,23 +2113,28 @@ void PlayerAction()
         }
       }
     }
-    if(player[i].key.b && player[i].talknum > 0){ // プレイヤーが3入力したとき
+    // 会話処理
+    if(player[i].key.b  > 0 && player[i].flag_talk == false){ // プレイヤーが3入力したとき
       for(int j=0; j<ENEMY_NUM; j++){
-        SDL_Rect extend_area = enemy[j].dst_rect;
+        SDL_Rect extend_area = enemy[j].dst_rect; // 敵の周り+10px
         extend_area.x -= 10;
         extend_area.y -= 10;
         extend_area.w += 20;
         extend_area.h += 20;
-        if(SDL_HasIntersection(&extend_area,&player[i].dst_rect)){ // 敵の近くにプレイヤーがいる時
+        if(SDL_HasIntersection(&extend_area,&player[i].dst_rect) && enemy[j].talknum > 0){ // 敵の近く(敵の周り+10px内)にプレイヤーがいる時
           player[i].flag_talk = true; //プレイヤーと敵の会話フラグを立てる　
           enemy[j].flag_talk = true;
           enemy[j].flag_one_talk = true;
           enemy[j].save_angle = enemy[j].move_angle;
-          enemy[j].talk_angle = 270 + (atan2((enemy[j].dst_rect.y - enemy[j].dst_rect.h/2) - (player[i].dst_rect.y - player[i].dst_rect.h/2) ,(enemy[j].dst_rect.x + enemy[j].dst_rect.w/2) - (player[i].dst_rect.x + player[i].dst_rect.w/2))) * 180.0 / 3.14;
+          enemy[j].talk_angle = 270 + (atan2((enemy[j].dst_rect.y - enemy[j].dst_rect.h/2) - (player[i].dst_rect.y - player[i].dst_rect.h/2) ,(enemy[j].dst_rect.x + enemy[j].dst_rect.w/2) - (player[i].dst_rect.x + player[i].dst_rect.w/2))) * 180.0 / 3.14; // 敵の視界をプレイヤーの方向に向けて固定
           if(enemy[j].talk_angle >= 360) enemy[j].talk_angle -= 360;
           printf("%d  %d\n",enemy[j].dst_rect.x, enemy[j].dst_rect.y);
           player[i].talkstarttime = SDL_GetTicks();
           enemy[j].talkstarttime = SDL_GetTicks();
+          if(player[i].dst_rect.x < enemy[j].dst_rect.x) {
+            enemy[j].flag_fukidasiflip = true;
+            player[i].flag_fukidasiflip = true;
+          }
        }
       }
     }
