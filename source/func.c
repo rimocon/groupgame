@@ -589,9 +589,9 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
           SDL_RenderCopyEx(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst,0,NULL,SDL_FLIP_HORIZONTAL); // フキダシ画像をレンダーに出力
           // フキダシのテキストのための位置調整
           dst.x += 10;
-          dst.y += 5;
-          dst.w -= 30;
-          dst.h -= 20;
+          dst.y += 10;
+          dst.w -= 90;
+          dst.h -= 30;
           SDL_RenderCopy(mainrenderer, fukidashi.textimage[0],&fukidashi.font_src_rect,&dst);
         }
         else{ // プレイヤーが敵の左側
@@ -602,9 +602,9 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
           SDL_RenderCopy(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst); // フキダシ画像をレンダーに出力
           // フキダシのテキストのための位置調整
           dst.x += 10;
-          dst.y += 5;
-          dst.w -= 30;
-          dst.h -= 20;
+          dst.y += 10;
+          dst.w -= 90;
+          dst.h -= 30;
           SDL_RenderCopy(mainrenderer, fukidashi.textimage[0],&fukidashi.font_src_rect,&dst);
         }
       }
@@ -631,9 +631,9 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
           SDL_RenderCopy(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst); // フキダシ画像をレンダーに出力
           // フキダシのテキストのための位置調整
           dst.x += 10;
-          dst.y += 5;
-          dst.w -= 30;
-          dst.h -= 20;
+          dst.y += 10;
+          dst.w -= 90;
+          dst.h -= 30;
           SDL_RenderCopy(mainrenderer, fukidashi.textimage[0],&fukidashi.font_src_rect,&dst);
 
       }
@@ -645,9 +645,9 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
           SDL_RenderCopyEx(mainrenderer, fukidashi.image_texture, &fukidashi.src_rect, &dst,0,NULL,SDL_FLIP_HORIZONTAL); // フキダシ画像をレンダーに出力
           // フキダシのテキストのための位置調整
           dst.x += 10;
-          dst.y += 5;
-          dst.w -= 30;
-          dst.h -= 20;
+          dst.y += 10;
+          dst.w -= 90; // 3:1が文字のバランスいい
+          dst.h -= 30;
           SDL_RenderCopy(mainrenderer, fukidashi.textimage[0],&fukidashi.font_src_rect,&dst);
       }
     }
@@ -2154,7 +2154,7 @@ void PlayerAction()
         extend_area.y -= 10;
         extend_area.w += 20;
         extend_area.h += 20;
-        if(SDL_HasIntersection(&extend_area,&player[i].dst_rect) && enemy[j].talknum > 0){ // 敵の近く(敵の周り+10px内)にプレイヤーがいる時
+        if(SDL_HasIntersection(&extend_area,&player[i].dst_rect) && enemy[j].talknum > 0 && enemy[j].flag_talk == false){ // 敵の近く(敵の周り+10px内)にプレイヤーがいる時
           player[i].flag_talk = true; //プレイヤーと敵の会話フラグを立てる　
           enemy[j].flag_talk = true;
           enemy[j].flag_one_talk = true;
@@ -2168,7 +2168,8 @@ void PlayerAction()
             enemy[j].flag_fukidasiflip = true;
             player[i].flag_fukidasiflip = true;
           }
-       }
+          break;
+        }
       }
     }
     // スプレーが切れたとき、出さない
