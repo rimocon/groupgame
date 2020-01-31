@@ -57,7 +57,16 @@ int main(int argc, char *argv[])
         break;
       case GAMEMODE:
         if(stage_trans_flag == true){ //ステージの遷移タイミングである時
-          stage_num++; //ステージ番号をインクリメント
+          //stage_num++; //ステージ番号をインクリメント
+          if(stage_num == 1){
+            stage_num = 2;
+          }
+          else if(stage_num == 2){
+            stage_num = 3;
+          }
+          else if(stage_num == 3){
+            
+          }
           Stage_Renew(); //ステージが進んだ事による、各種変数の更新
           status = STAGENUMMODE; //ステージ番号表示モードに状態を設定
           stage_trans_flag = false; 

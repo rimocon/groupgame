@@ -39,7 +39,11 @@ void Startup()
     printf("ウィンドウを生成できませんでした\n");
     SDL_Quit(); //終了
   }
-  kinkai_flag = true;                                           //金塊は最初は、配置されている
+  kinkai_flag = true;
+  player[0].flag_kinkai = false;                                           //金塊は最初は、配置されている
+  player[1].flag_kinkai = false;                                           //金塊は最初は、配置されている
+  player[2].flag_kinkai = false;                                           //金塊は最初は、配置されている
+
   kinkai_keep_flag = false;                                     //最初は、プレイヤーは金塊を保持していない
   hacking_flag = false;                                         //最初ハッキングはされていない
   player_flag[0] = true;                                        //プレイヤー1 は最初は、生存
@@ -98,6 +102,11 @@ void Stage_Renew()
 {
 
   kinkai_flag = true;       //金塊は最初は、配置されている
+
+  player[0].flag_kinkai = false;                                           //金塊は最初は、配置されている
+  player[1].flag_kinkai = false;                                           //金塊は最初は、配置されている
+  player[2].flag_kinkai = false;                                           //金塊は最初は、配置されている
+
   kinkai_keep_flag = false; //最初は、プレイヤーは金塊を保持していない
   hacking_flag = false;     //最初ハッキングはされていない
   player_flag[0] = true;    //プレイヤー1 は最初は、生存
