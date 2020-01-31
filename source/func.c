@@ -99,6 +99,9 @@ void Stage_Renew()
 
   kinkai_flag = true;       //金塊は最初は、配置されている
   kinkai_keep_flag = false; //最初は、プレイヤーは金塊を保持していない
+  player[0].flag_kinkai = false;
+  player[1].flag_kinkai = false;
+  player[2].flag_kinkai = false;
   hacking_flag = false;     //最初ハッキングはされていない
   player_flag[0] = true;    //プレイヤー1 は最初は、生存
   player_flag[1] = true;    //プレイヤー2 は最初は、生存
