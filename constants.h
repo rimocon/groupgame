@@ -27,6 +27,7 @@
 #define ENEMY_MODIFY_COMMAND 'B'
 #define TALK_START_COMMAND 'T'
 #define TALK_END_COMMAND 't'
+#define CONTACT_COMMAND 'c'
 
 /*  関数のプロトタイプ宣言 */
 //またあとで

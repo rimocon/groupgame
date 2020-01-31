@@ -1075,8 +1075,9 @@ void MoveChara()
               //if (one_time_flag == false)
               //{ //ステージ中で、クリアした瞬間の1回目の実行時のみ実行
               //one_time_flag = true;
-              stage_trans_flag = true; //ステージが遷移タイミングであることを示す
+              //stage_trans_flag = true; //ステージが遷移タイミングであることを示す
               player[myid].key.a = 0;
+              joystick_send(18);
               //}
             }
           }
@@ -1659,7 +1660,7 @@ void StageNumShow()
   CONTAINER data;
   memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
 
-  //SDL_RenderCopy(mainrenderer, background[0].image_texture, &background[0].src_rect, &background[0].dst_rect); //背景をレンダーに出力
+  SDL_RenderCopy(mainrenderer, background[0].image_texture, &background[0].src_rect, &background[0].dst_rect); //背景をレンダーに出力
   //for (int i = 0; i < FONT_NUM; i++)
   //{
   //boxColor(mainrenderer, font[i].dst_rect.x, font[i].dst_rect.y, font[i].dst_rect.x + font[i].dst_rect.w, font[i].dst_rect.y + font[i].dst_rect.h, 0xff000000);
@@ -2018,6 +2019,11 @@ void joystick_send(int num) //ジョイスティックの操作に関する情�
     data.command = TALK_END_COMMAND; //コマンドを格納
     data.cid = myid;              //クライアントIDを格納
   }
+  else if (num == 18)
+  { //ゴールに当たった時
+    data.command = CONTACT_COMMAND; //コマンドを格納
+    data.cid = myid;              //クライアントIDを格納
+  }
   send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
   fprintf(stderr, "send_data %d\n", num);
 }
@@ -2163,6 +2169,7 @@ static int execute_command()
     for(int i = 0; i < ENEMY_NUM; i++){
       stay_start[i] = SDL_GetTicks();
     }
+    break;
   case QUIT_COMMAND: //'Q'のとき
     fprintf(stderr, "client[%d] %s sent quit command.\n", data.cid, clients[data.cid].name);
     result = 0;
@@ -2187,12 +2194,17 @@ static int execute_command()
     break;
   case TALK_START_COMMAND:
     player[data.cid].key.b = 1;
+    result = 1;
     break;
 
   case TALK_END_COMMAND:
     player[data.cid].key.b = 0;
+    result = 1;
     break;
-
+  case CONTACT_COMMAND:
+    stage_trans_flag = true;
+    result = 1;
+    break;
   default: //その他の文字が入力された場合
     //fprintf(stderr, "execute_command(): %c is not a valid command.\n", data.command);
     //exit(1); //異常終了
