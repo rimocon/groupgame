@@ -32,6 +32,8 @@ bool up, down;
 #define SPRAY_HEIGHT 50
 #define SAIRUI_TIME 3000
 #define SPRAY_TIME 300 // スプレーが使える時間
+#define TALK_TIME 1000
+#define TALK_NUM 3
 
 #define HACKTIME 2000 //ハッキングに要する時間
 #define STOPTIME 2000 //ハッキング中にカメラを止める時間
@@ -174,19 +176,18 @@ typedef struct
   SDL_Rect dst_rect;
 } objectinfo;
 
-typedef struct
-{              //キー入力用の構造体を型宣言
-  Uint32 left, //左矢印
-      right,   //右矢印
-      up,      //上矢印
-      down,    //下矢印
-      a,       //4ボタン(決定ボタン)
-      x,       //2ボタン(催涙スプレー)
-      y;       //1ボタン(ハッキングボタン)
-} inputkeys;
+typedef struct { //キー入力用の構造体を型宣言
+  Uint32  left, //左矢印
+          right, //右矢印
+          up, //上矢印
+          down, //下矢印
+          a,  //4ボタン(決定ボタン)
+          x,  //2ボタン(催涙スプレー)
+          y, //1ボタン(ハッキングボタン)
+          b; // 3ボタン(会話ボタン)
+}inputkeys;
 
-typedef struct
-{
+typedef struct {
   objecttype type;
   SDL_Texture *image_texture;
   SDL_Texture *spray_texture;
@@ -208,7 +209,11 @@ typedef struct
   int spray_hitlines[2][4];
   SDL_Point spray_origin;
   int spraytime;
-} playerinfo;
+  int talkstarttime;
+  bool flag_talk;
+  bool flag_fukidasiflip;
+}playerinfo;
+
 
 typedef struct
 {
@@ -248,7 +253,15 @@ typedef struct
   unsigned int savetime;      // 時間を保存する
   int tri[2][3];              // 視界の三角形
   int prev_angle;
-} enemyinfo; // 敵の構造体
+  int save_angle; //
+  int talk_angle;
+  bool flag_talk;
+  int talkstarttime;
+  bool flag_one_talk;
+  int talktime;
+  int talknum;
+  bool flag_fukidasiflip;
+}enemyinfo; // 敵の構造体
 
 typedef struct
 {
@@ -262,7 +275,17 @@ typedef struct
   SDL_Texture *image_texture;
   SDL_Rect src_rect;
   SDL_Rect dst_rect;
-} fontinfo;
+}fontinfo;
+
+typedef struct {
+  SDL_Texture * image_texture;
+  SDL_Rect src_rect;
+  SDL_Rect dst_rect;
+  SDL_Texture *textimage[2]; // 0:プレイヤー側のテキスト、1:敵側のテキスト
+  SDL_Rect font_src_rect;
+}fukidashiinfo;
+
+
 
 /* グローバル変数 */
 //ネット関連
@@ -278,6 +301,7 @@ static char *imgfiles[TYPE_NUM] = {"", "./images/kinkai.png", "./images/shelf.pn
 
 //フォント
 static char *fonts[FONT_NUM] = {"開始", "終了", "STAGE 1", "STAGE 2", "STAGE 3", "4番ボタンで開始！"};
+static char *text_fukidashi[2] = {"Hi!","．．．"};
 
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
     {700, 200, 120, 100},
@@ -328,8 +352,9 @@ camerainfo camera[CAMERA_NUM];
   カメラの張り付く前の座標を保持しておき、張り付いた後に、カメラの座標に代入することにより、カメラを固定する。*/
 camerainfo camera_before[CAMERA_NUM];
 enemyinfo enemy[ENEMY_NUM];
-backgroundinfo background[BACKGROUND_NUM];             //背景の情報を実体化
-fontinfo font[FONT_NUM];                               //フォントの情報を実体化
+backgroundinfo background[BACKGROUND_NUM]; //背景の情報を実体化
+fontinfo font[FONT_NUM]; //フォントの情報を実体化
+fukidashiinfo fukidashi;
 static objectinfo kotei_objects[KOTEI_OBJECT_NUM_MAX]; // 金塊、カメラ、棚、出入り口の動かない画面に固定のオブジェクトたちの情報を格納した「kotei_objects」という実体を作る
 int kotei_object_num;
 int savestopenemy[ENEMY_NUM];
