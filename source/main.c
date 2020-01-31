@@ -9,14 +9,15 @@ int main(int argc, char *argv[])
   const int fps = 60.0;                //1秒に何回描画するか
   const int framedelay = 1000.0 / fps; //1秒 = 1000msなので1回の描画にかけるべき時間
   Uint32 framestart;                   //処理の始まりの時間を格納する変数
-  Uint32 modi_before = SDL_GetTicks();                    //プレイヤーの座標を修正するのに使う時間
+  Uint32 modi_before = SDL_GetTicks(); //プレイヤーの座標を修正するのに使う時間
   //Uint32 random_start;                 //ランダム移動を開始した時間を格納
-  int frametime;                       //1回の処理にかかった時間を格納する変数
+  int frametime; //1回の処理にかかった時間を格納する変数
   int modi_time = 0;
   //int random_total_time;               //ランダム運動をしているトータル時間
 
   one_time_flag = false;
   stage_trans_flag = false;
+  game_over_flag = false;
   stage_num = 1; //最初のステージ番号は'1'
 
   u_short port = DEFAULT_PORT;
@@ -45,57 +46,70 @@ int main(int argc, char *argv[])
 
   while (run)
   {
+    printf("%d\n", stage_num);
     framestart = SDL_GetTicks();
     if ((SDL_PollEvent(&inputevent)))
     {
       Input();
     }
     control_requests();
-    if(stage_trans_flag == true){ //ステージの遷移タイミングである時
-      stage_num++; //ステージ番号をインクリメント
-      Stage_Renew(); //ステージが進んだ事による、各種変数の更新
+    if (stage_trans_flag == true)
+    { //ステージの遷移タイミングである時
+      if (game_over_flag == true)
+      {
+        stage_num = 5;
+        game_over_flag == false;
+      }
+      else
+      {
+        stage_num++; //ステージ番号をインクリメント
+      }
+      Stage_Renew();         //ステージが進んだ事による、各種変数の更新
       status = STAGENUMMODE; //ステージ番号表示モードに状態を設定
       stage_trans_flag = false;
     }
-    switch(status){
-      case MENUMODE:
-        DrawMenu();
-        break;
-      case GAMEMODE:
+    switch (status)
+    {
+    case MENUMODE:
+      DrawMenu();
+      break;
+    case GAMEMODE:
 
-        MoveChara(); //$B%-%c%i0\F0(B
-        PlayerAction();
-        MoveTriangle(); //$B;03Q7A0\F0(B
-        Collision(); //$BEv$?$jH=Dj(B
-        RenderWindow(); //$BIA2h(B
-        Events();
+      MoveChara(); //$B%-%c%i0\F0(B
+      PlayerAction();
+      MoveTriangle(); //$B;03Q7A0\F0(B
+      Collision();    //$BEv$?$jH=Dj(B
+      RenderWindow(); //$BIA2h(B
+      Events();
 
-        //Destroy(); //$BGK4~4XO"(B
-        //SDL_Delay(3);
-        break;
-      case RESULTMODE:
-        //DrawResult();
-        break;
-      case STAGENUMMODE:
-        StageNumShow();
-          printf("STAGENUMMODE stage_num : %d\n",stage_num);
-        break;
+      //Destroy(); //$BGK4~4XO"(B
+      //SDL_Delay(3);
+      break;
+    case RESULTMODE:
+      //DrawResult();
+      break;
+    case STAGENUMMODE:
+      StageNumShow();
+      printf("STAGENUMMODE stage_num : %d\n", stage_num);
+      break;
     }
     frametime = SDL_GetTicks() - framestart; //処理が終わった時間-処理が始まった時間=1回のループ処理にかかった時間
     //printf("一回の処理時間　%d\n",frametime);
 
     modi_time += SDL_GetTicks() - modi_before;
-    if(modi_time > 500){ //500msごとに座標を更新
+    if (modi_time > 500)
+    { //500msごとに座標を更新
       joystick_send(0);
 
-      if(myid == 0){
+      if (myid == 0)
+      {
         joystick_send(13);
       }
       modi_before = SDL_GetTicks();
       modi_time = 0;
     }
 
-    if(framedelay > frametime) //一回の処理にかける時間より1回のループ処理にかかった時間が小さかったら
+    if (framedelay > frametime) //一回の処理にかける時間より1回のループ処理にかかった時間が小さかったら
     {
       SDL_Delay(framedelay - frametime); //余った時間分おやすみ
     }

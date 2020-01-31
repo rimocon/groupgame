@@ -68,6 +68,7 @@ int myid;
 int stage_num; //ステージの通し番号
 bool one_time_flag;
 bool stage_trans_flag;
+bool game_over_flag;
 
 
 SDL_Window *mainwindow; //メイン画面用

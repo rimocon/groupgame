@@ -16,8 +16,8 @@ bool up, down;
 // 金塊、カメラ、棚、出入り口の数
 #define CAMERA_NUM 5
 //#define CAMERA_NUM 0
-#define BACKGROUND_NUM 1
-#define FONT_NUM 6
+#define BACKGROUND_NUM 2
+#define FONT_NUM 8
 
 #define ENEMY_SPEED 1
 
@@ -143,7 +143,7 @@ static int map2[MAP_HEIGHT][MAP_WIDTH] = {
     {2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2},
     {2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2},
     {2, 0, 8, 2, 2, 0, 0, 0, 0, 0, 2, 0, 0, 5, 0, 0, 0, 0, 0, 2},
-    {2, 6, 7, 2, 2, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 2},
+    {2, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2},
     {2, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
 };
 
@@ -165,7 +165,7 @@ typedef enum {
   TYPE_ENEMY_MOVING_FLOOR_REV = 13, // REV = Reverseの略です
   TYPE_BACKGROUND = 14,
   TYPE_SPRAY = 15,
-  TYPE_NUM = 16
+  TYPE_NUM = 17
 } objecttype;
 
 typedef struct
@@ -297,10 +297,10 @@ static fd_set mask; //FD集合を表す構造体
 
 //画像ファイルパス
 //static char *imgfiles[TYPE_NUM] = {"","./images/kinkai.png","./images/shelf.png","./images/camera.png","./images/entrance.png","./images/enemy.png","./images/player.png", "./images/player2.png", "./images/player3.png","./images/floor_ul.png","./images/floor_ur.png","./images/floor_dl.png","./images/floor_dr.png","./images/floor_rev.png","./images/menu.png","./images/spray.png"}; // 読み込む画像ファイルを指定
-static char *imgfiles[TYPE_NUM] = {"", "./images/kinkai.png", "./images/shelf.png", "./images/camera.png", "./images/entrance.png", "./images/enemy.png", "./images/player1_8pattern.png", "./images/player2_8pattern.png", "./images/player3_8pattern.png", "./images/floor_ul.png", "./images/floor_ur.png", "./images/floor_dl.png", "./images/floor_dr.png", "./images/floor_rev.png", "./images/menu.png", "./images/spray.png"}; // 読み込む画像ファイルを指定
+static char *imgfiles[TYPE_NUM] = {"", "./images/kinkai.png", "./images/shelf.png", "./images/camera.png", "./images/entrance.png", "./images/enemy.png", "./images/player1_8pattern.png", "./images/player2_8pattern.png", "./images/player3_8pattern.png", "./images/floor_ul.png", "./images/floor_ur.png", "./images/floor_dl.png", "./images/floor_dr.png", "./images/floor_rev.png", "./images/menu.png", "./images/spray.png", "./images/floor.png"}; // 読み込む画像ファイルを指定
 
 //フォント
-static char *fonts[FONT_NUM] = {"開始", "終了", "STAGE 1", "STAGE 2", "STAGE 3", "4番ボタンで開始！"};
+static char *fonts[FONT_NUM] = {"開始", "終了", "STAGE 1", "STAGE 2", "STAGE 3", "4番ボタンで開始！", "ゲームクリア！", "ゲームオーバー！"};
 static char *text_fukidashi[2] = {"Hi!","．．．"};
 
 static SDL_Rect camera_dst_rects[CAMERA_NUM] = {
@@ -341,6 +341,8 @@ static SDL_Rect font_dst_rects[FONT_NUM] = {
     {540, 380, 0, 0},
     {540, 380, 0, 0},
     {540, 380, 0, 0},
+    {400, 530, 0, 0},
+    {400, 530, 0, 0},
     {400, 530, 0, 0}
     };
 
