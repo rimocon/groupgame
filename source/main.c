@@ -56,7 +56,6 @@ int main(int argc, char *argv[])
       Stage_Renew(); //ステージが進んだ事による、各種変数の更新
       status = STAGENUMMODE; //ステージ番号表示モードに状態を設定
       stage_trans_flag = false;
-      printf("GAMEMODE stage_num : %d\n",stage_num);
     }
     switch(status){
       case MENUMODE:

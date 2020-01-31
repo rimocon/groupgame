@@ -644,6 +644,8 @@ void MoveTriangle()
 
 void RenderWindow(void) //画面の描画(イベントが無い時)
 {
+
+
   SDL_SetRenderDrawColor(mainrenderer, 255, 255, 255, 255); // 生成したレンダラーに描画色として白を設定
   SDL_RenderClear(mainrenderer);                            // 設定した描画色(白)でレンダラーをクリア
   for (int i = 0; i < kotei_object_num; i++)
@@ -1081,6 +1083,10 @@ void MoveChara()
               //stage_trans_flag = true; //ステージが遷移タイミングであることを示す
               player[myid].key.a = 0;
               joystick_send(18);
+              printf("now kinkai hantei\n");
+              player[0].flag_kinkai = false;
+              player[1].flag_kinkai = false;
+              player[2].flag_kinkai = false;
               //}
             }
           }
@@ -1467,7 +1473,6 @@ void MoveChara()
       stay_start[i] = SDL_GetTicks(); //留まっている時間カウントの開始時間を更新
     }
     stay_time[i] = SDL_GetTicks() - stay_start[i]; //留まっている時間
-    printf("stay_time = %d\n", stay_time[i]);
     //printf("same_place_flag= %d\n", same_place_flag);
     if (stay_time[i] >= 2000 && random_start_flag[i] == 0) //留まっている時間が2秒以上の時
     {
@@ -2066,6 +2071,10 @@ static int input_command()
 
 static int execute_command()
 { //サーバからデータを受け取ったとき
+  printf("flg kinkai0 : %d\n",player[0].flag_kinkai);
+  printf("flg kinkai1 : %d\n",player[1].flag_kinkai);
+  printf("flg kinkai2 : %d\n",player[2].flag_kinkai);
+
   CONTAINER data;
   int result = 1;
   memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
