@@ -1542,13 +1542,13 @@ float Rotation(int x1, int y1, int a, int b, double theta, int *x2, int *y2)
 
 void SetCamera()
 { //カメラの初期値セット
-  if (stage_num == 1)
+  if (stage_num == 2)
   {
-    camera[0].angle = 30.0; //初期の回転位置
-    camera[1].angle = 70.0;
-    camera[2].angle = 180.0;
-    camera[3].angle = 280.0;
-    camera[4].angle = 80.0;
+    camera[0].angle = 90.0; //初期の回転位置
+    camera[1].angle = 270.0;
+    camera[2].angle = 315.0;
+    camera[3].angle = 40.0;
+    camera[4].angle = 240.0;
     for (int i = 0; i < CAMERA_NUM; i++)
     {
       camera[i].clockwise = true;
@@ -1568,13 +1568,13 @@ void SetCamera()
       camera[i].theta[2] = 105 - camera[i].angle;
     }
   }
-  else if (stage_num == 2)
+  else if (stage_num == 1)
   {
-    camera[0].angle = 30.0; //初期の回転位置
-    camera[1].angle = 70.0;
+    camera[0].angle = 45.0; //初期の回転位置
+    camera[1].angle = 215.0;
     camera[2].angle = 180.0;
-    camera[3].angle = 280.0;
-    camera[4].angle = 80.0;
+    camera[3].angle = 270.0;
+    camera[4].angle = 0.0;
     for (int i = 0; i < CAMERA_NUM; i++)
     {
       camera[i].clockwise = true;
