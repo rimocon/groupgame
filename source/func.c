@@ -1586,7 +1586,7 @@ void SetCamera()
   if (stage_num == 1)
   {
     camera[0].angle = 90.0; //初期の回転位置
-    camera[1].angle = 270.0;
+    camera[1].angle = 135.0;
     camera[2].angle = 315.0;
     camera[3].angle = 40.0;
     camera[4].angle = 240.0;
