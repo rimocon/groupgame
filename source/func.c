@@ -1668,6 +1668,10 @@ void DrawMenu()
   CONTAINER data;
   memset(&data, 0, sizeof(CONTAINER)); //dataの初期化
 
+  player_flag[0] = true;
+  player_flag[1] = true;
+  player_flag[2] = true;
+
   SDL_RenderCopy(mainrenderer, background[0].image_texture, &background[0].src_rect, &background[0].dst_rect); //背景をレンダーに出力
   for (int i = 0; i < 2; i++)                                                                                  //出力する文字は、"開始"と"終了"の2文字のみ
   {
