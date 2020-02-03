@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
   while (run)
   {
-    printf("%d\n", stage_num);
+    printf("%d\n", status);
     framestart = SDL_GetTicks();
     if ((SDL_PollEvent(&inputevent)))
     {
@@ -54,16 +54,14 @@ int main(int argc, char *argv[])
     }
     control_requests();
     if (stage_trans_flag == true)
-    { //ステージの遷移タイミングである時
-      if (game_over_flag == true)
-      {
-        stage_num = 5;
-        game_over_flag == false;
-      }
-      else
-      {
-        stage_num++; //ステージ番号をインクリメント
-      }
+    {              //ステージの遷移タイミングである時
+                   //if (game_over_flag == true)
+                   //{
+                   //stage_num = 5;
+                   //game_over_flag == false;
+                   //}
+      stage_num++; //ステージ番号をインクリメント
+
       Stage_Renew();         //ステージが進んだ事による、各種変数の更新
       status = STAGENUMMODE; //ステージ番号表示モードに状態を設定
       stage_trans_flag = false;

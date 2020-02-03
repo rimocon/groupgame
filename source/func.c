@@ -1686,6 +1686,8 @@ void DrawMenu()
       data.cid = myid;                     //クライアントIDを格納
       send_data(&data, sizeof(CONTAINER)); //クライアントのデータを送信
       player[myid].key.a = 0;
+      up = false;
+      down = false;
     }
   }
   else if (down)
@@ -1728,7 +1730,6 @@ void StageNumShow()
   else if (stage_num == 5)
   {
     SDL_RenderCopy(mainrenderer, font[7].image_texture, &font[7].src_rect, &font[7].dst_rect); //フォントをレンダーに出力
-
   }
 
   //}
@@ -2192,9 +2193,13 @@ static int execute_command()
     {
       //stage_num = 5;
       //Stage_Renew();
-      stage_trans_flag = true;
-      game_over_flag = true;
-      status = STAGENUMMODE;
+      //stage_trans_flag = true;
+      //game_over_flag = true;
+      up = false;
+      down = false;
+      player[myid].key.a = 0;
+      Stage_Renew();
+      status = MENUMODE;
     }
     //fprintf(stderr, "client[%d], name : %s, get kinkai !!!!! \n", data.cid, clients[data.cid].name);
     //kinkai_flag = false;
