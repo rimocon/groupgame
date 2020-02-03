@@ -1110,7 +1110,7 @@ void MoveChara()
           }
           else if (kotei_objects[j].type == TYPE_ENTRANCE)
           {
-            if (player[i].flag_kinkai == true)
+            if (player[myid].flag_kinkai == true)
             {
               //gameclear処理
               printf("GAME CLEAR!!\n");
@@ -1731,6 +1731,7 @@ void StageNumShow()
   {
     SDL_RenderCopy(mainrenderer, font[4].image_texture, &font[4].src_rect, &font[4].dst_rect); //フォントをレンダーに出力
     SDL_RenderCopy(mainrenderer, font[5].image_texture, &font[5].src_rect, &font[5].dst_rect); //フォントをレンダーに出力
+    stage_trans_flag = false;
   }
   else if (stage_num == 4)
   {
