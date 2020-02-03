@@ -96,16 +96,13 @@ void Startup()
 //ステージが進んだ事による、各種変数の更新
 void Stage_Renew()
 {
-
+  stage_trans_flag = false;
   kinkai_flag = true;       //金塊は最初は、配置されている
   kinkai_keep_flag = false; //最初は、プレイヤーは金塊を保持していない
-  player[0].flag_kinkai = false;
-  player[1].flag_kinkai = false;
-  player[2].flag_kinkai = false;
-  hacking_flag = false;  //最初ハッキングはされていない
-  player_flag[0] = true; //プレイヤー1 は最初は、生存
-  player_flag[1] = true; //プレイヤー2 は最初は、生存
-  player_flag[2] = true; //プレイヤー3 は最初は、生存
+  hacking_flag = false;     //最初ハッキングはされていない
+  player_flag[0] = true;    //プレイヤー1 は最初は、生存
+  player_flag[1] = true;    //プレイヤー2 は最初は、生存
+  player_flag[2] = true;    //プレイヤー3 は最初は、生存
   //mainrenderer = SDL_CreateRenderer(mainwindow, -1, 0);         //メインウィンドウに対するレンダラー生成
   //TTF_Init();                                                   //ttfを初期化
   //japanesefont = TTF_OpenFont("fonts-japanese-gothic.ttf", 80); //フォント読み込み
@@ -688,7 +685,7 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
     if (player_flag[i] == true)
     {
       SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
-        // 催涙スプレーの描画
+                                                                                                       // 催涙スプレーの描画
       if (player[i].spray_flag == 1)
       {
         SDL_RenderCopyEx(mainrenderer, player[i].spray_texture, &player[i].spray_src_rect, &player[i].spray_dst_rect, player[i].look_angle - 90, &player[i].spray_origin, SDL_FLIP_NONE);
@@ -800,7 +797,8 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
     }
   }
   // 催涙スプレーのゲージを最前面に表示
-  for(int i=0; i<PLAYER_NUM; i++){
+  for (int i = 0; i < PLAYER_NUM; i++)
+  {
     if (player_flag[i] == true)
     {
       //催涙スプレーのゲージ描画
@@ -880,7 +878,7 @@ void Collision()
         player[myid].flag_kinkai == true)
     {
       player_flag[myid] = false; // 他のプレイヤーも消える？
-      joystick_send(2);          //プレイヤーが消えたことが他のクライアントに通知される。
+      joystick_send(2); //プレイヤーが消えたことが他のクライアントに通知される。
       enemy[j].tri[0][0] = tri_before[0][0];
       enemy[j].tri[1][0] = tri_before[1][0];
       enemy[j].tri[0][1] = tri_before[0][1];
@@ -2206,6 +2204,9 @@ static int execute_command()
       //Stage_Renew();
       //stage_trans_flag = true;
       //game_over_flag = true;
+      player[0].flag_kinkai = false;
+      player[1].flag_kinkai = false;
+      player[2].flag_kinkai = false;
       up = false;
       down = false;
       player[myid].key.a = 0;
@@ -2291,6 +2292,9 @@ static int execute_command()
     result = 1;
     break;
   case CONTACT_COMMAND:
+    player[0].flag_kinkai = false;
+    player[1].flag_kinkai = false;
+    player[2].flag_kinkai = false;
     stage_trans_flag = true;
     result = 1;
     break;

@@ -44,6 +44,15 @@ int main(int argc, char *argv[])
   setup_client(server_name, port); //クライアントのセットアップを行う関数
   Startup();                       //初期設定
 
+    /* オーディオ*/
+    if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024) == -1) {
+        printf("Failed: %s¥n", Mix_GetError());
+        exit(-1);
+    }
+    Mix_Music* music;
+    music = Mix_LoadMUS("./bgm/bgm1.mp3");
+    Mix_PlayMusic(music, -1);
+
   while (run)
   {
     printf("%d\n", status);

@@ -36,7 +36,7 @@ bool up, down;
 #define TALK_NUM 3
 
 #define HACKTIME 2000 //ハッキングに要する時間
-#define STOPTIME 2000 //ハッキング中にカメラを止める時間
+#define STOPTIME 3000 //ハッキング中にカメラを止める時間
 /*  変数  */
 bool kinkai_flag;      //金塊を描画するかしないか
 bool hacking_flag;     //金塊を描画するかしないか
