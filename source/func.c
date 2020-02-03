@@ -656,28 +656,19 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
       SDL_RenderCopy(mainrenderer, kotei_objects[i].image_texture, &kotei_objects[i].src_rect, &kotei_objects[i].dst_rect); //固定オブジェクトをレンダーに出力(毎回描画しないといけない？)
     }
   }
-  // 催涙スプレーの描画
+  // プレイヤーの描画
   for (int i = 0; i < PLAYER_NUM; i++)
   {
     if (player_flag[i] == true)
     {
       SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &player[i].dst_rect); //プレイヤーをレンダーに出力
+        // 催涙スプレーの描画
       if (player[i].spray_flag == 1)
       {
         SDL_RenderCopyEx(mainrenderer, player[i].spray_texture, &player[i].spray_src_rect, &player[i].spray_dst_rect, player[i].look_angle - 90, &player[i].spray_origin, SDL_FLIP_NONE);
         // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][1],player[i].spray_hitlines[1][1], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
         // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][2],player[i].spray_hitlines[1][2], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
         // lineColor(mainrenderer,player[i].spray_hitlines[0][0],player[i].spray_hitlines[1][0],player[i].spray_hitlines[0][3],player[i].spray_hitlines[1][3], 0xff00ff00); // 催涙スプレーの当たり判定、デバッグ用
-      }
-      //催涙スプレーのゲージ描画
-      double unit = 500 / (double)SPRAY_TIME;                                           // 500pxがスプレーのMAX
-      int line_h = 20;                                                                  // スプレーの残りを表すゲージの縦幅
-      int spraygauge = WINDOWWIDTH - abs(player[i].spraytime - SPRAY_TIME) * unit;      // スプレーの残りを描画するために値を変換
-      SDL_Rect dst = {WINDOWWIDTH - 534, (WINDOWHEIGHT - 65) + i * line_h + 5, 20, 20}; // ゲージ横のプレイヤー画像
-      SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &dst); // プレイヤー画像をレンダーに出力
-      if (player[i].spraytime > 0)
-      {
-        boxColor(mainrenderer, WINDOWWIDTH - 500, (WINDOWHEIGHT - 65) + i * line_h + 5, spraygauge, (WINDOWHEIGHT - 65) + (i + 1) * line_h, 0xff00ffff); // スプレーの残りをゲージで描画
       }
 
       // 会話のフキダシの描画(プレイヤー側)
@@ -774,6 +765,22 @@ void RenderWindow(void) //画面の描画(イベントが無い時)
       {
         rectangleColor(mainrenderer, player[i].dst_rect.x - 20, player[i].dst_rect.y - 10, player[i].dst_rect.x + player[i].dst_rect.w + 22, player[i].dst_rect.y, 0xff0000ff); //ゲージ表示
         boxColor(mainrenderer, player[i].dst_rect.x - 20, player[i].dst_rect.y - 10, player[i].dst_rect.x - 20 + gauge, player[i].dst_rect.y, 0xff0000ff);                      //ゲージの枠表示
+      }
+    }
+  }
+  // 催涙スプレーのゲージを最前面に表示
+  for(int i=0; i<PLAYER_NUM; i++){
+    if (player_flag[i] == true)
+    {
+      //催涙スプレーのゲージ描画
+      double unit = 500 / (double)SPRAY_TIME;                                           // 500pxがスプレーのMAX
+      int line_h = 20;                                                                  // スプレーの残りを表すゲージの縦幅
+      int spraygauge = WINDOWWIDTH - abs(player[i].spraytime - SPRAY_TIME) * unit;      // スプレーの残りを描画するために値を変換
+      SDL_Rect dst = {WINDOWWIDTH - 534, (WINDOWHEIGHT - 65) + i * line_h + 5, 20, 20}; // ゲージ横のプレイヤー画像
+      SDL_RenderCopy(mainrenderer, player[i].image_texture, &player[i].src_rect, &dst); // プレイヤー画像をレンダーに出力
+      if (player[i].spraytime > 0)
+      {
+        boxColor(mainrenderer, WINDOWWIDTH - 500, (WINDOWHEIGHT - 65) + i * line_h + 5, spraygauge, (WINDOWHEIGHT - 65) + (i + 1) * line_h, 0xff00ffff); // スプレーの残りをゲージで描画
       }
     }
   }
@@ -1542,7 +1549,7 @@ float Rotation(int x1, int y1, int a, int b, double theta, int *x2, int *y2)
 
 void SetCamera()
 { //カメラの初期値セット
-  if (stage_num == 2)
+  if (stage_num == 1)
   {
     camera[0].angle = 90.0; //初期の回転位置
     camera[1].angle = 270.0;
@@ -1568,7 +1575,7 @@ void SetCamera()
       camera[i].theta[2] = 105 - camera[i].angle;
     }
   }
-  else if (stage_num == 1)
+  else if (stage_num == 2)
   {
     camera[0].angle = 45.0; //初期の回転位置
     camera[1].angle = 215.0;
@@ -1596,11 +1603,11 @@ void SetCamera()
   }
   else if (stage_num == 3)
   {
-    camera[0].angle = 30.0; //初期の回転位置
-    camera[1].angle = 70.0;
-    camera[2].angle = 180.0;
-    camera[3].angle = 280.0;
-    camera[4].angle = 80.0;
+    camera[0].angle = 45.0; //初期の回転位置
+    camera[1].angle = 125.0;
+    camera[2].angle = 225.0;
+    camera[3].angle = 225.0;
+    camera[4].angle = 270.0;
     for (int i = 0; i < CAMERA_NUM; i++)
     {
       camera[i].clockwise = true;
