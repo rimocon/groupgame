@@ -1,0 +1,84 @@
+\documentclass{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings,jlisting,url,here}
+
+\lstset{%
+  language={C},
+  basicstyle={\small},%
+  identifierstyle={\small},%
+  commentstyle={\small\itshape},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small},%
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  numbers=left,%
+  xrightmargin=0zw,%
+  xleftmargin=3zw,%
+  numberstyle={\scriptsize},% stepnumber=1,
+  numbersep=1zw,%
+  lineskip=-0.5ex%
+}
+% xなんちゃらが変数，進捗書く
+\newcommand{\xa}{ハッキング回数制限機能の追加}
+\newcommand{\xb}{敵とプレイヤーのクライアント間の位置ズレの解消}
+\newcommand{\xc}{複数の敵の位置ズレの解消}
+\newcommand{\xd}{敵の視界の回転の改善}
+\newcommand{\xe}{プログラムの統合}
+\newcommand{\xf}{ステージ遷移処理の追加}
+\newcommand{\xg}{会話処理の追加}
+\newcommand{\xh}{画像の変更}
+% []内の数が引数，#数字で引数読む
+\newcommand{\pitem}[8]{
+\item #1
+\item #2
+\item #3
+\item #4
+\item #5
+\item #6
+\item #7
+\item #8
+}
+
+\title{グループレポート}
+\author{6119019092 織田武瑠 6119019207 矢野大暉 6119019056 山口力也}
+\date{\number\year/\number\month/\number\day 提出}
+
+\begin{document}
+\maketitle
+
+\section{開発期間1/20～1/26の進捗状況} 
+
+\subsection{進展事項}
+今回の開発期間では，ゲームの設計として主に
+\begin{itemize}
+\pitem{\xa}{\xb}{\xc}{\xd}{\xe}{\xf}{\xg}{\xh}
+\end{itemize}
+を行った．以下にその詳細を示す．
+
+\subsection{\xa}
+監視カメラの動作を止めるハッキング動作を行える回数を各プレイヤー1回のみに制限した．これによってゲームバランスの改善をすることができた．
+
+\subsection{\xb}
+これまではクライアントからコマンドを送信して，それを受け取ったサーバーがコマンドを各クライアントにブロードキャストし，クライアント内で処理をする流れになっていた．しかし，プレイヤーの座標が別のクライアントで一致していない問題が発生した．そのため，基準となるクライアントが定期的にプレイヤーや敵の情報をサーバーに渡して，各クライアントにブロードキャストすることでゲームの情報を正しく描画させるようにした．
+
+\subsection{\xc}
+上記の位置ズレの問題の改善を，複数の敵を描画する場合にも行った．
+
+\subsection{\xd}
+プレイヤーを追跡する敵の動きで，敵の視界を回転させるときに右回転しかできない問題が発生していた．これを目標の角度まで最短時間で到達する方向に回転するようにした．
+
+\subsection{\xe}
+個人間で開発していた機能同士を統合し，コンフリクトを解消した．
+
+\subsection{\xf}
+ステージクリア後に，別のステージに遷移する機能を追加した．
+
+\subsection{\xg}
+プレイヤーが敵に近づいてゲームパッドの3ボタンを押すことで会話を行い，一定時間敵の視界を会話しているプレイヤーに固定させるコマンドを追加した．　
+
+\subsection{\xh}
+各プレイヤーごとに異なった色のプレイヤー画像になるように画像を差し替えた．また，カメラの画像も変更した．
+
+\end{document}
