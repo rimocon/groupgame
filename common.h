@@ -30,6 +30,8 @@
 #define MENUMODE 1
 #define GAMEMODE 2
 #define RESULTMODE 3
+#define STAGENUMMODE 4 
+#define ENEMY_NUM 5
 
 /*  関数のプロトタイプ宣言  */
 
@@ -45,6 +47,8 @@ extern void MakeMap(void);
 extern void DrawResult(void); //結果描画
 extern void PlayerAction(); // プレイヤーが行う妨害アクション
 extern void Events(void); //イベント処理
+extern void Stage_Renew(); //ステージが進んだ時の各種変数の更新
+extern void StageNumShow(void); //ステージ1以降にステージ開始前に表示される画面を表示
 
 extern void setup_client(char *, u_short);
 extern int control_requests();
@@ -55,12 +59,17 @@ extern void joystick_send(int);
 int status;          //ゲームの現在の状態
 bool run;            //プログラムが動いてるかどうか
 int elapsed_time;    //ゲーム開始時からの経過時間
-bool same_place_flag; //NPCが一定時間同じ座標にとどまっているかどうかを示すフラグ
-bool random_start_flag; //NPCが一定時間同じ座標にとどまっため、ランダムウォークを始めたことを示すフラグ
-Uint32 stay_start;   //NPCが同じ場所に留まり始めた時間を格納する変数
-int stay_time;       //留まっている時間を格納する変数
-int random_time;     //ランダムウォークをしている時間
+bool same_place_flag[ENEMY_NUM]; //NPCが一定時間同じ座標にとどまっているかどうかを示すフラグ
+bool random_start_flag[ENEMY_NUM]; //NPCが一定時間同じ座標にとどまっため、ランダムウォークを始めたことを示すフラグ
+Uint32 stay_start[ENEMY_NUM];   //NPCが同じ場所に留まり始めた時間を格納する変数
+int stay_time[ENEMY_NUM];       //留まっている時間を格納する変数
+int random_time[ENEMY_NUM];     //ランダムウォークをしている時間
 int myid;
+int stage_num; //ステージの通し番号
+bool one_time_flag;
+bool stage_trans_flag;
+bool game_over_flag;
+
 
 SDL_Window *mainwindow; //メイン画面用
 SDL_Renderer *mainrenderer; //メイン画面用レンダラー

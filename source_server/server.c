@@ -251,6 +251,10 @@ int control_requests()
         if (start_count == num_clients)
         { //接続しているクライアント全員が、スタートボタンを押したことが確認できた時
           send_data(BROADCAST, &data, sizeof(data));
+          start_count_flag[0] = 0;
+          start_count_flag[1] = 0;
+          start_count_flag[2] = 0;
+          start_count = 0;
         }
         result = 1;
         break;
@@ -268,6 +272,18 @@ int control_requests()
         result = 1;
         break;
       case ENEMY_MODIFY_COMMAND: //Bのとき
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case TALK_START_COMMAND: // 'T' のとき(3ボタン押された時)
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case TALK_END_COMMAND: // 't' のとき(3ボタン離された時)
+        send_data(BROADCAST, &data, sizeof(data));
+        result = 1;
+        break;
+      case CONTACT_COMMAND: // 'c' のとき(3ボタン離された時)
         send_data(BROADCAST, &data, sizeof(data));
         result = 1;
         break;
